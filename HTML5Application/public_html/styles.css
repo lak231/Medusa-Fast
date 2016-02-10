@@ -116,7 +116,7 @@ and open the template in the editor.
     margin-left: 50px;
     margin-right: 50px;
     color: white;
-    font-size: 17px;
+    font-size: 18px;
     line-height: 180%;
      padding: 0px;
 }
@@ -132,8 +132,9 @@ and open the template in the editor.
 }
 #codes li{
     padding: 10px;
-    font-family: "Lato";
-    font-size: 20px;
+   font-family: "Lato";
+   font-weight: bold;
+    font-size: 18px;  
 }
 #games{
     background-color: #667467;
