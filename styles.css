@@ -1,0 +1,129 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Feb 9, 2016, 10:45:53 AM
+    Author     : khainguyen
+*/
+
+.navigation {
+  background-color: #f2efec;
+    height: 120px;
+    text-align: center; 
+    padding: 16px;
+    list-style-type: none;
+    margin: 0px;   
+    font-family: "Lato";
+    font-size: 18px;  
+    
+}
+.navigation li{
+    display: inline;
+    padding: 12px 0px 12px 0px;
+    background-color: white;    
+    
+}
+
+.navigation ul{
+    padding: 12px;
+    margin-left: 700px;
+}
+.navigation a{
+    color: #B81D18;
+    text-align: center;
+    padding: 12px 12px 12px 12px;  
+    text-decoration: blink;
+}
+
+.navigation a:hover{     
+    font-weight: bolder;
+}
+#activeNav{
+    background-color: #B81D18;
+    color: white;   
+  
+}
+.ava { 
+    margin-top: -40px;;
+    padding-left: 400px;
+    text-align: left;
+}
+.ava img{
+    height: 200px;
+    border: 1px solid #30231d;   
+     
+}
+.ava ul{
+    margin-left:200px;
+    margin-top: -205px;
+  
+}
+.ava p{
+    font-family: "Kelly Slab";
+    font-size: 32px;    
+    margin-left: 9px;
+}
+.ava li{
+    display: list-item;
+    background-color: transparent;
+    padding: 2px;
+}
+.ava a{
+    font-family: "Kelly Slab";
+    font-size: 18px;     
+    text-decoration: underline;
+    color: black;
+    opacity: 0.7;  
+}
+.ava a:hover{
+    font-weight: normal;
+    opacity: 1;
+}
+
+
+#newest{
+    background-color: black;
+    height: 500px;
+    font-family: "Lato";
+    text-align: center;
+}
+#newest li img{
+    height: 100%;
+    width: 100%;
+    opacity: 0.20;
+}
+#newest ul{
+    height: 100%;
+}
+#newest li {
+    display: inline-block;    
+    width: 33%;
+    height: 100%;
+}
+#newest li h1{
+    margin-top: -470px;
+    color: whitesmoke;
+    font-size: 40px;
+    
+}
+
+#codes{
+    background-color: #f0f0f0;
+    height: 300px;
+}
+#codes ul{
+    margin-left: 450px;
+     margin-right: 450px;
+    
+}
+#games{
+    background-color: #667467;
+    height: 300px;
+}
+footer{
+    background-color: #30231d;
+    height: 200px;
+}
+
