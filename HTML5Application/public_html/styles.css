@@ -38,7 +38,7 @@ and open the template in the editor.
 }
 
 .navigation a:hover{     
-    font-weight: bolder;
+    text-decoration: underline;
 }
 #activeNav{
     background-color: #B81D18;
@@ -51,19 +51,19 @@ and open the template in the editor.
     text-align: left;
 }
 .ava img{
-    height: 200px;
+    height: 180px;
     border: 1px solid #30231d;   
      
 }
 .ava ul{
-    margin-left:200px;
-    margin-top: -205px;
+    margin-left:180px;
+    margin-top: -175px;
   
 }
 .ava p{
     font-family: "Kelly Slab";
     font-size: 32px;    
-    margin-left: 9px;
+    margin-left: 10px;
 }
 .ava li{
     display: list-item;
@@ -81,33 +81,46 @@ and open the template in the editor.
     font-weight: normal;
     opacity: 1;
 }
-
-
 #newest{
     background-color: black;
-    height: 500px;
+    height: 400px;
     font-family: "Lato";
     text-align: center;
+    padding: 0px;
 }
 #newest li img{
     height: 100%;
     width: 100%;
-    opacity: 0.20;
+    opacity: 0.130;
 }
 #newest ul{
     height: 100%;
+    text-align:center;
+    padding: 0px;
 }
 #newest li {
     display: inline-block;    
     width: 33%;
     height: 100%;
+    padding: 0px;
 }
-#newest li h1{
-    margin-top: -470px;
-    color: whitesmoke;
+#newest h1{
+    margin-top: -330px;
+    color: white;
     font-size: 40px;
+    padding: 0px;
     
 }
+#newest p{
+    margin-top: 10px;
+    margin-left: 50px;
+    margin-right: 50px;
+    color: white;
+    font-size: 17px;
+    line-height: 180%;
+     padding: 0px;
+}
+
 
 #codes{
     background-color: #f0f0f0;
@@ -115,8 +128,12 @@ and open the template in the editor.
 }
 #codes ul{
     margin-left: 450px;
-     margin-right: 450px;
-    
+     margin-right: 450px; 
+}
+#codes li{
+    padding: 10px;
+    font-family: "Kelly Slab";
+    font-size: 20px;
 }
 #games{
     background-color: #667467;
