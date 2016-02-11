@@ -91,7 +91,7 @@ and open the template in the editor.
 #newest li img{
     height: 100%;
     width: 100%;
-    opacity: 0.130;
+    opacity: 0.20;
 }
 #newest ul{
     height: 100%;
@@ -105,7 +105,7 @@ and open the template in the editor.
     padding: 0px;
 }
 #newest h1{
-    margin-top: -330px;
+    margin-top: -370px;
     color: white;
     font-size: 40px;
     padding: 0px;
@@ -116,25 +116,70 @@ and open the template in the editor.
     margin-left: 50px;
     margin-right: 50px;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     line-height: 180%;
-     padding: 0px;
+    padding: 0px;
 }
-
-
 #codes{
-    background-color: #f0f0f0;
-    height: 300px;
-}
-#codes ul{
+    height: 450px;
     margin-left: 450px;
-     margin-right: 450px; 
+    margin-right: 450px;
+    margin-top: 80px;
 }
-#codes li{
-    padding: 10px;
-   font-family: "Lato";
-   font-weight: bold;
-    font-size: 18px;  
+
+#codes img{
+    height: 350px;
+    float: left;
+    
+}
+#codes h2{
+    font-size: 25px;  
+    font-family: "Lato";
+    color: #2f2f2f;
+    font-weight: bold;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 20px;
+    margin-left: 30px;
+    margin-bottom: 20px;
+}
+#codes p{
+    color: #4f4f4f;
+    font-family: "Lato";
+    font-size: 20px;
+    line-height: 140%;
+    margin-left: 320px;
+    margin-bottom: 5px;
+    
+}
+
+hr {
+    display: block;
+    height: 2px;
+    border: 0;
+    border-top: 5px solid #a1a1a1;    
+    padding: 0;
+    margin-top: 35px;
+    margin-right: 20px;
+    margin-left: 320px;   
+    margin-bottom: 35px;
+}
+
+#codes a{
+    font-family: "Lato";
+    font-size: 20px;    
+    margin-left: 30px;
+    text-decoration: none;
+}
+
+#codes h3{
+    font-size: 22px;  
+    font-family: "Lato";
+    color: #3f3f3f;
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 30px;
+    margin-bottom: 10px;
 }
 #games{
     background-color: #667467;
