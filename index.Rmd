@@ -6,11 +6,9 @@ output: html_document
 includes:
       in_header: "library.html"
 ---
-<body>
 
 <!-- I recommend you host this file on your own, since this will change without warning -->
 <style>
-
     #year{
         font-family: 'Ropa Sans', sans-serif;
         font-size: 45px;
@@ -26,39 +24,33 @@ includes:
     #container{
         display: -webkit-box;
         display: -moz-box;
-        position: absolute;
-        top: 145px; right: 0; bottom: 0; left: 0;
-        width: 75%;
-        height: 75%;
+        top: 250px; right: 0; bottom: 250px; left: 0;
+        width: 100%;
+        height:100%;
         margin: auto;
         background-color: whitesmoke;
+        display: inline-block;
+
     }
 </style>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="http://datamaps.github.io/scripts/datamaps.world.min.js?v=1"></script>
-<link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Ropa+Sans' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
 <h1 align="center" id = "name">TERRORIST ATTACKS AROUND THE WORLD 1970-2014</h1>
 <h1 align="center" id ="year">1970</h1>
-<div id="container"> </div>
-
+<div id="container"> 12323234</div>
 
 <script>
-    //basic map config with custom fills, mercator projection
 
-    //get component of hex
+    
     function componentToHex(c) {
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
-    //convert rgb to hex value
+    
     function rgbToHex(r, g, b) {
         return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
     }
-
-
 
     var map = new Datamap({
         scope: 'world',
@@ -178,8 +170,6 @@ includes:
         }
     });
 </script>
-</body>
-
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
