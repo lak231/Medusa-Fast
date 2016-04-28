@@ -38,7 +38,11 @@ includes:
 <script src="http://datamaps.github.io/scripts/datamaps.world.min.js?v=1"></script>
 <h1 align="center" id = "name">TERRORIST ATTACKS AROUND THE WORLD 1970-2014</h1>
 <h1 align="center" id ="year">1970</h1>
+<<<<<<< HEAD
 <div id="container"> </div>
+=======
+<div id="container"> 12323234</div>
+>>>>>>> 0d54919e630b4c4f2abca1569a9ac161414b1f05
 
 <script>
 
