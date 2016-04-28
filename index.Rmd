@@ -24,9 +24,9 @@ includes:
     #container{
         display: -webkit-box;
         display: -moz-box;
-        width: 200%;
-        height:800%;
-        margin-left: -50%;
+        width: 150%;
+        height:768px;
+        margin-left: -25%;
         background-color: whitesmoke;
         display: block;
 
