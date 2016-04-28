@@ -24,12 +24,11 @@ includes:
     #container{
         display: -webkit-box;
         display: -moz-box;
-        top: 250px; right: 0; bottom: 250px; left: 0;
-        width: 1920px;
+        width: 200%;
         height:100%;
-        margin: auto;
+        margin-left: -50%;
         background-color: whitesmoke;
-        display: inline-block;
+        display: block;
 
     }
 </style>
@@ -38,7 +37,8 @@ includes:
 <script src="http://datamaps.github.io/scripts/datamaps.world.min.js?v=1"></script>
 <h1 align="center" id = "name">TERRORIST ATTACKS AROUND THE WORLD 1970-2014</h1>
 <h1 align="center" id ="year">1970</h1>
-<div id="container"> </div>
+
+<div id="container">ssdfasasdfasdfasdfasdfasdfasfasdfasdfasdfasdfasdfasdfsdaf </div>
 
 <script>
 
