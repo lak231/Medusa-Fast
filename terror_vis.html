@@ -163,9 +163,8 @@
 
             // stop when reach the end of the file
             if (year <= 2014) {
-                if (loop == true){
                     window.setTimeout(draw, 400);
-                }
+
 
             }
             else {
@@ -173,15 +172,7 @@
             }
         }
     };
-    function begin(){
-        if (loop == false){
-            d3.csv("terror_reduced.csv",process);
-            loop = true;
-        }
-        else{
-            loop = false;
-        }
-    }
+    d3.csv("terror_reduced.csv",process);
 
 </script>
 </body>
