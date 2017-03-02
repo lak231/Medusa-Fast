@@ -1,0 +1,18 @@
+#headline{
+  background-color: #010524;
+  width: 100vw;
+  position: relative;
+  margin-top: 3vw;
+  margin-bottom: 3vw;
+  display: block;
+}
+#section_selector{
+  position: absolute;
+  top:0vw;
+  background-color: #010524;
+  margin-left: 27vw;
+  margin-right: 27vw;
+  margin-top: 2vw;
+
+  display: block;
+}
