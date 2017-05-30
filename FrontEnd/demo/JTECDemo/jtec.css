@@ -1,0 +1,87 @@
+.overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: rgba(1,1,1,.9);
+    overflow-x: hidden;
+    transition: all 0.5s;
+    z-index: 1;
+}
+
+.overlay__content{
+    position: relative;
+    top: 25%;
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+    z-index:2;
+}
+
+.overlay a{
+    padding: 10px;
+    color: #fff;
+    font-size: 30px;
+    text-decoration: none;
+    display: block;
+    z-index:3;
+}
+
+.overlay .closeBtn{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 15px;
+}
+
+.overlay .closeBtn:hover{
+    color: #05f;
+}
+
+.overlay .helpBtn:hover{
+    color: #05f;
+}
+
+.overlay .helpBtn{
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 15px;
+}
+
+.overlay .calDot{
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    color: #f00;
+    font-size: 50px;
+    z-index: 99;
+}
+
+.overlay .valDotActive{
+    position: absolute;
+    color: #f00;
+    font-size: 50px;
+    animation-name: blink;
+    animation-duration: 1s;
+    animation-iteration-count: 3;
+}
+
+@keyframes blink{
+
+    0% {color: #f00;}
+    25% {color: #f55;}
+    50% {color: #faa;}
+    75% {color: #f55;}
+    100% {color: #f00;}
+}
+
+.overlay .valDot{
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    color: #f00;
+    font-size: 50px;
+    z-index: 99;
+}

@@ -1,0 +1,46 @@
+<html>
+
+	<head>
+	</head>
+
+	<body>
+
+		<script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+		<script src="./JTECServer.js"></script>
+
+		<script type="text/javascript">
+
+		//Test Code
+
+		initializeUser();
+
+		for (i = 0; i < 5; i++){  //generate x entries entries
+		var my_x_array = []
+		var my_y_array = []
+
+//for loop to generate random values into x_array and y_array
+		for (x = 0; x < 100; x++){
+			my_x_array.push(randomValue());
+			my_y_array.push(randomValue())
+		}
+
+
+		var date = new Date();
+		var my_timestamp_array = [date,date,date,date,date];
+		var screen_size = [1000,1000];
+		var valid = true;
+		var valid_percent = 75;
+	  var url = "http://www.EliasisChill.com/";
+
+		pushData(my_x_array,my_y_array,my_timestamp_array, screen_size, valid, valid_percent,url);
+		}
+
+		logOut();
+
+		</script>
+
+
+	</body>
+
+
+</html>
