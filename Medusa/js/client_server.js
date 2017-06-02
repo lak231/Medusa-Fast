@@ -17,15 +17,11 @@ var cur_url = "";
 var time = "";
 var gaze_array = [];
 
-// collect relevant data
-function init_data(){
+// start WebGazer and collect data
+function collect_data(){
     gazer_id = createID()
     cur_url = window.location.href;
     time = (new Date).getTime();
-}
-
-// start WebGazer and collect data
-function start_webgazer(){
     webgazer.setRegression('ridge') 
   	    .setTracker('clmtrackr')
   	    .setGazeListener(function(data, elapsedTime) {
