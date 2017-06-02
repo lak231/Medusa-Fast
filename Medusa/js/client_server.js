@@ -15,20 +15,22 @@ const tableName = "Gazers";
 var gazer_id = "";
 var cur_url = "";
 var time = "";
-var gaze_array = [];
+var x_array = [];
+var y_array = [];
 
 // start WebGazer and collect data
 function collect_data(){
-    gazer_id = createID()
+    createID();
     cur_url = window.location.href;
-    time = (new Date).getTime();
+    time = (new Date).getTime().toString();
     webgazer.setRegression('ridge') 
   	    .setTracker('clmtrackr')
   	    .setGazeListener(function(data, elapsedTime) {
             if (data == null) {
                 return;
             }
-            gaze_array.push([data.x,data.y]);
+            x_array.push([data.x]);
+            y_array.push([data.y]);
         })
     	.begin()
 }
@@ -37,7 +39,8 @@ function collect_data(){
 function createID() {
     // check if there is a gazer_id already stored
     if (typeof(Storage) !== "undefined") {
-        if (localStorage.getItem("gazer_id") !== "undefined"){
+        console.log(localStorage.getItem("gazer_id"));
+        if (localStorage.getItem("gazer_id") !== null){
             gazer_id = localStorage.getItem("gazer_id");
         }
         else{
@@ -61,7 +64,6 @@ function createGazersTable() {
         AttributeDefinitions: [       
             { AttributeName: "gazer_id", AttributeType: "S" },              
             { AttributeName: "time_collected", AttributeType: "S" }
-
         ],
         ProvisionedThroughput: {       
             ReadCapacityUnits: 5,
@@ -78,7 +80,7 @@ function createGazersTable() {
 }
 
 // create data form and push to database
-function createItem() {
+function createGazer() {
     var params = {
         TableName :tableName,
         Item:{
@@ -86,7 +88,8 @@ function createItem() {
             "time_collected":time,
             "info":{
                 "url": cur_url,
-                "gaze_location": gaze_array
+                "gaze_x": x_array,
+                "gaze_y":y_array
             }
         }
     };
@@ -102,3 +105,5 @@ function createItem() {
 window.onbeforeunload = function() {
     webgazer.end(); 
 }
+
+
