@@ -1,8 +1,5 @@
-<html>
-<head>
-<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script>
 
-<script type="text/javascript">
+
 // setting up AWS configurations
 AWS.config.region = 'us-east-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -84,7 +81,7 @@ function createGazersTable() {
     });
 }
 
-// Create a data entry item
+// create data form and push to database
 function createItem() {
     var params = {
         TableName :tableName,
@@ -106,4 +103,6 @@ function createItem() {
     });
 }
 
-</script>
+window.onbeforeunload = function() {
+    webgazer.end(); 
+}
