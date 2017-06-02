@@ -61,33 +61,24 @@ function delete_elem(name) {
 function create_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
-        var context = canvas.getContext("2d");
         delete_elem("consent_form");
         set_calibration_instruction();
-        setTimeout(function () {
-            delete_elem("instruction");
-        }, 3000);
-        dots = [];
         currDot = 0;
         dots = shuffle([
-            new Dot(canvas.width * 0.2, canvas.height * 0.2, 5),
-            new Dot(canvas.width * 0.8, canvas.height * 0.2, 5),
-            new Dot(canvas.width * 0.2, canvas.height * 0.5, 5),
-            new Dot(canvas.width * 0.5, canvas.height * 0.5, 5),
-            new Dot(canvas.width * 0.8, canvas.height * 0.5, 5),
-            new Dot(canvas.width * 0.2, canvas.height * 0.8, 5),
-            new Dot(canvas.width * 0.5, canvas.height * 0.8, 5),
-            new Dot(canvas.width * 0.8, canvas.height * 0.8, 5),
-            new Dot(canvas.width * 0.35, canvas.height * 0.35, 5),
-            new Dot(canvas.width * 0.65, canvas.height * 0.35, 5),
-            new Dot(canvas.width * 0.35, canvas.height * 0.65, 5),
-            new Dot(canvas.width * 0.65, canvas.height * 0.65, 5),
-            new Dot(canvas.width * 0.5, canvas.height * 0.2, 5)
+            new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
+            new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
+            new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
+            new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
+            new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
+            new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
+            new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
+            new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
+            new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
+            new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
+            new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
+            new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
+            new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
         ]);
-        setTimeout(function () {
-            draw_dot(context, dots[0], "#EEEFF7");
-        }, 3000);
-
     }
 }
 
@@ -98,10 +89,17 @@ function set_calibration_instruction() {
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
                                 "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
-                             "</header>";
+                             "</header>" +
+                             "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
     document.body.appendChild(instruction);
 }
 
+function start_calibration() {
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    delete_elem("instruction");
+    draw_dot(context, dots[0], "#EEEFF7");
+}
 function draw_dot(context, dot, color) {
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
@@ -138,6 +136,8 @@ function dotEvent(event) {
         if (currDot !== dots.length - 1) {
             currDot += 1;
             draw_dot(context, dots[currDot], "#EEEFF7");
+        } else {
+            delete_elem("canvas-overlay");
         }
     }
 }
