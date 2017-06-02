@@ -3,16 +3,19 @@
 
 <body>
 <!--Load the style sheet-->
-<link rel="stylesheet" type="text/css" href="medusa.css">
+<link rel="stylesheet" type="text/css" href="css/medusa.css">
 <!--Load WebGazer library-->
-<script src="webgazer.js" type="text/javascript" ></script>
+<script src="js/webgazer.js" type="text/javascript" ></script>
 <!--Load script library-->
-<script src="medusa.js" type="text/javascript" ></script>
+<script src="js/medusa.js" type="text/javascript" ></script>
 <!--Consent form-->
 <!--<div id="consent-form" onclick="start_webgazer()"></div>-->
 <script>
-    create_overlay()
-    delete_overlay()
+    create_form();
+    create_overlay();
+    //create_validation()
+    //delete_overlay()
 </script>
+<script src="js/jquery-3.2.1.slim.min.js" type="text/javascript"></script>
 </body>
 </html>
