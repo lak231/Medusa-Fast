@@ -17,8 +17,8 @@ function create_overlay(){
     document.body.appendChild(canvas);
 }
 
-// delete the overlay used for calibration and validation
 
+// show the consent form before doing calibration
 function create_form() {
     // hide the background and create canvas
     create_overlay();
@@ -53,10 +53,13 @@ function create_form() {
     document.body.appendChild(form);
 }
 
+// delete an element
 function delete_elem(name) {
     var elem = document.getElementById(name);
     elem.parentNode.removeChild(elem);
 }
+
+// prepare for the calibration
 function create_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
@@ -81,6 +84,8 @@ function create_calibration() {
     }
 }
 
+
+// show the calibration instruction 
 function set_calibration_instruction() {
     var instruction = document.createElement("div");
     instruction.id = "instruction";
@@ -93,6 +98,7 @@ function set_calibration_instruction() {
     document.body.appendChild(instruction);
 }
 
+// the actual calibration process
 function start_calibration() {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
@@ -103,6 +109,8 @@ function start_calibration() {
     // create a table in the server
     createGazersTable();
 }
+
+// draw the dots for calibration and validation
 function draw_dot(context, dot, color) {
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
@@ -110,6 +118,7 @@ function draw_dot(context, dot, color) {
     context.fill();
 }
 
+// a dot
 var Dot = function (x, y, r) {
     this.x = x;
     this.y = y;
@@ -120,12 +129,15 @@ var Dot = function (x, y, r) {
     this.bottom = y + r;
 };
 
+// clear all the canvas
 function clear_canvas () {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+
+// on click dot 
 function dotEvent(event) {
     var x = event.x;
     var y = event.y;
