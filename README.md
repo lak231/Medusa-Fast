@@ -10,9 +10,9 @@ This framework strictly uses Amazon DynamoDB for backend for consistency. To set
 3. Select **Manage Federated Identities**. 
 4. Select **Create New Identity Pool"**. 
 5. 
-- Enter a name into the box **Identity pool name**. Anything will work here. 
-- **VERY IMPORTANT**. Check the box **Enable access to unauthenticaled identities**.
-- Select **Create pool**. 
+    - Enter a name into the box **Identity pool name**. Anything will work here. 
+    - **VERY IMPORTANT**. Check the box **Enable access to unauthenticaled identities**.
+    - Select **Create pool**. 
 6. Select **Allow**. 
 7. In the **Platform** dropdown selection, chose Javascript. It will show example code for Javascript. In the first code box, under *Get AWS Credentials*, There is a line with 
 **IdentityPoolId**. It will look something like *'us-east-2:6f89cc95-78a6-4d78-9ec1-4eb5fab8b86f'*. Copy the id to replace the value of the var *IdentityPoolId* in gaze_config.js. 
@@ -27,7 +27,7 @@ This framework strictly uses Amazon DynamoDB for backend for consistency. To set
 - Select **Add Statement**. 
 13. Select **Next Step**. 
 14. Select **Apply policy**.
-25. It will go back to the policy page. Find the line **Role ARN** at the top of the page, and copy the information there, which looks something like **arn:aws:iam::345518382834:role/Cognito_whateverUnauth_Role**. Copy the id to replace the value of the var *RoleArn* in gaze_config.js. 
+15. It will go back to the policy page. Find the line **Role ARN** at the top of the page, and copy the information there, which looks something like **arn:aws:iam::345518382834:role/Cognito_whateverUnauth_Role**. Copy the id to replace the value of the var *RoleArn* in gaze_config.js. 
 16. You are all sets!!!
 
 ## Frontend Installation
