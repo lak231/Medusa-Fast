@@ -3,8 +3,8 @@
 // setting up AWS configurations
 AWS.config.region = 'us-east-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-IdentityPoolId: 'us-east-2:3b25824a-8344-494d-99ee-91a2815b71a3',
-RoleArn: "arn:aws:iam::790084491156:role/Cognito_MedusaUnauth_Role"
+IdentityPoolId: IdentityPoolId ,
+RoleArn: RoleArn
 });
 // initiate AWS
 var dynamodb = new AWS.DynamoDB();
@@ -128,6 +128,7 @@ function finish_collection(){
     sendGazerToServer();
 }
 
+// get element from point
 function get_elements_seen(x,y){
     var element = document.elementFromPoint(x, y);
     if (element in elem_array ){
