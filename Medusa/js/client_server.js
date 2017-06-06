@@ -12,11 +12,14 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 
 // constants 
 const tableName = "Gazers";
+// variable
 var gazer_id = "";
 var cur_url = "";
 var time = "";
+var elem_array = {};
 var x_array = [];
 var y_array = [];
+
 
 // Create unique id from time + RNG
 function createID() {
@@ -36,12 +39,13 @@ function createID() {
     }
 }
 
-// record gaze location into an array
+// record gaze location into x and y arrays. Used to control sample rate
+// otherwise, collect_data() will collect data at maximum sample rate
 function record_gaze_location(){
     var prediction = webgazer.getCurrentPrediction();
     if (prediction) {
-        x_array.push([prediction.x]);
-        y_array.push([prediction.y]);
+        x_array.push(prediction.x);
+        y_array.push(prediction.y);
     }
 }
 
@@ -56,8 +60,9 @@ function collect_data(){
             if (data == null) {
                 return;
             }
-            x_array.push([data.x]);
-            y_array.push([data.y]);
+            x_array.push(data.x);
+            y_array.push(data.y);
+            get_elements_seen(data.x,data.y);
         })
     	.begin()
     // setInterval(function(){ record_gaze_location() }, 1000);
@@ -114,12 +119,26 @@ function sendGazerToServer() {
         }
     });
 }
+
+// clean up webgazer and send data to server. Must call once the validation ends
 function finish_collection(){
     // end web gazer 
     webgazer.end(); 
     // send data to server
     sendGazerToServer();
 }
+
+function get_elements_seen(x,y){
+    var element = document.elementFromPoint(x, y);
+    if (element in elem_array ){
+        elem_array[element] = elem_array[element] + 1
+    }
+    else{
+        elem_array[element] = 1
+       
+    }
+}
+  
 
 window.onbeforeunload = function(event){
         return confirm("Confirm refresh");
