@@ -21,10 +21,10 @@ This framework strictly uses Amazon DynamoDB for backend for consistency. To set
 10. Select **Create role policy**.
 11. The selection **Policy Generator** is already selected. Seleck **Select**. 
 12. 
-- In the dropdown **AWS Service**, chose **Amazon DynamoDB**.
-- In the Dropdown **Actions**, Check the following box: *BatchWriteItem*, *CreateTable*, *GetItems*, *PutItems*, *UpdateItems*. 
-- In the box **Amazon Resource Name**, enter *.
-- Select **Add Statement**. 
+    - In the dropdown **AWS Service**, chose **Amazon DynamoDB**.
+    - In the Dropdown **Actions**, Check the following box: *BatchWriteItem*, *CreateTable*, *GetItems*, *PutItems*, *UpdateItems*. 
+    - In the box **Amazon Resource Name**, enter *.
+    - Select **Add Statement**. 
 13. Select **Next Step**. 
 14. Select **Apply policy**.
 15. It will go back to the policy page. Find the line **Role ARN** at the top of the page, and copy the information there, which looks something like **arn:aws:iam::345518382834:role/Cognito_whateverUnauth_Role**. Copy the id to replace the value of the var *RoleArn* in gaze_config.js. 
