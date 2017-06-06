@@ -18,23 +18,6 @@ var time = "";
 var x_array = [];
 var y_array = [];
 
-// start WebGazer and collect data
-function collect_data(){
-    createID();
-    cur_url = window.location.href;
-    time = (new Date).getTime().toString();
-    webgazer.setRegression('ridge') 
-  	    .setTracker('clmtrackr')
-  	    .setGazeListener(function(data, elapsedTime) {
-            if (data == null) {
-                return;
-            }
-            x_array.push([data.x]);
-            y_array.push([data.y]);
-        })
-    	.begin()
-}
-
 // Create unique id from time + RNG
 function createID() {
     // check if there is a gazer_id already stored
@@ -52,6 +35,36 @@ function createID() {
         gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
     }
 }
+
+// record gaze location into an array
+function record_gaze_location(){
+    var prediction = webgazer.getCurrentPrediction();
+    if (prediction) {
+        x_array.push([prediction.x]);
+        y_array.push([prediction.y]);
+    }
+}
+
+// start WebGazer and collect data
+function collect_data(){
+    createID();
+    cur_url = window.location.href;
+    time = (new Date).getTime().toString();
+    webgazer.setRegression('ridge') 
+  	    .setTracker('clmtrackr')
+        .setGazeListener(function(data, elapsedTime) {
+            if (data == null) {
+                return;
+            }
+            x_array.push([data.x]);
+            y_array.push([data.y]);
+        })
+    	.begin()
+    // setInterval(function(){ record_gaze_location() }, 1000);
+    
+}
+
+
 
 // Create data table
 function createGazersTable() {
@@ -80,7 +93,7 @@ function createGazersTable() {
 }
 
 // create data form and push to database
-function createGazer() {
+function sendGazerToServer() {
     var params = {
         TableName :tableName,
         Item:{
@@ -101,9 +114,14 @@ function createGazer() {
         }
     });
 }
-
-window.onbeforeunload = function() {
+function finish_collection(){
+    // end web gazer 
     webgazer.end(); 
+    // send data to server
+    sendGazerToServer();
 }
 
+window.onbeforeunload = function(event){
+        return confirm("Confirm refresh");
+};
 

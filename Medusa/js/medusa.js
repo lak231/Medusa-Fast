@@ -95,11 +95,14 @@ function set_calibration_instruction() {
 }
 
 function start_calibration() {
-    collect_data();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     delete_elem("instruction");
     draw_dot(context, dots[0], "#EEEFF7");
+    // initiate data collection process
+    collect_data();
+    // create a table in the server
+    createGazersTable();
 }
 function draw_dot(context, dot, color) {
     context.beginPath();
@@ -139,7 +142,7 @@ function dotEvent(event) {
             draw_dot(context, dots[currDot], "#EEEFF7");
         } else {
             delete_elem("canvas-overlay");
-            createGazer();
+            finish_collection();
         }
     }
 }
