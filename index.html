@@ -4,6 +4,8 @@
 <body>
 <!--Load the style sheet-->
 <link rel="stylesheet" type="text/css" href="css/medusa.css">
+<!--Load config file-->
+<script src="js/gaze_config.js" type="text/javascript" ></script>
 <!--Load WebGazer library-->
 <script src="js/webgazer.js" type="text/javascript" ></script>
 <!--Load script library-->
@@ -17,8 +19,9 @@
 
 <script>
     create_form();
-    collect_data();
-    createGazersTable();
+    window.onbeforeunload = function(event){
+        return confirm("Confirm refresh");
+};
 </script>
 
 </body>
