@@ -49,12 +49,24 @@ function record_gaze_location(){
     }
 }
 
+// Load Webgazer Once load, start the collect data procedure
+function loadWebgazer() {
+    $.getScript( "js/webgazer.js" )
+        .done(function( script, textStatus ) {
+            collect_data();
+        })
+        .fail(function( jqxhr, settings, exception ) {
+            $( "div.log" ).text( "Triggered ajaxError handler." );
+        });
+}
+
 // start WebGazer and collect data
 function collect_data(){
     createID();
     cur_url = window.location.href;
     time = (new Date).getTime().toString();
-    webgazer.setRegression('ridge') 
+    webgazer.clearData()
+        .setRegression('ridge') 
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
             if (data == null) {
@@ -65,13 +77,23 @@ function collect_data(){
             get_elements_seen(data.x,data.y);
         })
     	.begin()
+        .showPredictionPoints(false); /* shows a square every 100 milliseconds where current prediction is */
     // setInterval(function(){ record_gaze_location() }, 1000);
-    
+    checkWebgazer();
 }
 
+// Check Webgazer
+function checkWebgazer() {
+    if (webgazer.isReady()) {
+        console.log('webgazer is ready.');
+        // Create database
+        createGazersTable();
+    } else {
+        setTimeout(checkWebgazer, 100);
+    }
+}
 
-
-// Create data table
+// Create data table in the database if haven't already exists
 function createGazersTable() {
     var params = {
         TableName : tableName,
@@ -98,17 +120,13 @@ function createGazersTable() {
 }
 
 // create data form and push to database
-function sendGazerToServer() {
+function sendGazerToServer(data = {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array}){ 
     var params = {
         TableName :tableName,
-        Item:{
+        Item: {
             "gazer_id": gazer_id,
             "time_collected":time,
-            "info":{
-                "url": cur_url,
-                "gaze_x": x_array,
-                "gaze_y":y_array
-            }
+            "info":data
         }
     };
     docClient.put(params, function(err, data) {
@@ -123,7 +141,7 @@ function sendGazerToServer() {
 // clean up webgazer and send data to server. Must call once the validation ends
 function finish_collection(){
     // end web gazer 
-    webgazer.end(); 
+    // webgazer.end(); 
     // send data to server
     sendGazerToServer();
 }
@@ -140,8 +158,4 @@ function get_elements_seen(x,y){
     }
 }
   
-
-window.onbeforeunload = function(event){
-        return confirm("Confirm refresh");
-};
 
