@@ -55,6 +55,7 @@ var validation_settings = {
     duration: 20,  // duration of a a singe position sampled
     num_dots: 10,  // the number of dots used for validation
     position_array: [],    // array of possible positions
+    distance: 100
 };
 
 /************************************
@@ -197,13 +198,8 @@ function draw_dot(context, dot, color) {
  * @param {*} mouse 
  * @param {*} object 
  */
-function collide_mouse(mouse, object){
-    if (mouse.x < object.right && mouse.x > object.left && mouse.y > object.top && mouse.y < object.bottom) {
-        return true;
-    }
-    else{
-        return false;
-    }
+function collide_mouse(mouse, object) {
+    return (mouse.x < object.right && mouse.x > object.left && mouse.y > object.top && mouse.y < object.bottom);
 }
 
 /**
@@ -288,7 +284,7 @@ function initiate_webgazer(){
                 return;
             }
             if (current_task === "validation") {
-                canvas_on_click(data);
+                validation_event_handler(data);
             }
             x_array.push(data.x);
             y_array.push(data.y);
@@ -521,6 +517,14 @@ function on_click_validation(mouse){
     draw_dot(context, curr_object, "#EEEFF7");
     num_objects_shown++;
 }
+
+function validation_event_handler(data) {
+    var dist = parseInt(Math.sqrt(((data.x - curr_object.x) * (d.x - curr_object.x)) + ((data.y - curr_object.y) * (data.y - curr_object.y))));
+    if (dist < validation_settings.distance) {
+        
+    }
+}
+
 function finish_validation(){
     // TODO: fnish this function
 }
