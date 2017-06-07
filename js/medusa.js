@@ -449,8 +449,8 @@ function start_calibration() {
         }
         curr_object = objects_array.pop();
         draw_dot(context, curr_object, "#EEEFF7");
+        num_objects_shown ++;
     }
-    start_calibration();
 }
 
 /**
@@ -458,21 +458,20 @@ function start_calibration() {
  */
 function on_click_calibration(mouse){
     if (collide_mouse(mouse, curr_object) === false) return;
+    if (num_objects_shown > calibration_settings.num_dots) {
+        finish_calibration();
+        return;
+    }
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    if (currDot !== dots.length - 1) {
-        clear_canvas();
-        // if run out of dots, create a new dots array
-        if (objects_array.length == 0) {
-            objects_array = create_dot_array(calibration_settings.position_array);
-        }
-        curr_object = objects_array.pop();
-        draw_dot(context, curr_object, "#EEEFF7");
-    } 
-    // finish calibration
-    else {    
-        finish_calibration();
+    clear_canvas();
+    // if run out of dots, create a new dots array
+    if (objects_array.length == 0) {
+        objects_array = create_dot_array(calibration_settings.position_array);
     }
+    curr_object = objects_array.pop();
+    draw_dot(context, curr_object, "#EEEFF7");
+    num_objects_shown++;
 }
 
 /**
@@ -484,20 +483,41 @@ function finish_calibration(){
 
 
 
-/**
- * prepare for the validation process
- */
-function prepare_validation(){
-    // TODO: fininsh this function
-}
 
 /**
  * prepare for the calidation process
  */
 function start_validation(){
-    // TODO: finish this function
+      delete_elem("instruction");
+        if (objects_array.length == 0) {
+            objects_array = create_dot_array(calibration_settings.position_array);
+        }
+        curr_object = objects_array.pop();
+        draw_dot(context, curr_object, "#EEEFF7");
+        num_objects_shown ++;
+    }
 }
 
+/**
+ * function to call when click event is triggered during validation
+ */
+function on_click_validation(mouse){
+    if (collide_mouse(mouse, curr_object) === false) return;
+    if (num_objects_shown > validation_settings.num_dots) {
+        finish_validation();
+        return;
+    }
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    clear_canvas();
+    // if run out of dots, create a new dots array
+    if (objects_array.length == 0) {
+        objects_array = create_dot_array(validation_settings.position_array);
+    }
+    curr_object = objects_array.pop();
+    draw_dot(context, curr_object, "#EEEFF7");
+    num_objects_shown++;
+}
 function finish_validation(){
     // TODO: fnish this function
 }
