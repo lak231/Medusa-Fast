@@ -160,6 +160,7 @@ var Dot = function (x, y, r = 10) {
     this.top = y - r;
     this.right = x + r;
     this.bottom = y + r;
+    this.hit_count = 0;
 };
 
 /**
@@ -479,6 +480,8 @@ function on_click_calibration(mouse){
  */
 function finish_calibration(){
 //TODO: no idea what to put here, but just leave it here for structure purpose
+    objects_array = [];
+    num_objects_shown = 0;
 }
 
 
@@ -488,14 +491,14 @@ function finish_calibration(){
  * prepare for the calidation process
  */
 function start_validation(){
-      delete_elem("instruction");
-        if (objects_array.length == 0) {
-            objects_array = create_dot_array(calibration_settings.position_array);
-        }
-        curr_object = objects_array.pop();
-        draw_dot(context, curr_object, "#EEEFF7");
-        num_objects_shown ++;
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    if (objects_array.length == 0) {
+        objects_array = create_dot_array(validation_settings.position_array);
     }
+    curr_object = objects_array.pop();
+    draw_dot(context, curr_object, "#EEEFF7");
+    num_objects_shown ++;
 }
 
 /**
