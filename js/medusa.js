@@ -21,6 +21,8 @@ var x_array = [];
 var y_array = [];
 var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
+var objects = [];    //array of dots
+var num_objects_shown = 0; //number of objects shown
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
@@ -44,7 +46,6 @@ var calibration_settings = {
     duration: 20,  // duration of a a singe position sampled
     num_dots: 10,  // the number of dots used for calibration
     position_array: [],  // array of possible positions
-    dots: []    //array of dots
 };
 /************************************
 * VALIDATION PARAMETERS
@@ -54,8 +55,6 @@ var validation_settings = {
     duration: 20,  // duration of a a singe position sampled
     num_dots: 10,  // the number of dots used for validation
     position_array: [],    // array of possible positions
-    dots: []    //array of dots
-
 };
 
 /************************************
@@ -205,6 +204,24 @@ function collide_mouse(mouse, object){
         return false;
     }
 }
+
+/**
+ * Action when the mouse is clicked on canvas
+ * @param {*} event 
+ */
+function canvas_on_click(event) {
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    var x = event.x;
+    var y = event.y;
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+    var mouse = {x:x,y:y};
+    if (current_task === "calibration"){
+        on_click_calibration(mouse);
+    }
+}
+
 /************************************
 * MAIN FUNCTIONS
 ************************************/
@@ -407,7 +424,6 @@ function create_consent_form() {
  * show the calibration instruction  form
  */
 function create_calibration_instruction() {
-     
     var instruction = document.createElement("div");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
@@ -442,51 +458,35 @@ function start_calibration() {
 }
 
 /**
+ * function to call when click event is triggered during calibration
+ */
+function on_click_calibration(mouse){
+    if (collide_mouse(mouse, curr_object) === false) return;
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    if (currDot !== dots.length - 1) {
+        clear_canvas();
+        // if run out of dots, create a new dots array
+        if (calibration_settings.dots.length == 0) {
+            calibration_settings.dots = create_dot_array(calibration_settings.position_array);
+        }
+        curr_object = calibration_settings.dots.pop();
+        draw_dot(context, dot, "#EEEFF7");
+    } 
+    // finish calibration
+    else {    
+        finish_calibration();
+    }
+}
+
+/**
  * When finish calibration
  */
 function finish_calibration(){
 //TODO: no idea what to put here, but just leave it here for structure purpose
 }
 
-/**
- * Action when the mouse is clicked on canvas
- * @param {*} event 
- */
-function canvas_on_click(event) {
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    var x = event.x;
-    var y = event.y;
-    x -= canvas.offsetLeft;
-    y -= canvas.offsetTop;
-    var mouse = {x:x,y:y};
-    if (current_task === "calibration"){
-        on_click_calibration(mouse);
-    }
-}
 
-/**
- * function to call when click event is triggered during calibration
- */
-function on_click_calibration(mouse){
-   // check if clicked on dot
-    if (collide_mouse(mouse, curr_object)) { 
-        // create new dot for calibration   
-        if (currDot !== dots.length - 1) {
-            clear_canvas();
-            // if run out of dots, create a new dots array
-            if (calibration_settings.dots.length == 0) {
-                calibration_settings.dots = create_dot_array(calibration_settings.position_array);
-            }
-            curr_object = calibration_settings.dots.pop();
-            draw_dot(context, dot, "#EEEFF7");
-        } 
-        // finish calibration
-        else {    
-            finish_calibration();
-        }
-    }
-}
 
 /**
  * prepare for the validation process
