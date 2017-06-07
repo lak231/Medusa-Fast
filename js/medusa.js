@@ -8,28 +8,41 @@
 * these positions are relative to the window
 ************************************/
 
-const calibration_dot_positions = 
-const validation_dot_positions = 
-const simple_paradigm_positions = 
-const 
 
 
 /************************************
-* COLLECTION OF VARIABLES
+* VARIABLES
 ************************************/
-// name of table in database
-const tableName = "Gazers";
-// id of current user.
-var gazer_id = "";
-// url of the current website
-var cur_url = "";
-// time stamp of this session
-var time = "";
-// task number
-var task = 1;
+const tableName = "Gazers"; // name of table in database
+var gazer_id = "";  // id of user
+var cur_url = "";   // url of website
+var time = "";  // time of current webgazer session
 var x_array = [];
 var y_array = [];
+var current_task = "calibration";    //current running task.
 
+/************************************
+* CALIBRATION PARAMETERS
+************************************/
+var calibration_settings = {
+    method: "watch",    // calibration method, either watch or click.
+    duration = 20,  // duration of a a singe position sampled
+    num_dots = 10,  // the number of dots used for calibration
+    position_array =    // array of possible positions
+    dots = null,    //array of dots
+
+};
+/************************************
+* VALIDATION PARAMETERS
+************************************/
+var calibration_settings = {
+    method: "watch",    // validation method, either watch or click.
+    duration = 20,  // duration of a a singe position sampled
+    num_dots = 10,  // the number of dots used for validation
+    position_array =    // array of possible positions
+    dots = null,    //array of dots
+
+};
 
 
 
@@ -307,7 +320,7 @@ function send_data_to_database(data = {"url": cur_url, "gaze_x": x_array, "gaze_
 /**
  * clean up webgazer and send data to server. Must call once the validation ends
  */
-function finish_collection(){
+function end_experiment(){
     // end web gazer 
     // webgazer.end(); 
     // send data to server
@@ -326,9 +339,10 @@ function task_navigation(){
 /************************************
 * CALIBRATION AND VALIDATION
 ************************************/
+// dot array
 var dots = [];
+// current dot in dot array
 var currDot = 0;
-
 
 /**
  * show the consent form before doing calibration
@@ -378,7 +392,7 @@ function create_calibration_instruction() {
     instruction.innerHTML += "<header class=\"form__header\">" +
                                 "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
                              "</header>" +
-                             "<button class=\"form__button\" type=\"button\" onclick=\"task_navigation()\">Start ></button>";
+                             "<button class=\"form__button\" type=\"button\" onclick=\"prepare_calibration()\">Start ></button>";
     document.body.appendChild(instruction);
 }
 
@@ -422,6 +436,13 @@ function start_calibration() {
 }
 
 /**
+ * When finish calibration
+ */
+function finish_calibration(){
+//TODO: no idea what to put here, but just leave it here for structure purpose
+}
+
+/**
  * Action when the mouse is clicked on canvas
  * @param {*} event 
  */
@@ -432,17 +453,37 @@ function canvas_on_click(event) {
     var y = event.y;
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
-    if (x < dots[currDot].right && x > dots[currDot].left && y > dots[currDot].top && y < dots[currDot].bottom) {
-        clear_canvas();
-        console.log("dot clicked");
+    // check if clicked on dot
+    if (x < dots[currDot].right && x > dots[currDot].left && y > dots[currDot].top && y < dots[currDot].bottom) { 
+        // create new dot for calibration   
         if (currDot !== dots.length - 1) {
+            clear_canvas();
             currDot += 1;
             draw_dot(context, dots[currDot], "#EEEFF7");
-        } else {
-            delete_elem("canvas-overlay");
-            finish_collection();
+        } 
+        // finish calibration
+        else {    
+            finish_calibration();
         }
     }
+}
+
+/**
+ * prepare for the validation process
+ */
+function prepare_validation(){
+    // TODO: fininsh this function
+}
+
+/**
+ * prepare for the calidation process
+ */
+function start_validation(){
+    // TODO: finish this function
+}
+
+function finish_validation(){
+    // TODO: fnish this function
 }
 
 /************************************
