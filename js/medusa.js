@@ -29,22 +29,20 @@ var calibration_settings = {
     duration = 20,  // duration of a a singe position sampled
     num_dots = 10,  // the number of dots used for calibration
     position_array =    // array of possible positions
-    dots = null,    //array of dots
+    dots = [],    //array of dots
 
 };
 /************************************
 * VALIDATION PARAMETERS
 ************************************/
-var calibration_settings = {
+var validation_settings = {
     method: "watch",    // validation method, either watch or click.
     duration = 20,  // duration of a a singe position sampled
     num_dots = 10,  // the number of dots used for validation
     position_array =    // array of possible positions
-    dots = null,    //array of dots
+    dots = [],    //array of dots
 
 };
-
-
 
 /************************************
 * SETTING UP AWS
@@ -339,11 +337,6 @@ function task_navigation(){
 /************************************
 * CALIBRATION AND VALIDATION
 ************************************/
-// dot array
-var dots = [];
-// current dot in dot array
-var currDot = 0;
-
 /**
  * show the consent form before doing calibration
  */
@@ -403,8 +396,9 @@ function prepare_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         delete_elem("consent_form");
-        currDot = 0;
-        dots = create_dot_array(calibration_dot_positions);
+    if (calibration_settings.dots.length == 0) {
+        calibration_settings.dots = create_dot_array(calibration_settings.position_array);
+    }
 
         // dots = shuffle([
         //     new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
@@ -458,8 +452,8 @@ function canvas_on_click(event) {
         // create new dot for calibration   
         if (currDot !== dots.length - 1) {
             clear_canvas();
-            currDot += 1;
-            draw_dot(context, dots[currDot], "#EEEFF7");
+            dot = calibration_settings.dots.pop();
+            draw_dot(context, dot, "#EEEFF7");
         } 
         // finish calibration
         else {    
