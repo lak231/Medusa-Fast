@@ -13,9 +13,11 @@ var gazer_id = "";
 var cur_url = "";
 // time stamp of this session
 var time = "";
-
+// task number
+var task = 1;
 var x_array = [];
 var y_array = [];
+
 
 /************************************
 * SETTING UP AWS
@@ -55,6 +57,37 @@ var docClient = new AWS.DynamoDB.DocumentClient();
     return array;
 }
 
+/**
+ * Dot object
+ * @param {*} x - x_coordinate of the center
+ * @param {*} y - y_coordinate of the center
+ * @param {*} r - radius
+ */
+var Dot = function (x, y, r) {
+    this.x = x;
+    this.y = y;
+    this.r = r;
+    this.left = x - r;
+    this.top = y - r;
+    this.right = x + r;
+    this.bottom = y + r;
+};
+
+/************************************
+* MAIN FUNCTIONS
+************************************/
+
+/**
+ * record gaze location into x and y arrays. Used to control sample rate
+ * otherwise, collect_data() will collect data at maximum sample rate
+ */
+function record_gaze_location(){
+    var prediction = webgazer.getCurrentPrediction();
+    if (prediction) {
+        x_array.push(prediction.x);
+        y_array.push(prediction.y);
+    }
+}
 
 /**
  * Create unique ID from time + RNG. Load the ID from local storage if it's already there.
@@ -77,33 +110,23 @@ function createID() {
 }
 
 /**
- * record gaze location into x and y arrays. Used to control sample rate
- * otherwise, collect_data() will collect data at maximum sample rate
- */
-function record_gaze_location(){
-    var prediction = webgazer.getCurrentPrediction();
-    if (prediction) {
-        x_array.push(prediction.x);
-        y_array.push(prediction.y);
-    }
-}
-
-/**
  * Load Webgazer. Once loaded, start the collect data procedure
  * @author 
  */
-function loadWebgazer() {
+function load_webgazer() {
     $.getScript( "js/webgazer.js" )
         .done(function( script, textStatus ) {
-            collect_data();
+            initiate_webgazer();
         })
         .fail(function( jqxhr, settings, exception ) {
             $( "div.log" ).text( "Triggered ajaxError handler." );
         });
 }
 
-// start WebGazer and collect data
-function collect_data(){
+/**
+ * start WebGazer and collect data
+ */
+function initiate_webgazer(){
     createID();
     cur_url = window.location.href;
     time = (new Date).getTime().toString();
@@ -121,22 +144,26 @@ function collect_data(){
     	.begin()
         .showPredictionPoints(false); /* shows a square every 100 milliseconds where current prediction is */
     // setInterval(function(){ record_gaze_location() }, 1000);
-    checkWebgazer();
+    check_webgazer_status();
 }
 
-// Check Webgazer
-function checkWebgazer() {
+/**
+ * Check if webgazer successfully initiated.
+ */
+function check_webgazer_status() {
     if (webgazer.isReady()) {
         console.log('webgazer is ready.');
         // Create database
-        createGazersTable();
+        create_gazer_database_table();
     } else {
-        setTimeout(checkWebgazer, 100);
+        setTimeout(check_webgazer_status, 100);
     }
 }
 
-// Create data table in the database if haven't already exists
-function createGazersTable() {
+/**
+ * Create data table in the database if haven't already exists
+ */
+function create_gazer_database_table() {
     var params = {
         TableName : tableName,
         KeySchema: [
@@ -161,8 +188,11 @@ function createGazersTable() {
     });
 }
 
-// create data form and push to database
-function sendGazerToServer(data = {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array}){ 
+/**
+ * send data to server
+ * @param {*} data - the type of data to be sent to server. 
+ */
+function send_data_to_database(data = {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array}){ 
     var params = {
         TableName :tableName,
         Item: {
@@ -188,22 +218,22 @@ function finish_collection(){
     sendGazerToServer();
 }
 
-// get element from point
-function get_elements_seen(x,y){
-    var element = document.elementFromPoint(x, y);
-    if (element in elem_array ){
-        elem_array[element] = elem_array[element] + 1
-    }
-    else{
-        elem_array[element] = 1
-       
+
+/**
+ * Navigate to a specific task. Task is selected with the task variable. 
+ */
+function task_navigation(){
+    if (task === 1){
+        prepare_calibration_1();
     }
 }
-  
 
 
-var dots = [];
-var currDot = 0;
+/************************************
+* HTML PREP FUNCTIONS
+* functions which interact with the html files.
+************************************/
+
 // create the overlay for calibration and validation
 function create_overlay(){
     var canvas = document.createElement('canvas');
@@ -221,7 +251,7 @@ function create_overlay(){
 
 
 // show the consent form before doing calibration
-function create_form() {
+function create_consent_form() {
     // hide the background and create canvas
     create_overlay();
     var form = document.createElement("div");
@@ -249,24 +279,73 @@ function create_form() {
                                     "</p>" +
                                 "</fieldset>" +
 
-                                "<button class=\"form__button\" type=\"button\" onclick=\"create_calibration()\">Next ></button>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"create_calibration_instruction() \">Next ></button>" +
                             "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
 }
 
-// delete an element
-function delete_elem(name) {
-    var elem = document.getElementById(name);
+// show the calibration instruction 
+function create_calibration_instruction() {
+     
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+                                "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
+                             "</header>" +
+                             "<button class=\"form__button\" type=\"button\" onclick=\"task_navigation()\">Start ></button>";
+    document.body.appendChild(instruction);
+}
+
+// clear all the canvas
+function clear_canvas () {
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+/**
+ * Get html element from a point
+ * @param {*} x - x_coordinate of point
+ * @param {*} y - y_coordinate of point
+ */
+function get_elements_seen(x,y){
+    var element = document.elementFromPoint(x, y);
+    if (element in elem_array ){
+        elem_array[element] = elem_array[element] + 1
+    }
+    else{
+        elem_array[element] = 1
+       
+    }
+}
+
+/**
+ * Delete an element with id
+ * @param {*} name - id the of element
+ */
+function delete_elem(id) {
+    var elem = document.getElementById(id);
     elem.parentNode.removeChild(elem);
 }
 
-// prepare for the calibration
-function create_calibration() {
+/************************************
+* TASK 1 - WEBSITE GAZING POSITION
+* Collect gazing data on the website, then draw the heatmap of gazing positions. Include points and html elements
+* Has calibration, validation and data collection.
+************************************/
+var dots = [];
+var currDot = 0;
+
+/**
+ * Prepare the calibration of task 1
+ */
+function prepare_calibration_1() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         delete_elem("consent_form");
-        set_calibration_instruction();
         currDot = 0;
         dots = shuffle([
             new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
@@ -284,58 +363,32 @@ function create_calibration() {
             new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
         ]);
     }
+    start_calibration_1();
 }
 
-
-// show the calibration instruction 
-function set_calibration_instruction() {
-    var instruction = document.createElement("div");
-    instruction.id = "instruction";
-    instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;
-    instruction.innerHTML += "<header class=\"form__header\">" +
-                                "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
-                             "</header>" +
-                             "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
-    document.body.appendChild(instruction);
-}
-
-// the actual calibration process
-function start_calibration() {
+/**
+ * start the calibration process
+ */
+function start_calibration_1() {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     delete_elem("instruction");
-    draw_dot(context, dots[0], "#EEEFF7");
+    draw_dot_1(context, dots[0], "#EEEFF7");
 }
 
-// draw the dots for calibration and validation
-function draw_dot(context, dot, color) {
+/**
+ * Draw the dots for calibration and validation of task 1
+ * @param {*} context - context of canvas
+ * @param {*} dot - the Dot object
+ * @param {*} color - color of the dot
+ */
+function draw_dot_1(context, dot, color) {
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
     context.fillStyle = color;
     context.fill();
 }
 
-// a dot
-var Dot = function (x, y, r) {
-    this.x = x;
-    this.y = y;
-    this.r = r;
-    this.left = x - r;
-    this.top = y - r;
-    this.right = x + r;
-    this.bottom = y + r;
-};
-
-// clear all the canvas
-function clear_canvas () {
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-
-// on click dot 
 function dotEvent(event) {
     var x = event.x;
     var y = event.y;
@@ -348,7 +401,7 @@ function dotEvent(event) {
         console.log("dot clicked");
         if (currDot !== dots.length - 1) {
             currDot += 1;
-            draw_dot(context, dots[currDot], "#EEEFF7");
+            draw_dot_1(context, dots[currDot], "#EEEFF7");
         } else {
             delete_elem("canvas-overlay");
             finish_collection();
@@ -356,5 +409,9 @@ function dotEvent(event) {
     }
 }
 
-
+/************************************
+* TASK 2 - TASK-BASED TEST
+* Collect data based on specific tasks and tests. 
+* Has calibration and validation 
+************************************/
 
