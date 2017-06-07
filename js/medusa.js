@@ -46,14 +46,14 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 
 
 /************************************
-* HELPER FUNCTIONS
+* COMMON FUNCTIONS
 ************************************/
 /**
  * Shuffles array in place.
  * @param array items The array containing the items.
  * @author http://stackoverflow.com/a/2450976/4175553
  */
-    function shuffle(array) {
+function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
 
     // While there remain elements to shuffle...
@@ -69,6 +69,57 @@ var docClient = new AWS.DynamoDB.DocumentClient();
         array[randomIndex] = temporaryValue;
     }
     return array;
+}
+
+/**
+ * create the overlay over the website
+ */
+function create_overlay(){
+    var canvas = document.createElement('canvas');
+    canvas.id     = "canvas-overlay";
+    canvas.addEventListener("mousedown", dotEvent, false);
+    // style the newly created canvas
+    canvas.style.zIndex   = 10;
+    canvas.style.position = "fixed";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.backgroundColor = "#1c1d21";
+    // add the canvas to web page
+    document.body.appendChild(canvas);
+}
+
+/**
+ * clear all the canvas
+ */
+function clear_canvas () {
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+/**
+ * Get html element from a point
+ * @param {*} x - x_coordinate of point
+ * @param {*} y - y_coordinate of point
+ */
+function get_elements_seen(x,y){
+    var element = document.elementFromPoint(x, y);
+    if (element in elem_array ){
+        elem_array[element] = elem_array[element] + 1
+    }
+    else{
+        elem_array[element] = 1
+       
+    }
+}
+
+/**
+ * Delete an element with id
+ * @param {*} name - id the of element
+ */
+function delete_elem(id) {
+    var elem = document.getElementById(id);
+    elem.parentNode.removeChild(elem);
 }
 
 /**
@@ -88,16 +139,32 @@ var Dot = function (x, y, r = 10) {
 };
 
 /**
- * Create an array of dots from an array of positions
+ * Create an array of dots from an array of positions, then shuffle it
  * @param {*} pos_array - array of positions
  * @param {*} radius - the radius of the dots
+ * @return{*} dot_array - the array of dots
  */
+
 function create_dot_array(pos_array, radius = 10){
     var dot_array = [];
     for (var dot_pos in pos_array){
         dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1],radius))
     }
+    dot_array = shuffle(dot_array);
     return dot_array;
+}
+
+/**
+ * Draw the a dot
+ * @param {*} context - context of canvas
+ * @param {*} dot - the Dot object
+ * @param {*} color - color of the dot
+ */
+function draw_dot(context, dot, color) {
+    context.beginPath();
+    context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
+    context.fillStyle = color;
+    context.fill();
 }
 
 /************************************
@@ -247,7 +314,6 @@ function finish_collection(){
     sendGazerToServer();
 }
 
-
 /**
  * Navigate to a specific task. Task is selected with the task variable. 
  */
@@ -257,28 +323,11 @@ function task_navigation(){
     }
 }
 
-
 /************************************
-* HTML PREP FUNCTIONS
-* functions which interact with the html files.
+* CALIBRATION AND VALIDATION
 ************************************/
-
-/**
- * create the overlay for calibration and validation
- */
-function create_overlay(){
-    var canvas = document.createElement('canvas');
-    canvas.id     = "canvas-overlay";
-    canvas.addEventListener("mousedown", dotEvent, false);
-    // style the newly created canvas
-    canvas.style.zIndex   = 10;
-    canvas.style.position = "fixed";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    canvas.style.backgroundColor = "#1c1d21";
-    // add the canvas to web page
-    document.body.appendChild(canvas);
-}
+var dots = [];
+var currDot = 0;
 
 
 /**
@@ -332,70 +381,32 @@ function create_calibration_instruction() {
                              "<button class=\"form__button\" type=\"button\" onclick=\"task_navigation()\">Start ></button>";
     document.body.appendChild(instruction);
 }
-/**
- * clear all the canvas
- */
-function clear_canvas () {
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-}
 
 /**
- * Get html element from a point
- * @param {*} x - x_coordinate of point
- * @param {*} y - y_coordinate of point
- */
-function get_elements_seen(x,y){
-    var element = document.elementFromPoint(x, y);
-    if (element in elem_array ){
-        elem_array[element] = elem_array[element] + 1
-    }
-    else{
-        elem_array[element] = 1
-       
-    }
-}
-
-/**
- * Delete an element with id
- * @param {*} name - id the of element
- */
-function delete_elem(id) {
-    var elem = document.getElementById(id);
-    elem.parentNode.removeChild(elem);
-}
-
-/************************************
-* CALIBRATION AND VALIDATION
-************************************/
-var dots = [];
-var currDot = 0;
-
-/**
- * Prepare the calibration of task 1
+ * Prepare the calibration 
  */
 function prepare_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         delete_elem("consent_form");
         currDot = 0;
-        dots = create_dot_array()
-        dots = shuffle([
-            new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
-            new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
-            new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
-            new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
-            new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
-            new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
-            new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
-            new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
-            new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
-            new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
-            new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
-            new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
-            new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
-        ]);
+        dots = create_dot_array(calibration_dot_positions);
+
+        // dots = shuffle([
+        //     new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
+        //     new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
+        //     new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
+        //     new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
+        //     new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
+        //     new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
+        //     new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
+        //     new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
+        //     new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
+        //     new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
+        //     new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
+        //     new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
+        //     new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
+        // ]);
     }
     start_calibration();
 }
@@ -410,18 +421,6 @@ function start_calibration() {
     draw_dot(context, dots[0], "#EEEFF7");
 }
 
-/**
- * Draw the dots for calibration and validation of task 1
- * @param {*} context - context of canvas
- * @param {*} dot - the Dot object
- * @param {*} color - color of the dot
- */
-function draw_dot(context, dot, color) {
-    context.beginPath();
-    context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
-    context.fillStyle = color;
-    context.fill();
-}
 
 function dotEvent(event) {
     var x = event.x;
