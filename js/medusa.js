@@ -446,6 +446,7 @@ function start_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         var context = canvas.getContext("2d");
+        clear_canvas();
         delete_elem("instruction");
         if (objects_array.length == 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
@@ -480,9 +481,9 @@ function create_new_dot_calibration(){
  * When finish calibration
  */
 function finish_calibration(){
-//TODO: no idea what to put here, but just leave it here for structure purpose
     objects_array = [];
     num_objects_shown = 0;
+    start_validation();
 }
 
 /**
@@ -491,6 +492,7 @@ function finish_calibration(){
 function start_validation(){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    clear_canvas();
     if (objects_array.length == 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
@@ -520,7 +522,8 @@ function create_new_dot_validation(){
 }
 
 function finish_validation(){
-    // TODO: fnish this function
+    objects_array = [];
+    num_objects_shown = 0;
 }
 
 /************************************
