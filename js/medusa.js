@@ -192,7 +192,19 @@ function draw_dot(context, dot, color) {
     context.fill();
 }
 
-function collide()
+/**
+ * Check if an object collides with a mouse
+ * @param {*} mouse 
+ * @param {*} object 
+ */
+function collide_mouse(mouse, object){
+    if (mouse.x < object.right && mouse.x > object.left && mouse.y > object.top && mouse.y < object.bottom) {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 /************************************
 * MAIN FUNCTIONS
 ************************************/
@@ -455,7 +467,7 @@ function canvas_on_click(event) {
  */
 function on_click_calibration(mouse){
    // check if clicked on dot
-    if (mouse.x < curr_object.right && mouse.x > curr_object.left && mouse.y > curr_object.top && mouse.y < curr_object.bottom) { 
+    if (collide_mouse(mouse, curr_object)) { 
         // create new dot for calibration   
         if (currDot !== dots.length - 1) {
             clear_canvas();
