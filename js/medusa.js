@@ -19,18 +19,32 @@ var cur_url = "";   // url of website
 var time = "";  // time of current webgazer session
 var x_array = [];
 var y_array = [];
-var current_task = "calibration";    //current running task.
-
+var current_task = "calibration";    // current running task.
+var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
+ // dots = shuffle([
+        //     new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
+        //     new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
+        //     new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
+        //     new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
+        //     new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
+        //     new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
+        //     new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
+        //     new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
+        //     new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
+        //     new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
+        //     new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
+        //     new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
+        //     new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
+        // ]);
 var calibration_settings = {
     method: "watch",    // calibration method, either watch or click.
     duration = 20,  // duration of a a singe position sampled
     num_dots = 10,  // the number of dots used for calibration
     position_array =    // array of possible positions
     dots = [],    //array of dots
-
 };
 /************************************
 * VALIDATION PARAMETERS
@@ -178,6 +192,7 @@ function draw_dot(context, dot, color) {
     context.fill();
 }
 
+function collide()
 /************************************
 * MAIN FUNCTIONS
 ************************************/
@@ -396,25 +411,7 @@ function prepare_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         delete_elem("consent_form");
-    if (calibration_settings.dots.length == 0) {
         calibration_settings.dots = create_dot_array(calibration_settings.position_array);
-    }
-
-        // dots = shuffle([
-        //     new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
-        //     new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
-        //     new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
-        //     new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
-        //     new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
-        //     new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
-        //     new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
-        //     new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
-        //     new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
-        //     new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
-        //     new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
-        //     new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
-        //     new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
-        // ]);
     }
     start_calibration();
 }
@@ -447,12 +444,26 @@ function canvas_on_click(event) {
     var y = event.y;
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
-    // check if clicked on dot
-    if (x < dots[currDot].right && x > dots[currDot].left && y > dots[currDot].top && y < dots[currDot].bottom) { 
+    var mouse = {x:x,y:y};
+    if (current_task === "calibration"){
+        on_click_calibration(mouse);
+    }
+}
+
+/**
+ * function to call when click event is triggered during calibration
+ */
+function on_click_calibration(mouse){
+   // check if clicked on dot
+    if (mouse.x < curr_object.right && mouse.x > curr_object.left && mouse.y > curr_object.top && mouse.y < curr_object.bottom) { 
         // create new dot for calibration   
         if (currDot !== dots.length - 1) {
             clear_canvas();
-            dot = calibration_settings.dots.pop();
+            // if run out of dots, create a new dots array
+            if (calibration_settings.dots.length == 0) {
+                calibration_settings.dots = create_dot_array(calibration_settings.position_array);
+            }
+            curr_object = calibration_settings.dots.pop();
             draw_dot(context, dot, "#EEEFF7");
         } 
         // finish calibration
