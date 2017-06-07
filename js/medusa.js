@@ -2,8 +2,20 @@
 //global var
 
 
+
 /************************************
-* COLLECTION VARIABLES
+* POSITION ARRAYS FOR TASKS
+* these positions are relative to the window
+************************************/
+
+const calibration_dot_positions = 
+const validation_dot_positions = 
+const simple_paradigm_positions = 
+const 
+
+
+/************************************
+* COLLECTION OF VARIABLES
 ************************************/
 // name of table in database
 const tableName = "Gazers";
@@ -17,6 +29,8 @@ var time = "";
 var task = 1;
 var x_array = [];
 var y_array = [];
+
+
 
 
 /************************************
@@ -63,7 +77,7 @@ var docClient = new AWS.DynamoDB.DocumentClient();
  * @param {*} y - y_coordinate of the center
  * @param {*} r - radius
  */
-var Dot = function (x, y, r) {
+var Dot = function (x, y, r = 10) {
     this.x = x;
     this.y = y;
     this.r = r;
@@ -72,6 +86,19 @@ var Dot = function (x, y, r) {
     this.right = x + r;
     this.bottom = y + r;
 };
+
+/**
+ * Create an array of dots from an array of positions
+ * @param {*} pos_array - array of positions
+ * @param {*} radius - the radius of the dots
+ */
+function create_dot_array(pos_array, radius = 10){
+    var dot_array = [];
+    for (var dot_pos in pos_array){
+        dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1],radius))
+    }
+    return dot_array;
+}
 
 /************************************
 * MAIN FUNCTIONS
@@ -210,7 +237,9 @@ function send_data_to_database(data = {"url": cur_url, "gaze_x": x_array, "gaze_
     });
 }
 
-// clean up webgazer and send data to server. Must call once the validation ends
+/**
+ * clean up webgazer and send data to server. Must call once the validation ends
+ */
 function finish_collection(){
     // end web gazer 
     // webgazer.end(); 
@@ -234,7 +263,9 @@ function task_navigation(){
 * functions which interact with the html files.
 ************************************/
 
-// create the overlay for calibration and validation
+/**
+ * create the overlay for calibration and validation
+ */
 function create_overlay(){
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
@@ -250,7 +281,9 @@ function create_overlay(){
 }
 
 
-// show the consent form before doing calibration
+/**
+ * show the consent form before doing calibration
+ */
 function create_consent_form() {
     // hide the background and create canvas
     create_overlay();
@@ -284,8 +317,9 @@ function create_consent_form() {
     form.style.zIndex = 11;
     document.body.appendChild(form);
 }
-
-// show the calibration instruction 
+/**
+ * show the calibration instruction  form
+ */
 function create_calibration_instruction() {
      
     var instruction = document.createElement("div");
@@ -298,8 +332,9 @@ function create_calibration_instruction() {
                              "<button class=\"form__button\" type=\"button\" onclick=\"task_navigation()\">Start ></button>";
     document.body.appendChild(instruction);
 }
-
-// clear all the canvas
+/**
+ * clear all the canvas
+ */
 function clear_canvas () {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
@@ -345,6 +380,7 @@ function prepare_calibration() {
         var canvas = document.getElementById("canvas-overlay");
         delete_elem("consent_form");
         currDot = 0;
+        dots = create_dot_array()
         dots = shuffle([
             new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
             new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
@@ -415,6 +451,24 @@ var tSimple = {};
 tSimple.positions = [];
 function simpleStart() {
     // if we don't have dot-positions any more, refill the array
+    var canvas = document.getElementById("canvas-overlay");
+        currDot = 0;
+        dots = shuffle([
+            new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
+            new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
+            new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
+            new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
+            new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
+            new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
+            new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
+            new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
+            new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
+            new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
+            new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
+            new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
+            new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
+        ]);
+    }
     if (tSimple.positions.length == 0) {
         tSimple.positions = shuffle([
             {x: "20%", y: "20%"},
