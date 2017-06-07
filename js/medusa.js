@@ -8,7 +8,17 @@
 * these positions are relative to the window
 ************************************/
 
-
+ {x: "20%", y: "20%"},
+            {x: "50%", y: "20%"},
+            {x: "80%", y: "20%"},
+            {x: "20%", y: "50%"},
+            {x: "80%", y: "50%"},
+            {x: "20%", y: "80%"},
+            {x: "50%", y: "80%"},
+            {x: "80%", y: "80%"}
+simple_paradigm_settings = {
+    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
+}
 
 /************************************
 * VARIABLES
@@ -23,30 +33,17 @@ var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
+
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
- // dots = shuffle([
-        //     new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
-        //     new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
-        //     new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
-        //     new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
-        //     new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
-        //     new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
-        //     new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
-        //     new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
-        //     new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
-        //     new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
-        //     new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
-        //     new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
-        //     new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
-        // ]);
 var calibration_settings = {
     method: "watch",    // calibration method, either watch or click.
     duration: 20,  // duration of a a singe position sampled
     num_dots: 10,  // the number of dots used for calibration
-    position_array: [],  // array of possible positions
+    position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
 };
+
 /************************************
 * VALIDATION PARAMETERS
 ************************************/
@@ -170,7 +167,6 @@ var Dot = function (x, y, r = 10) {
  * @param {*} radius - the radius of the dots
  * @return{*} dot_array - the array of dots
  */
-
 function create_dot_array(pos_array, radius = 10){
     var dot_array = [];
     for (var dot_pos in pos_array){
@@ -214,8 +210,14 @@ function canvas_on_click(event) {
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
     var mouse = {x:x,y:y};
-    if (current_task === "calibration"){
-        on_click_calibration(mouse);
+    if (collide_mouse(mouse, curr_object) === false) return;
+    switch(current_task) {
+    case "calibration":
+        create_new_dot_calibration();
+        break;
+    case "validation":
+        create_new_dot_validation();
+        break;
     }
 }
 
@@ -440,6 +442,7 @@ function start_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         var context = canvas.getContext("2d");
+        clear_canvas();
         delete_elem("instruction");
         if (objects_array.length == 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
@@ -453,8 +456,7 @@ function start_calibration() {
 /**
  * function to call when click event is triggered during calibration
  */
-function on_click_calibration(mouse){
-    if (collide_mouse(mouse, curr_object) === false) return;
+function create_new_dot_calibration(){
     if (num_objects_shown > calibration_settings.num_dots) {
         finish_calibration();
         return;
@@ -475,13 +477,10 @@ function on_click_calibration(mouse){
  * When finish calibration
  */
 function finish_calibration(){
-//TODO: no idea what to put here, but just leave it here for structure purpose
     objects_array = [];
     num_objects_shown = 0;
+    start_validation();
 }
-
-
-
 
 /**
  * prepare for the calidation process
@@ -489,6 +488,7 @@ function finish_calibration(){
 function start_validation(){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    clear_canvas();
     if (objects_array.length == 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
@@ -500,8 +500,7 @@ function start_validation(){
 /**
  * function to call when click event is triggered during validation
  */
-function on_click_validation(mouse){
-    if (collide_mouse(mouse, curr_object) === false) return;
+function create_new_dot_validation(){
     if (num_objects_shown > validation_settings.num_dots) {
         finish_validation();
         return;
@@ -521,12 +520,14 @@ function on_click_validation(mouse){
 function validation_event_handler(data) {
     var dist = parseInt(Math.sqrt(((data.x - curr_object.x) * (d.x - curr_object.x)) + ((data.y - curr_object.y) * (data.y - curr_object.y))));
     if (dist < validation_settings.distance) {
-        
+
     }
 }
 
+
 function finish_validation(){
-    // TODO: fnish this function
+    objects_array = [];
+    num_objects_shown = 0;
 }
 
 /************************************
