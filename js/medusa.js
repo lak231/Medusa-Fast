@@ -77,7 +77,7 @@ function shuffle(array) {
 function create_overlay(){
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
-    canvas.addEventListener("mousedown", dotEvent, false);
+    canvas.addEventListener("mousedown", canvas_on_click, false);
     // style the newly created canvas
     canvas.style.zIndex   = 10;
     canvas.style.position = "fixed";
@@ -421,12 +421,15 @@ function start_calibration() {
     draw_dot(context, dots[0], "#EEEFF7");
 }
 
-
-function dotEvent(event) {
-    var x = event.x;
-    var y = event.y;
+/**
+ * Action when the mouse is clicked on canvas
+ * @param {*} event 
+ */
+function canvas_on_click(event) {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    var x = event.x;
+    var y = event.y;
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
     if (x < dots[currDot].right && x > dots[currDot].left && y > dots[currDot].top && y < dots[currDot].bottom) {
