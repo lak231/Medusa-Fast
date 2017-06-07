@@ -21,7 +21,7 @@ var x_array = [];
 var y_array = [];
 var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
-var objects = [];    //array of dots
+var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 /************************************
 * CALIBRATION PARAMETERS
@@ -425,36 +425,32 @@ function create_consent_form() {
  */
 function create_calibration_instruction() {
     var instruction = document.createElement("div");
+    delete_elem("consent_form");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
                                 "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
                              "</header>" +
-                             "<button class=\"form__button\" type=\"button\" onclick=\"prepare_calibration()\">Start ></button>";
+                             "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
     document.body.appendChild(instruction);
 }
 
 /**
  * Prepare the calibration 
  */
-function prepare_calibration() {
+function start_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
-        delete_elem("consent_form");
-        calibration_settings.dots = create_dot_array(calibration_settings.position_array);
+        var context = canvas.getContext("2d");
+        delete_elem("instruction");
+        if (objects_array.length == 0) {
+            objects_array = create_dot_array(calibration_settings.position_array);
+        }
+        curr_object = objects_array.pop();
+        draw_dot(context, curr_object, "#EEEFF7");
     }
     start_calibration();
-}
-
-/**
- * start the calibration process
- */
-function start_calibration() {
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    delete_elem("instruction");
-    draw_dot(context, dots[0], "#EEEFF7");
 }
 
 /**
@@ -467,11 +463,11 @@ function on_click_calibration(mouse){
     if (currDot !== dots.length - 1) {
         clear_canvas();
         // if run out of dots, create a new dots array
-        if (calibration_settings.dots.length == 0) {
-            calibration_settings.dots = create_dot_array(calibration_settings.position_array);
+        if (objects_array.length == 0) {
+            objects_array = create_dot_array(calibration_settings.position_array);
         }
-        curr_object = calibration_settings.dots.pop();
-        draw_dot(context, dot, "#EEEFF7");
+        curr_object = objects_array.pop();
+        draw_dot(context, curr_object, "#EEEFF7");
     } 
     // finish calibration
     else {    
