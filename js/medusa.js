@@ -41,20 +41,20 @@ var curr_object = null;     // current object on screen. Can be anything. Used t
         // ]);
 var calibration_settings = {
     method: "watch",    // calibration method, either watch or click.
-    duration = 20,  // duration of a a singe position sampled
-    num_dots = 10,  // the number of dots used for calibration
-    position_array =    // array of possible positions
-    dots = [],    //array of dots
+    duration: 20,  // duration of a a singe position sampled
+    num_dots: 10,  // the number of dots used for calibration
+    position_array: [],  // array of possible positions
+    dots: []    //array of dots
 };
 /************************************
 * VALIDATION PARAMETERS
 ************************************/
 var validation_settings = {
     method: "watch",    // validation method, either watch or click.
-    duration = 20,  // duration of a a singe position sampled
-    num_dots = 10,  // the number of dots used for validation
-    position_array =    // array of possible positions
-    dots = [],    //array of dots
+    duration: 20,  // duration of a a singe position sampled
+    num_dots: 10,  // the number of dots used for validation
+    position_array: [],    // array of possible positions
+    dots: []    //array of dots
 
 };
 
@@ -140,7 +140,7 @@ function get_elements_seen(x,y){
 
 /**
  * Delete an element with id
- * @param {*} name - id the of element
+ * @param {*} id - id the of element
  */
 function delete_elem(id) {
     var elem = document.getElementById(id);
@@ -266,8 +266,11 @@ function initiate_webgazer(){
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
-            if (data == null) {
+            if (data === null) {
                 return;
+            }
+            if (current_task === "validation") {
+                canvas_on_click(data);
             }
             x_array.push(data.x);
             y_array.push(data.y);
