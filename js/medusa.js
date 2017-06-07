@@ -224,7 +224,7 @@ function finish_collection(){
  */
 function task_navigation(){
     if (task === 1){
-        prepare_calibration_1();
+        prepare_calibration();
     }
 }
 
@@ -332,9 +332,7 @@ function delete_elem(id) {
 }
 
 /************************************
-* TASK 1 - WEBSITE GAZING POSITION
-* Collect gazing data on the website, then draw the heatmap of gazing positions. Include points and html elements
-* Has calibration, validation and data collection.
+* CALIBRATION AND VALIDATION
 ************************************/
 var dots = [];
 var currDot = 0;
@@ -342,7 +340,7 @@ var currDot = 0;
 /**
  * Prepare the calibration of task 1
  */
-function prepare_calibration_1() {
+function prepare_calibration() {
     if ($("#consent-yes").is(':checked')) {
         var canvas = document.getElementById("canvas-overlay");
         delete_elem("consent_form");
@@ -363,17 +361,17 @@ function prepare_calibration_1() {
             new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
         ]);
     }
-    start_calibration_1();
+    start_calibration();
 }
 
 /**
  * start the calibration process
  */
-function start_calibration_1() {
+function start_calibration() {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     delete_elem("instruction");
-    draw_dot_1(context, dots[0], "#EEEFF7");
+    draw_dot(context, dots[0], "#EEEFF7");
 }
 
 /**
@@ -382,7 +380,7 @@ function start_calibration_1() {
  * @param {*} dot - the Dot object
  * @param {*} color - color of the dot
  */
-function draw_dot_1(context, dot, color) {
+function draw_dot(context, dot, color) {
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
     context.fillStyle = color;
@@ -401,7 +399,7 @@ function dotEvent(event) {
         console.log("dot clicked");
         if (currDot !== dots.length - 1) {
             currDot += 1;
-            draw_dot_1(context, dots[currDot], "#EEEFF7");
+            draw_dot(context, dots[currDot], "#EEEFF7");
         } else {
             delete_elem("canvas-overlay");
             finish_collection();
@@ -410,8 +408,203 @@ function dotEvent(event) {
 }
 
 /************************************
-* TASK 2 - TASK-BASED TEST
-* Collect data based on specific tasks and tests. 
-* Has calibration and validation 
-************************************/
+ * SIMPLE DOT VIEWING PARADIGM
+ * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
+ ************************************/
+var tSimple = {};
+tSimple.positions = [];
+function simpleStart() {
+    // if we don't have dot-positions any more, refill the array
+    if (tSimple.positions.length == 0) {
+        tSimple.positions = shuffle([
+            {x: "20%", y: "20%"},
+            {x: "50%", y: "20%"},
+            {x: "80%", y: "20%"},
+            {x: "20%", y: "50%"},
+            {x: "80%", y: "50%"},
+            {x: "20%", y: "80%"},
+            {x: "50%", y: "80%"},
+            {x: "80%", y: "80%"}
+        ]);
+    }
+    var pos = tSimple.positions.pop();
+    $('#stimuli_dot').css({
+        'top': pos.y,
+        'left': pos.x
+    });
+    data_current.task = 'simple';
+    data_current.x = pos.x;
+    data_current.y = pos.y;
+    data_current.condition = 'dot_' + pos.x + '_' + pos.y;
 
+    cam.recording = 1;
+    setTimeout('$("#stimuli_fixation").hide(); status = "fixation_offset";', 1500);
+    setTimeout('simpleShowdot();', 2000);
+}
+
+function simpleShowdot() {
+    status = "stimulus_onset";
+    $("#stimuli_dot").show();
+    setTimeout('status = "stimulus_offset"; endTrial();',  2000);
+}
+
+
+/************************************
+ * POSNER VIEWING PARADIGM
+ ************************************/
+function posnerStart() {
+    var p = Math.random() >= 0.5 ? '&gt;&gt;&gt;' : '&lt;&lt;&lt;';
+    $('#stimuli_prime').html(p);
+
+    var t = Math.random() >= 0.5 ? 'X' : 'N';
+    $('#stimuli_target').html(t);
+
+    var cond = Math.random() >= 0.7 ? 'incongruent' : 'congruent';
+
+    var tpos = 'left';
+    if ((cond == 'incongruent' && p == '&lt;&lt;&lt;') || ((cond == 'congruent' && p == '&gt;&gt;&gt;'))) {
+        tpos = 'right';
+    }
+
+    var pos = {};
+    if (tpos == 'left') {
+        pos.x = '20%';
+        pos.y = '30%';
+    } else {
+        pos.x = '80%';
+        pos.y = '30%';
+    }
+
+
+    $('#stimuli_target').css({
+        'top': pos.x,
+        'left': pos.y
+    });
+
+
+    data_current.task = 'posner';
+    data_current.x = pos.x;
+    data_current.y = pos.y;
+    data_current.condition = 'posner_' + pos.x + '_' + pos.y + '_' + tpos;
+
+    cam.recording = 1;
+    setTimeout("$('#stimuli_fixation').hide();", 1000);
+    setTimeout('posnerShowprime();', 1500);
+}
+ 
+function posnerShowprime() {
+    $('#stimuli_prime').show();
+    setTimeout("posnerShowTarget();", 300);
+}
+
+function posnerShowTarget() {
+    $('#stimuli_prime').hide();
+    $('#stimuli_target').show();
+    setTimeout("endTrial();", 1500);
+}
+
+
+/************************************
+ * SMOOTH PURSUIT PARADIGM
+ ************************************/
+var tPursuit = {};
+function pursuitStart() {
+    $('#stimuli_fixation').hide();
+    var pos_possible = shuffle([
+        {x: "20%", y: "20%", tx: "80%", ty: "20%"},
+        {x: "20%", y: "20%", tx: "20%", ty: "80%"},
+        {x: "20%", y: "20%", tx: "80%", ty: "80%"},
+
+        {x: "80%", y: "20%", tx: "20%", ty: "20%"},
+        {x: "80%", y: "20%", tx: "20%", ty: "80%"},
+        {x: "80%", y: "20%", tx: "80%", ty: "80%"},
+
+        {x: "20%", y: "80%", tx: "20%", ty: "20%"},
+        {x: "20%", y: "80%", tx: "80%", ty: "20%"},
+        {x: "20%", y: "80%", tx: "80%", ty: "80%"},
+
+        {x: "80%", y: "80%", tx: "20%", ty: "20%"},
+        {x: "80%", y: "80%", tx: "80%", ty: "20%"},
+        {x: "80%", y: "80%", tx: "20%", ty: "80%"}
+    ]);
+    var pos = pos_possible[0];
+    $s = $('#stimuli_dot');
+    $s.css({
+        'top': pos.y,
+        'left': pos.x
+    });
+
+    $s.css({
+        'background-color': '#000'
+    });
+
+
+    data_current.task = 'pursuit';
+    data_current.x = pos.x;
+    data_current.y = pos.y;
+    data_current.condition = 'pursuit_' + pos.x + '_' + pos.y + '_' + pos.tx + '_' + pos.ty;
+
+    cam.recording = 1;
+    $s.show();
+    setTimeout(function() {
+        status = "pursuit_start";
+        $('#stimuli_dot').css({
+            'background-color': '#dd494b'
+        }).animate({ "left": pos.tx, "top": pos.ty },
+            2000,
+            'linear',
+        function() {
+            status = "pursuit_end";
+            setTimeout("endTrial();", 500);
+        });
+    }, 1500);
+}
+
+
+
+/************************************
+ * FREE VIEWING PARADIGM
+ ************************************/
+var tFreeview = {};
+tFreeview.stimuli = [];
+function freeviewStart() {
+    if (tFreeview.stimuli.length == 0) {
+        for (var k = 1; k <= 30; k++) {
+            if (k < 10) {
+                tFreeview.stimuli.push("stimuli/tolcam_face_0" + k + ".png");
+            } else {
+                tFreeview.stimuli.push("stimuli/tolcam_face_" + k + ".png");
+            }
+        }
+        tFreeview.stimuli = shuffle(tFreeview.stimuli);
+    }
+    var img = tFreeview.stimuli.pop();
+    $('#stimuli_fixation').css({
+        'top': '50%',
+        'left': '50%'
+    });
+    var type = Math.random() >= 0.5 ? "left" : "right";
+
+    $('#stimuli_img').css({
+        "left": type == "left" ? "25%" : "75%",
+        "width": "50%",
+        "background-image": "url("+img+")"
+    });
+
+
+    data_current.task = 'freeviewing';
+    data_current.x = $('#stimuli_img').css('left');
+    data_current.y = "0%";
+    data_current.condition = 'view_' + img + '_' + type;
+
+
+    cam.recording = 1;
+    setTimeout("$('#stimuli_fixation').hide(); status = 'fixation_offset';", 1000);
+    setTimeout("freeviewShow();", 1500);
+}
+
+function freeviewShow() {
+    status = 'stimulus_onset';
+    $('#stimuli_img').show();
+    setTimeout("status = 'stimulus_offset'; endTrial();", 3000);
+}
