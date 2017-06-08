@@ -5,13 +5,13 @@
 
 /************************************
 * POSITION ARRAYS FOR TASKS
-* these positions are relative to the window
+* these positions are relative to window
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 5,
-    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial. in mls
-    target_show_time: 1500 // amount of time target will appear on screen with each trial. in mls
+    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial in ms
+    target_show_time: 1500 // amount of time target will appear on screen with each trial in ms
 };
 
 pursuit_paradigm_settings = {
@@ -118,7 +118,7 @@ function shuffle(array) {
 }
 
 /**
- * create the overlay over the website
+ * Creates overlay over website
  */
 function create_overlay(){
     var canvas = document.createElement('canvas');
@@ -135,7 +135,7 @@ function create_overlay(){
 }
 
 /**
- * clear all the canvas
+ * Clears content of canvas
  */
 function clear_canvas () {
     var canvas = document.getElementById("canvas-overlay");
@@ -144,7 +144,7 @@ function clear_canvas () {
 }
 
 /**
- * Get html element from a point
+ * Gets html element from a point
  * @param {*} x - x_coordinate of point
  * @param {*} y - y_coordinate of point
  */
@@ -160,8 +160,8 @@ function get_elements_seen(x,y){
 }
 
 /**
- * Delete an element with id
- * @param {*} id - id the of element
+ * Deletes an element with id
+ * @param {*} id - id of the element
  */
 function delete_elem(id) {
     var elem = document.getElementById(id);
@@ -187,7 +187,7 @@ var Dot = function (x, y, r) {
 };
 
 /**
- * Create an array of dots from an array of positions, then shuffle it
+ * Creates an array of dots from an array of positions, then shuffles it
  * @param {*} pos_array - array of positions
  * @param {*} radius - the radius of the dots
  * @return{*} dot_array - the array of dots
@@ -205,7 +205,7 @@ function create_dot_array(pos_array, radius){
 }
 
 /**
- * Draw the a dot
+ * Draws a dot
  * @param {*} context - context of canvas
  * @param {*} dot - the Dot object
  * @param {*} color - color of the dot
@@ -218,7 +218,7 @@ function draw_dot(context, dot, color) {
 }
 
 /**
- * Check if an object collides with a mouse
+ * Checks if an object collides with a mouse click
  * @param {*} mouse 
  * @param {*} object 
  */
@@ -227,7 +227,7 @@ function collide_mouse(mouse, object) {
 }
 
 /**
- * Action when the mouse is clicked on canvas
+ * Handles clicks on canvas
  * @param {*} event 
  */
 function canvas_on_click(event) {
@@ -254,7 +254,7 @@ function canvas_on_click(event) {
 }
 
 /**
- * A backward compatiblity version of request animation frame
+ * A backward compatibility version of request animation frame
  * @author http://www.html5canvastutorials.com/advanced/html5-canvas-animation-stage/
  */
 window.requestAnimFrame = (function(callback) {
@@ -271,8 +271,8 @@ function show_target(){
 ************************************/
 
 /**
- * record gaze location into x and y arrays. Used to control sample rate
- * otherwise, collect_data() will collect data at maximum sample rate
+ * Records gaze location into x and y arrays. Used to control sample rate.
+ * Otherwise, collect_data() will collect data at maximum sample rate
  */
 function record_gaze_location(){
     var prediction = webgazer.getCurrentPrediction();
@@ -283,7 +283,7 @@ function record_gaze_location(){
 }
 
 /**
- * Create unique ID from time + RNG. Load the ID from local storage if it's already there.
+ * Creates unique ID from time + RNG. Loads the ID from local storage if it's already there.
  */
 function createID() {
     // check if there is a gazer_id already stored
@@ -303,7 +303,7 @@ function createID() {
 }
 
 /**
- * Load Webgazer. Once loaded, start the collect data procedure
+ * Loads Webgazer. Once loaded, starts the collect data procedure
  * @author 
  */
 function load_webgazer() {
@@ -317,7 +317,7 @@ function load_webgazer() {
 }
 
 /**
- * start WebGazer and collect data
+ * Starts WebGazer and collects data
  */
 function initiate_webgazer(){
     createID();
@@ -344,7 +344,7 @@ function initiate_webgazer(){
 }
 
 /**
- * Check if webgazer successfully initiated.
+ * Checks if webgazer is successfully initiated.
  */
 function check_webgazer_status() {
     if (webgazer.isReady()) {
@@ -357,7 +357,7 @@ function check_webgazer_status() {
 }
 
 /**
- * Create data table in the database if haven't already exists
+ * Creates data table in the database if it hasn't already existed
  */
 function create_gazer_database_table() {
     var params = {
@@ -385,7 +385,7 @@ function create_gazer_database_table() {
 }
 
 /**
- * send data to server
+ * Sends data to server
  * @param {*} data - the type of data to be sent to server. 
  */
 function send_data_to_database(data){
@@ -408,7 +408,8 @@ function send_data_to_database(data){
 }
 
 /**
- * clean up webgazer and send data to server. Must call once the validation ends
+ * Cleans up webgazer and sends data to server
+ * Must call once validation ends
  */
 function end_experiment(){
     // end web gazer 
@@ -418,7 +419,7 @@ function end_experiment(){
 }
 
 /**
- * Navigate to a specific task. Task is selected with the task variable. 
+ * Navigates to a specific task. Task is selected with the task variable.
  */
 function task_navigation(){
     if (task === 1){
@@ -430,7 +431,7 @@ function task_navigation(){
 * CALIBRATION AND VALIDATION
 ************************************/
 /**
- * show the consent form before doing calibration
+ * Shows consent form before doing calibration
  */
 function create_consent_form() {
     // hide the background and create canvas
@@ -467,7 +468,7 @@ function create_consent_form() {
 }
 
 /**
- * show the calibration instruction  form
+ * Shows calibration instructions
  */
 function create_calibration_instruction() {
     var instruction = document.createElement("div");
@@ -483,7 +484,7 @@ function create_calibration_instruction() {
 }
 
 /**
- * Prepare the calibration 
+ * Prepares calibration process
  */
 function start_calibration() {
     if ($("#consent-yes").is(':checked')) {
@@ -502,7 +503,7 @@ function start_calibration() {
 }
 
 /**
- * function to call when click event is triggered during calibration
+ * Handles click event during calibration
  */
 function create_new_dot_calibration(){
     if (num_objects_shown > calibration_settings.num_dots) {
@@ -522,7 +523,7 @@ function create_new_dot_calibration(){
 }
 
 /**
- * When finish calibration
+ * Wraps up calibration
  */
 function finish_calibration(){
     objects_array = [];
@@ -531,7 +532,7 @@ function finish_calibration(){
 }
 
 /**
- * prepare for the calidation process
+ * Prepares validation process
  */
 function start_validation(){
     var canvas = document.getElementById("canvas-overlay");
@@ -547,7 +548,7 @@ function start_validation(){
 }
 
 /**
- * function to call when click event is triggered during validation
+ * Handles click event during validation
  */
 function create_new_dot_validation(){
     if (num_objects_shown > validation_settings.num_dots) {
@@ -646,7 +647,7 @@ function draw_moving_dot(){
         x: curr_object.cx,
         y:curr_object.cy,
         r: DEFAULT_DOT_RADIUS
-    }
+    };
     draw_dot(context, dot, "#EEEFF7");
 }
 
