@@ -388,8 +388,7 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        store_data.url  = window.location.href;
-        store_data.task = current_task;
+        store_data.url  = window.location.href;      
         time = (new Date).getTime().toString();
         create_gazer_database_table();
         
@@ -535,6 +534,8 @@ function start_calibration() {
         clear_canvas();
         delete_elem("instruction");
         current_task = 'calibration';
+        store_data.task = current_task;
+        store_data.description = calibration_settings.method;
         if (objects_array.length === 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
         }
@@ -585,6 +586,7 @@ function calibration_event_handler(data) {
 function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
+    send_data_to_database();
     start_validation();
 }
 
@@ -599,6 +601,8 @@ function start_validation(){
     var context = canvas.getContext("2d");
     clear_canvas();
     current_task = 'validation';
+    store_data.task = current_task;
+    store_data.description = validation_settings;
     if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
