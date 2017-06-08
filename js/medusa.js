@@ -192,7 +192,7 @@ function delete_elem(id) {
  * @param {*} r - radius
  */
 var Dot = function (x, y, r) {
-    r = (typeof data !== "undefined") ? r : DEFAULT_DOT_RADIUS;
+    r = (typeof r !== "undefined") ? r : DEFAULT_DOT_RADIUS;
     this.x = x;
     this.y = y;
     this.r = r;
@@ -210,7 +210,7 @@ var Dot = function (x, y, r) {
  * @return{*} dot_array - the array of dots
  */
 function create_dot_array(pos_array, radius){
-    radius = (typeof data !== "undefined") ? radius : DEFAULT_DOT_RADIUS;
+    radius = (typeof radius !== "undefined") ? radius : DEFAULT_DOT_RADIUS;
     var dot_array = [];
     for (var dot_pos in pos_array){
         if (pos_array.hasOwnProperty(dot_pos)) {
@@ -249,7 +249,6 @@ function collide_mouse(mouse, object) {
  */
 function canvas_on_click(event) {
     var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
     var x = event.x;
     var y = event.y;
     x -= canvas.offsetLeft;
@@ -633,7 +632,7 @@ function start_simple_paradigm() {
     var context = canvas.getContext("2d");
     clear_canvas();
     current_task = 'simple_paradigm';
-     if (objects_array.length == 0) {
+     if (objects_array.length === 0) {
         objects_array = create_dot_array(simple_paradigm_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -672,11 +671,12 @@ function start_pursuit_paradigm() {
     }
 }
 
-var time;
+var timestamp;
+
 function draw_moving_dot(){
     var now = new Date().getTime(),
-        dt = now - (time || now);
-    time = now;
+        dt = now - (timestamp || now);
+    timestamp = now;
     var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
     var dist_per_frame = distance(curr_object.x,curr_object.y,curr_object.tx,curr_object.ty) /pursuit_paradigm_settings.dot_show_time * dt;
     var x_dist_per_frame = Math.cos(angle) * dist_per_frame;
@@ -685,9 +685,9 @@ function draw_moving_dot(){
     curr_object.cy = xy + y_dist_per_frame;
     var dot = {
         x: curr_object.cx,
-        y:curr_object.cy,
+        y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
-    }
+    };
     if (((curr_object.tx - curr_object.x)/(curr_object.tx - curr_object.cx) < 0) || ((curr_object.ty - curr_object.y)/(curr_object.ty - curr_object.cxy < 0))){
         end_pursuit_paradigm();
     }
