@@ -344,10 +344,10 @@ function createID() {
  * Loads Webgazer. Once loaded, starts the collect data procedure
  */
 function load_webgazer() {
-    $.getScript( "js/webgazer.js" )
+    $.getScript("js/webgazer.js")
         .done(function( script, textStatus ) {
             initiate_webgazer();
-        })
+        })  
         .fail(function( jqxhr, settings, exception ) {
             $( "div.log" ).text( "Triggered ajaxError handler." );
         });
