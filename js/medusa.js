@@ -11,8 +11,31 @@ simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 5,
     dot_show_time: 2000,     // amount of time dot will appear on screen with each trial. in mls
-    target-shown_time: 1500 // amount of time target will appear on screen with each trial. in mls
+    target_show_time: 1500 // amount of time target will appear on screen with each trial. in mls
 };
+
+pursuit_paradigm_settings = {
+    position_array:[
+        {x: "20%", y: "20%", tx: "80%", ty: "20%"},
+        {x: "20%", y: "20%", tx: "20%", ty: "80%"},
+        {x: "20%", y: "20%", tx: "80%", ty: "80%"},
+
+        {x: "80%", y: "20%", tx: "20%", ty: "20%"},
+        {x: "80%", y: "20%", tx: "20%", ty: "80%"},
+        {x: "80%", y: "20%", tx: "80%", ty: "80%"},
+
+        {x: "20%", y: "80%", tx: "20%", ty: "20%"},
+        {x: "20%", y: "80%", tx: "80%", ty: "20%"},
+        {x: "20%", y: "80%", tx: "80%", ty: "80%"},
+
+        {x: "80%", y: "80%", tx: "20%", ty: "20%"},
+        {x: "80%", y: "80%", tx: "80%", ty: "20%"},
+        {x: "80%", y: "80%", tx: "20%", ty: "80%"}
+    ],
+    num_trials: 5,
+    dot_show_time: 2000,
+    target_show_time: 1500
+}
 
 /************************************
 * VARIABLES
@@ -223,8 +246,18 @@ function canvas_on_click(event) {
     }
 }
 
+/**
+ * A backward compatiblity version of request animation frame
+ * @author http://www.html5canvastutorials.com/advanced/html5-canvas-animation-stage/
+ */
+window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+
 function show_target(){
-    
 }
 /************************************
 * MAIN FUNCTIONS
@@ -552,147 +585,51 @@ function start_simple_paradigm() {
     var context = canvas.getContext("2d");
     clear_canvas();
     current_task = 'simple_paradigm';
-    if (objects_array.length == 0) {
+     if (objects_array.length == 0) {
         objects_array = create_dot_array(simple_paradigm_settings.position_array);
     }
+    curr_object = objects_array.pop();
+    num_objects_shown ++;
     if (num_objects_shown > simple_paradigm_settings.num_trials) {
         end_simple_paradigm();
     }
     else{
-        curr_object = objects_array.pop();
-        draw_dot(context, curr_object, "#EEEFF7");
-        num_objects_shown ++;
-
+        show_target();
+        setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, "#EEEFF7");},simple_paradigm_settings.target_show_time);
         setTimeout("start_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
-    
-    setTimeout('$("#stimuli_fixation").hide(); status = "fixation_offset";', 1500);
-    setTimeout('simpleShowdot();', 2000);
 }
-
-function simpleShowdot() {
-    status = "stimulus_onset";
-    $("#stimuli_dot").show();
-    setTimeout('status = "stimulus_offset"; endTrial();',  2000);
-}
-
 function end_simple_paradigm(){
     //TODO: finish this function
 }
-/************************************
- * POSNER VIEWING PARADIGM
- ************************************/
-function start_posner_paradigm() {
-    var p = Math.random() >= 0.5 ? '&gt;&gt;&gt;' : '&lt;&lt;&lt;';
-    $('#stimuli_prime').html(p);
 
-    var t = Math.random() >= 0.5 ? 'X' : 'N';
-    $('#stimuli_target').html(t);
-
-    var cond = Math.random() >= 0.7 ? 'incongruent' : 'congruent';
-
-    var tpos = 'left';
-    if ((cond === 'incongruent' && p === '&lt;&lt;&lt;') || ((cond === 'congruent' && p === '&gt;&gt;&gt;'))) {
-        tpos = 'right';
-    }
-
-    var pos = {};
-    if (tpos == 'left') {
-        pos.x = '20%';
-        pos.y = '30%';
-    } else {
-        pos.x = '80%';
-        pos.y = '30%';
-    }
-
-
-    $('#stimuli_target').css({
-        'top': pos.x,
-        'left': pos.y
-    });
-
-
-    data_current.task = 'posner';
-    data_current.x = pos.x;
-    data_current.y = pos.y;
-    data_current.condition = 'posner_' + pos.x + '_' + pos.y + '_' + tpos;
-
-    cam.recording = 1;
-    setTimeout("$('#stimuli_fixation').hide();", 1000);
-    setTimeout('posnerShowprime();', 1500);
-}
- 
-function posnerShowprime() {
-    $('#stimuli_prime').show();
-    setTimeout("posnerShowTarget();", 300);
-}
-
-function posnerShowTarget() {
-    $('#stimuli_prime').hide();
-    $('#stimuli_target').show();
-    setTimeout("endTrial();", 1500);
-}
-
-function end_posner_paradigm(){
-    //TODO: finish this function
-}
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
-var tPursuit = {};
-function pursuitStart() {
-    $('#stimuli_fixation').hide();
-    var pos_possible = shuffle([
-        {x: "20%", y: "20%", tx: "80%", ty: "20%"},
-        {x: "20%", y: "20%", tx: "20%", ty: "80%"},
-        {x: "20%", y: "20%", tx: "80%", ty: "80%"},
-
-        {x: "80%", y: "20%", tx: "20%", ty: "20%"},
-        {x: "80%", y: "20%", tx: "20%", ty: "80%"},
-        {x: "80%", y: "20%", tx: "80%", ty: "80%"},
-
-        {x: "20%", y: "80%", tx: "20%", ty: "20%"},
-        {x: "20%", y: "80%", tx: "80%", ty: "20%"},
-        {x: "20%", y: "80%", tx: "80%", ty: "80%"},
-
-        {x: "80%", y: "80%", tx: "20%", ty: "20%"},
-        {x: "80%", y: "80%", tx: "80%", ty: "20%"},
-        {x: "80%", y: "80%", tx: "20%", ty: "80%"}
-    ]);
-    var pos = pos_possible[0];
-    $s = $('#stimuli_dot');
-    $s.css({
-        'top': pos.y,
-        'left': pos.x
-    });
-
-    $s.css({
-        'background-color': '#000'
-    });
-
-
-    data_current.task = 'pursuit';
-    data_current.x = pos.x;
-    data_current.y = pos.y;
-    data_current.condition = 'pursuit_' + pos.x + '_' + pos.y + '_' + pos.tx + '_' + pos.ty;
-
-    cam.recording = 1;
-    $s.show();
-    setTimeout(function() {
-        status = "pursuit_start";
-        $('#stimuli_dot').css({
-            'background-color': '#dd494b'
-        }).animate({ "left": pos.tx, "top": pos.ty },
-            2000,
-            'linear',
-        function() {
-            status = "pursuit_end";
-            setTimeout("endTrial();", 500);
-        });
-    }, 1500);
+function start_pursuit_paradigm() {
+    // if we don't have dot-positions any more, refill the array
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    clear_canvas();
+    current_task = 'pursuit_paradigm';
+     if (objects_array.length == 0) {
+        objects_array = shuffle(pursuit_paradigm_settings.position_array);
+    }
+    curr_object = objects_array.pop();
+    num_objects_shown ++;
+    if (num_objects_shown > pursuit_paradigm_settings.num_trials) {
+        end_pursuit_paradigm();
+    }
+    requestAnimationFrame()
 }
 
+function draw_moving_dot(){
+    draw_dot(context, curr_object, "#EEEFF7");
+}
 
+function end_pursuit_paradigm(){
+
+}
 
 /************************************
  * FREE VIEWING PARADIGM
