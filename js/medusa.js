@@ -1,19 +1,17 @@
 
-//global var
-
-
-
 /************************************
-* POSITION ARRAYS FOR TASKS
-* these positions are relative to window
+* SIMPLE_PARADIGM PARAMETERS
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 5,
-    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial in ms
-    target_show_time: 1500 // amount of time target will appear on screen with each trial in ms
+    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial, in ms
+    target_show_time: 1500 // amount of time 'target' will appear on screen with each trial, in ms
 };
 
+/************************************
+* PURSUIT_PARADIGM PARAMETERS
+************************************/
 pursuit_paradigm_settings = {
     position_array:[
         {x: "20%", y: "20%", tx: "80%", ty: "20%"},
@@ -37,6 +35,9 @@ pursuit_paradigm_settings = {
     target_show_time: 1500
 };
 
+/************************************
+* FREEVIEW_PARADIGM PARAMETERS
+************************************/
 freeview_paradigm_settings = {
     num_trials: 5,
     image_show_time: 2000,
@@ -45,19 +46,32 @@ freeview_paradigm_settings = {
 };
 
 /************************************
-* VARIABLES
+* CONSTANTS
 ************************************/
 const TABLE_NAME = "Gazers"; // name of table in database
 const DEFAULT_DOT_RADIUS = 10;
+
+/************************************
+* VARIABLES
+************************************/
 var gazer_id = "";  // id of user
-var cur_url = "";   // url of website
 var time = "";  // time of current webgazer session
-var x_array = [];
-var y_array = [];
+// data variable. Used as a template for the type of data we send to the database
+var store_data = {
+    url: "",   // url of website
+    task: "",   // the current performing task
+    elapsedTime: [], // time since webgazer.begin() is called
+    object_x: [], // x position of whatever object the current task is using
+    object_y: [],    // y position of whatever object the current task is using
+    gaze_x: [], // x position of gaze
+    gaze_y: [] // y position of gaze
+}
+
 var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
+
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
@@ -118,7 +132,6 @@ function shuffle(array) {
 }
 
 /**
-<<<<<<< HEAD
  * Get the distance between two points with position (x1,y1) and (x2,y2)
  * @param {*} x1 
  * @param {*} y1 
@@ -133,9 +146,7 @@ function distance(x1,y1,x2,y2){
 
 /**
  * create the overlay over the website
-=======
  * Creates overlay over website
->>>>>>> d063eacdc7b1c17b7c1076f5f8d7d4982e27588b
  */
 function create_overlay(){
     var canvas = document.createElement('canvas');
@@ -152,7 +163,7 @@ function create_overlay(){
 }
 
 /**
- * Clears content of canvas
+ * Clear content of canvas
  */
 function clear_canvas () {
     var canvas = document.getElementById("canvas-overlay");
@@ -280,8 +291,6 @@ window.request_anim_frame = (function(callback) {
         };
       })();
 
-function show_target(){
-}
 
 /**
  * draw a target in the middle of the screen
@@ -343,7 +352,6 @@ function createID() {
 
 /**
  * Loads Webgazer. Once loaded, starts the collect data procedure
- * @author 
  */
 function load_webgazer() {
     $.getScript( "js/webgazer.js" )
@@ -359,19 +367,18 @@ function load_webgazer() {
  * Starts WebGazer and collects data
  */
 function initiate_webgazer(){
-    createID();
-    cur_url = window.location.href;
-    time = (new Date).getTime().toString();
     webgazer.clearData()
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
-            if (data === null) {
-                return;
+            if (data === null) return;
+            if (current_task === "calibration" && calibration_settings.method === "watch"){
+                calibration_event_handler(data);
             }
-            if (current_task === "validation") {
+            else if (current_task === "validation" && validation_settings.method === "watch"){
                 validation_event_handler(data);
             }
+
             x_array.push(data.x);
             y_array.push(data.y);
             get_elements_seen(data.x,data.y);
@@ -389,7 +396,11 @@ function check_webgazer_status() {
     if (webgazer.isReady()) {
         console.log('webgazer is ready.');
         // Create database
+        createID();
+        cur_url = window.location.href;
+        time = (new Date).getTime().toString();
         create_gazer_database_table();
+        
     } else {
         setTimeout(check_webgazer_status, 100);
     }
@@ -467,7 +478,7 @@ function task_navigation(){
 }
 
 /************************************
-* CALIBRATION AND VALIDATION
+* CALIBRATION
 ************************************/
 /**
  * Shows consent form before doing calibration
@@ -507,7 +518,7 @@ function create_consent_form() {
 }
 
 /**
- * Shows calibration instructions
+ * Shows calibration instruction
  */
 function create_calibration_instruction() {
     var instruction = document.createElement("div");
@@ -523,7 +534,7 @@ function create_calibration_instruction() {
 }
 
 /**
- * Prepares calibration process
+ * Start the calibration
  */
 function start_calibration() {
     if ($("#consent-yes").is(':checked')) {
@@ -542,7 +553,7 @@ function start_calibration() {
 }
 
 /**
- * Handles click event during calibration
+ * Create a new dot for calibration
  */
 function create_new_dot_calibration(){
     if (num_objects_shown > calibration_settings.num_dots) {
@@ -562,7 +573,22 @@ function create_new_dot_calibration(){
 }
 
 /**
- * Wraps up calibration
+ * Handler for 'watch' procedure. 
+ * @param {*} data 
+ */
+function calibration_event_handler(data) {
+    var dist = distance(data.x,data.y,curr_object.x,curr_object.y)
+    if (dist < validation_settings.distance) {
+        if (curr_object.hit_count < validation_settings.duration) {
+            curr_object.hit_count += 1;
+        } else {
+            create_new_dot_calibration();
+        }
+    }
+}
+
+/**
+ * Triggered once the calibration process finishes. Clean up things and go on to next step
  */
 function finish_calibration(){
     objects_array = [];
@@ -570,6 +596,9 @@ function finish_calibration(){
     start_validation();
 }
 
+/************************************
+* VALIDATION
+************************************/
 /**
  * Prepares validation process
  */
@@ -587,7 +616,7 @@ function start_validation(){
 }
 
 /**
- * Handles click event during validation
+ * Create new dots for validation
  */
 function create_new_dot_validation(){
     if (num_objects_shown > validation_settings.num_dots) {
@@ -606,6 +635,10 @@ function create_new_dot_validation(){
     num_objects_shown++;
 }
 
+/**
+ * Handler for 'watch' procedure. 
+ * @param {*} data 
+ */
 function validation_event_handler(data) {
     var dist = distance(data.x,data.y,curr_object.x,curr_object.y)
     if (dist < validation_settings.distance) {
@@ -617,6 +650,9 @@ function validation_event_handler(data) {
     }
 }
 
+/**
+ * Triggered when validation ends
+ */
 function finish_validation(){
     objects_array = [];
     num_objects_shown = 0;
@@ -641,7 +677,7 @@ function start_simple_paradigm() {
         end_simple_paradigm();
     }
     else{
-        show_target();
+        draw_target();
         setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, "#EEEFF7");},simple_paradigm_settings.target_show_time);
         setTimeout("start_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
