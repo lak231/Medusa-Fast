@@ -56,7 +56,7 @@ const DEFAULT_DOT_RADIUS = 10;
 ************************************/
 var gazer_id = "";  // id of user
 var time = "";  // time of current webgazer session
-// data variable. Used as a template for the type of data we send to the database
+// data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
     url: "",   // url of website
     task: "",   // the current performing task
@@ -317,19 +317,6 @@ function draw_target() {
 /************************************
 * MAIN FUNCTIONS
 ************************************/
-
-/**
- * Records gaze location into x and y arrays. Used to control sample rate.
- * Otherwise, collect_data() will collect data at maximum sample rate
- */
-function record_gaze_location(){
-    var prediction = webgazer.getCurrentPrediction();
-    if (prediction) {
-        x_array.push(prediction.x);
-        y_array.push(prediction.y);
-    }
-}
-
 /**
  * Creates unique ID from time + RNG. Loads the ID from local storage if it's already there.
  */
@@ -438,14 +425,13 @@ function create_gazer_database_table() {
  * Sends data to server
  * @param {*} data - the type of data to be sent to server. 
  */
-function send_data_to_database(data){
-    data = (typeof data !== "undefined") ? data : {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array};
+function send_data_to_database(){
     var params = {
         TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
             "time_collected":time,
-            "info":data
+            "info":store_data
         }
     };
     docClient.put(params, function(err, data) {
