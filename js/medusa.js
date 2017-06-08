@@ -7,15 +7,6 @@
 * POSITION ARRAYS FOR TASKS
 * these positions are relative to the window
 ************************************/
-
- {x: "20%", y: "20%"},
-            {x: "50%", y: "20%"},
-            {x: "80%", y: "20%"},
-            {x: "20%", y: "50%"},
-            {x: "80%", y: "50%"},
-            {x: "20%", y: "80%"},
-            {x: "50%", y: "80%"},
-            {x: "80%", y: "80%"}
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
 }
@@ -215,10 +206,14 @@ function canvas_on_click(event) {
     if (collide_mouse(mouse, curr_object) === false) return;
     switch(current_task) {
     case "calibration":
-        create_new_dot_calibration();
+        if (calibration_settings.method === 'click'){
+            create_new_dot_calibration();
+        }
         break;
     case "validation":
-        create_new_dot_validation();
+        if (validation_settings.method === 'click'){
+            create_new_dot_validation();
+        }
         break;
     }
 }
@@ -422,6 +417,7 @@ function create_consent_form() {
     form.style.zIndex = 11;
     document.body.appendChild(form);
 }
+
 /**
  * show the calibration instruction  form
  */
@@ -447,6 +443,7 @@ function start_calibration() {
         var context = canvas.getContext("2d");
         clear_canvas();
         delete_elem("instruction");
+        current_task = 'calibration';
         if (objects_array.length === 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
         }
@@ -492,6 +489,7 @@ function start_validation(){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
+    current_task = 'validation';
     if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
@@ -542,43 +540,18 @@ function finish_validation(){
  ************************************/
 var tSimple = {};
 tSimple.positions = [];
-function simpleStart() {
+function start_simple_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
-        currDot = 0;
-        dots = shuffle([
-            new Dot(canvas.width * 0.2, canvas.height * 0.2, 10),
-            new Dot(canvas.width * 0.8, canvas.height * 0.2, 10),
-            new Dot(canvas.width * 0.2, canvas.height * 0.5, 10),
-            new Dot(canvas.width * 0.5, canvas.height * 0.5, 10),
-            new Dot(canvas.width * 0.8, canvas.height * 0.5, 10),
-            new Dot(canvas.width * 0.2, canvas.height * 0.8, 10),
-            new Dot(canvas.width * 0.5, canvas.height * 0.8, 10),
-            new Dot(canvas.width * 0.8, canvas.height * 0.8, 10),
-            new Dot(canvas.width * 0.35, canvas.height * 0.35, 10),
-            new Dot(canvas.width * 0.65, canvas.height * 0.35, 10),
-            new Dot(canvas.width * 0.35, canvas.height * 0.65, 10),
-            new Dot(canvas.width * 0.65, canvas.height * 0.65, 10),
-            new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
-        ]);
+    var context = canvas.getContext("2d");
+    clear_canvas();
+    current_task = 'simple_paradigm';
+    if (objects_array.length == 0) {
+        objects_array = create_dot_array(simple_paradigm_settings.position_array);
     }
-    if (tSimple.positions.length === 0) {
-        tSimple.positions = shuffle([
-            {x: "20%", y: "20%"},
-            {x: "50%", y: "20%"},
-            {x: "80%", y: "20%"},
-            {x: "20%", y: "50%"},
-            {x: "80%", y: "50%"},
-            {x: "20%", y: "80%"},
-            {x: "50%", y: "80%"},
-            {x: "80%", y: "80%"}
-        ]);
-    }
-    var pos = tSimple.positions.pop();
-    $('#stimuli_dot').css({
-        'top': pos.y,
-        'left': pos.x
-    });
+    curr_object = objects_array.pop();
+    draw_dot(context, curr_object, "#EEEFF7");
+    num_objects_shown ++;
     data_current.task = 'simple';
     data_current.x = pos.x;
     data_current.y = pos.y;
