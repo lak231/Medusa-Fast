@@ -170,7 +170,9 @@ var Dot = function (x, y, r = 10) {
 function create_dot_array(pos_array, radius = 10){
     var dot_array = [];
     for (var dot_pos in pos_array){
-        dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1],radius))
+        if (pos_array.hasOwnProperty(dot_pos)) {
+            dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1], radius));
+        }
     }
     dot_array = shuffle(dot_array);
     return dot_array;
@@ -343,7 +345,8 @@ function create_gazer_database_table() {
  * send data to server
  * @param {*} data - the type of data to be sent to server. 
  */
-function send_data_to_database(data = {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array}){ 
+function send_data_to_database(data){
+    data = (typeof data !== "undefined") ? data : {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array};
     var params = {
         TableName :tableName,
         Item: {
@@ -444,7 +447,7 @@ function start_calibration() {
         var context = canvas.getContext("2d");
         clear_canvas();
         delete_elem("instruction");
-        if (objects_array.length == 0) {
+        if (objects_array.length === 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
         }
         curr_object = objects_array.pop();
@@ -465,7 +468,7 @@ function create_new_dot_calibration(){
     var context = canvas.getContext("2d");
     clear_canvas();
     // if run out of dots, create a new dots array
-    if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(calibration_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -489,7 +492,7 @@ function start_validation(){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
-    if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -509,7 +512,7 @@ function create_new_dot_validation(){
     var context = canvas.getContext("2d");
     clear_canvas();
     // if run out of dots, create a new dots array
-    if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -520,10 +523,13 @@ function create_new_dot_validation(){
 function validation_event_handler(data) {
     var dist = parseInt(Math.sqrt(((data.x - curr_object.x) * (d.x - curr_object.x)) + ((data.y - curr_object.y) * (data.y - curr_object.y))));
     if (dist < validation_settings.distance) {
-
+        if (curr_object.hit_count < validation_settings.duration) {
+            curr_object.hit_count += 1;
+        } else {
+            create_new_dot_validation();
+        }
     }
 }
-
 
 function finish_validation(){
     objects_array = [];
@@ -556,7 +562,7 @@ function simpleStart() {
             new Dot(canvas.width * 0.5, canvas.height * 0.2, 10)
         ]);
     }
-    if (tSimple.positions.length == 0) {
+    if (tSimple.positions.length === 0) {
         tSimple.positions = shuffle([
             {x: "20%", y: "20%"},
             {x: "50%", y: "20%"},
@@ -603,7 +609,7 @@ function posnerStart() {
     var cond = Math.random() >= 0.7 ? 'incongruent' : 'congruent';
 
     var tpos = 'left';
-    if ((cond == 'incongruent' && p == '&lt;&lt;&lt;') || ((cond == 'congruent' && p == '&gt;&gt;&gt;'))) {
+    if ((cond === 'incongruent' && p === '&lt;&lt;&lt;') || ((cond === 'congruent' && p === '&gt;&gt;&gt;'))) {
         tpos = 'right';
     }
 
