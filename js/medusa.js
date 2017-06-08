@@ -40,7 +40,8 @@ pursuit_paradigm_settings = {
 /************************************
 * VARIABLES
 ************************************/
-const tableName = "Gazers"; // name of table in database
+const TABLE_NAME = "Gazers"; // name of table in database
+const DEFAULT_DOT_RADIUS = 10;
 var gazer_id = "";  // id of user
 var cur_url = "";   // url of website
 var time = "";  // time of current webgazer session
@@ -50,7 +51,6 @@ var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
-
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
@@ -168,7 +168,7 @@ function delete_elem(id) {
  * @param {*} r - radius
  */
 var Dot = function (x, y, r) {
-    r = (typeof data !== "undefined") ? r : 10;
+    r = (typeof data !== "undefined") ? r : DEFAULT_DOT_RADIUS;
     this.x = x;
     this.y = y;
     this.r = r;
@@ -186,7 +186,7 @@ var Dot = function (x, y, r) {
  * @return{*} dot_array - the array of dots
  */
 function create_dot_array(pos_array, radius){
-    radius = (typeof data !== "undefined") ? radius : 10;
+    radius = (typeof data !== "undefined") ? radius : DEFAULT_DOT_RADIUS;
     var dot_array = [];
     for (var dot_pos in pos_array){
         if (pos_array.hasOwnProperty(dot_pos)) {
@@ -354,7 +354,7 @@ function check_webgazer_status() {
  */
 function create_gazer_database_table() {
     var params = {
-        TableName : tableName,
+        TableName : TABLE_NAME,
         KeySchema: [
             { AttributeName: "gazer_id", KeyType: "HASH"},
             { AttributeName: "time_collected", KeyType: "RANGE" }  //Sort key
@@ -384,7 +384,7 @@ function create_gazer_database_table() {
 function send_data_to_database(data){
     data = (typeof data !== "undefined") ? data : {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array};
     var params = {
-        TableName :tableName,
+        TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
             "time_collected":time,
@@ -616,14 +616,31 @@ function start_pursuit_paradigm() {
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
     }
     curr_object = objects_array.pop();
+    curr_object.cx = curr_object.x;
+    curr_object.cy = curr_object.y;
     num_objects_shown ++;
     if (num_objects_shown > pursuit_paradigm_settings.num_trials) {
         end_pursuit_paradigm();
     }
 }
 
+var time;
 function draw_moving_dot(){
-    draw_dot(context, curr_object, "#EEEFF7");
+    
+    requestAnimFrame(draw_moving_dot);
+    var now = new Date().getTime(),
+        dt = now - (time || now);
+    time = now;
+    var x_dist_per_frame = (curr_object.tx - curr_object.x)/pursuit_paradigm_settings.dot_show_time * dt;
+    var y_dist_per_frame = (curr_object.ty - curr_object.y)/pursuit_paradigm_settings.dot_show_time * dt;
+    curr_object.cx = cx + x_dist_per_frame;
+    curr_object.cy = xy + y_dist_per_frame;
+    var dot = {
+        x: curr_object.cx,
+        y:curr_object.cy,
+        r: DEFAULT_DOT_RADIUS
+    }
+    draw_dot(context, dot, "#EEEFF7");
 }
 
 function end_pursuit_paradigm(){
