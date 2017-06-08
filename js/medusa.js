@@ -118,6 +118,19 @@ function shuffle(array) {
 }
 
 /**
+ * Get the distance between two points with position (x1,y1) and (x2,y2)
+ * @param {*} x1 
+ * @param {*} y1 
+ * @param {*} x2 
+ * @param {*} y2 
+ */
+function distance(x1,y1,x2,y2){
+    var a = x1 - x2
+    var b = y1 - y2
+    return parseInt(Math.sqrt(a*a + b*b));
+}
+
+/**
  * create the overlay over the website
  */
 function create_overlay(){
@@ -257,7 +270,7 @@ function canvas_on_click(event) {
  * A backward compatiblity version of request animation frame
  * @author http://www.html5canvastutorials.com/advanced/html5-canvas-animation-stage/
  */
-window.requestAnimFrame = (function(callback) {
+window.request_anim_frame = (function(callback) {
         return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
         function(callback) {
           window.setTimeout(callback, 1000 / 60);
@@ -266,6 +279,29 @@ window.requestAnimFrame = (function(callback) {
 
 function show_target(){
 }
+
+/**
+ * draw a target in the middle of the screen
+ */
+function draw_target() {
+    clear_canvas();
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    var midX = canvas.width*0.5;
+    var midY = canvas.height*0.5;
+    context.lineWidth = 5;
+    //draw horizontal line
+    context.beginPath();
+    context.moveTo(midX - 15, midY);
+    context.lineTo(midX + 15, midY);
+    context.stroke();
+    //draw vertical line
+    context.beginPath();
+    context.moveTo(midX, midY - 15);
+    context.lineTo(midX, midY + 15);
+    context.stroke();
+}
+
 /************************************
 * MAIN FUNCTIONS
 ************************************/
@@ -567,7 +603,7 @@ function create_new_dot_validation(){
 }
 
 function validation_event_handler(data) {
-    var dist = parseInt(Math.sqrt(((data.x - curr_object.x) * (d.x - curr_object.x)) + ((data.y - curr_object.y) * (data.y - curr_object.y))));
+    var dist = distance(data.x,data.y,curr_object.x,curr_object.y)
     if (dist < validation_settings.distance) {
         if (curr_object.hit_count < validation_settings.duration) {
             curr_object.hit_count += 1;
@@ -633,13 +669,13 @@ function start_pursuit_paradigm() {
 
 var time;
 function draw_moving_dot(){
-    
-    requestAnimFrame(draw_moving_dot);
     var now = new Date().getTime(),
         dt = now - (time || now);
     time = now;
-    var x_dist_per_frame = (curr_object.tx - curr_object.x)/pursuit_paradigm_settings.dot_show_time * dt;
-    var y_dist_per_frame = (curr_object.ty - curr_object.y)/pursuit_paradigm_settings.dot_show_time * dt;
+    var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
+    var dist_per_frame = distance(curr_object.x,curr_object.y,curr_object.tx,curr_object.ty) /pursuit_paradigm_settings.dot_show_time * dt;
+    var x_dist_per_frame = Math.cos(angle) * dist_per_frame;
+    var y_dist_per_frame = Math.sin(angle) * dist_per_frame;
     curr_object.cx = cx + x_dist_per_frame;
     curr_object.cy = xy + y_dist_per_frame;
     var dot = {
@@ -647,7 +683,16 @@ function draw_moving_dot(){
         y:curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     }
-    draw_dot(context, dot, "#EEEFF7");
+    if (((curr_object.tx - curr_object.x)/(curr_object.tx - curr_object.cx) < 0) || ((curr_object.ty - curr_object.y)/(curr_object.ty - curr_object.cxy < 0))){
+        end_pursuit_paradigm();
+    }
+    else{
+        var canvas = document.getElementById("canvas-overlay");
+        var context = canvas.getContext("2d");
+        clear_canvas();
+        draw_dot(context, dot, "#EEEFF7");
+        request_anim_frame(draw_moving_dot);    
+    }
 }
 
 function end_pursuit_paradigm(){
@@ -688,25 +733,6 @@ function draw_freeview_image(pos) {
     } else {
         context.drawImage(curr_object, 0.75*width, 0.25*height);
     }
-}
-
-function draw_target() {
-    clear_canvas();
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    var midX = canvas.width*0.5;
-    var midY = canvas.height*0.5;
-    context.lineWidth = 5;
-    //draw horizontal line
-    context.beginPath();
-    context.moveTo(midX - 15, midY);
-    context.lineTo(midX + 15, midY);
-    context.stroke();
-    //draw vertical line
-    context.beginPath();
-    context.moveTo(midX, midY - 15);
-    context.lineTo(midX, midY + 15);
-    context.stroke();
 }
 
 function end_freeview_paradigm() {
