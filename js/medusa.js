@@ -8,7 +8,10 @@
 * these positions are relative to the window
 ************************************/
 simple_paradigm_settings = {
-    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]]
+    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
+    num_trials: 5,
+    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial. in mls
+    target-shown_time: 1500 // amount of time target will appear on screen with each trial. in mls
 };
 
 /************************************
@@ -220,6 +223,9 @@ function canvas_on_click(event) {
     }
 }
 
+function show_target(){
+    
+}
 /************************************
 * MAIN FUNCTIONS
 ************************************/
@@ -540,8 +546,6 @@ function finish_validation(){
  * SIMPLE DOT VIEWING PARADIGM
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
-var tSimple = {};
-tSimple.positions = [];
 function start_simple_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
@@ -551,15 +555,17 @@ function start_simple_paradigm() {
     if (objects_array.length == 0) {
         objects_array = create_dot_array(simple_paradigm_settings.position_array);
     }
-    curr_object = objects_array.pop();
-    draw_dot(context, curr_object, "#EEEFF7");
-    num_objects_shown ++;
-    data_current.task = 'simple';
-    data_current.x = pos.x;
-    data_current.y = pos.y;
-    data_current.condition = 'dot_' + pos.x + '_' + pos.y;
+    if (num_objects_shown > simple_paradigm_settings.num_trials) {
+        end_simple_paradigm();
+    }
+    else{
+        curr_object = objects_array.pop();
+        draw_dot(context, curr_object, "#EEEFF7");
+        num_objects_shown ++;
 
-    cam.recording = 1;
+        setTimeout("start_simple_paradigm();",simple_paradigm_settings.dot_show_time);
+    }
+    
     setTimeout('$("#stimuli_fixation").hide(); status = "fixation_offset";', 1500);
     setTimeout('simpleShowdot();', 2000);
 }
