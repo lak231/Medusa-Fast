@@ -620,7 +620,6 @@ function start_pursuit_paradigm() {
     if (num_objects_shown > pursuit_paradigm_settings.num_trials) {
         end_pursuit_paradigm();
     }
-    requestAnimationFrame()
 }
 
 function draw_moving_dot(){
