@@ -8,8 +8,8 @@
 * these positions are relative to the window
 ************************************/
 simple_paradigm_settings = {
-    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-}
+    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]]
+};
 
 /************************************
 * VARIABLES
@@ -141,7 +141,8 @@ function delete_elem(id) {
  * @param {*} y - y_coordinate of the center
  * @param {*} r - radius
  */
-var Dot = function (x, y, r = 10) {
+var Dot = function (x, y, r) {
+    r = (typeof data !== "undefined") ? r : 10;
     this.x = x;
     this.y = y;
     this.r = r;
@@ -158,7 +159,8 @@ var Dot = function (x, y, r = 10) {
  * @param {*} radius - the radius of the dots
  * @return{*} dot_array - the array of dots
  */
-function create_dot_array(pos_array, radius = 10){
+function create_dot_array(pos_array, radius){
+    radius = (typeof data !== "undefined") ? radius : 10;
     var dot_array = [];
     for (var dot_pos in pos_array){
         if (pos_array.hasOwnProperty(dot_pos)) {
