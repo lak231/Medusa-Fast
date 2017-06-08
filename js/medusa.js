@@ -561,11 +561,13 @@ function simpleShowdot() {
     setTimeout('status = "stimulus_offset"; endTrial();',  2000);
 }
 
-
+function end_simple_paradigm(){
+    //TODO: finish this function
+}
 /************************************
  * POSNER VIEWING PARADIGM
  ************************************/
-function posnerStart() {
+function start_posner_paradigm() {
     var p = Math.random() >= 0.5 ? '&gt;&gt;&gt;' : '&lt;&lt;&lt;';
     $('#stimuli_prime').html(p);
 
@@ -616,7 +618,9 @@ function posnerShowTarget() {
     setTimeout("endTrial();", 1500);
 }
 
-
+function end_posner_paradigm(){
+    //TODO: finish this function
+}
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
