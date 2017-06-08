@@ -8,8 +8,8 @@
 * these positions are relative to the window
 ************************************/
 simple_paradigm_settings = {
-    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-}
+    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]]
+};
 
 /************************************
 * VARIABLES
@@ -141,7 +141,8 @@ function delete_elem(id) {
  * @param {*} y - y_coordinate of the center
  * @param {*} r - radius
  */
-var Dot = function (x, y, r = 10) {
+var Dot = function (x, y, r) {
+    r = (typeof data !== "undefined") ? r : 10;
     this.x = x;
     this.y = y;
     this.r = r;
@@ -158,10 +159,13 @@ var Dot = function (x, y, r = 10) {
  * @param {*} radius - the radius of the dots
  * @return{*} dot_array - the array of dots
  */
-function create_dot_array(pos_array, radius = 10){
+function create_dot_array(pos_array, radius){
+    radius = (typeof data !== "undefined") ? radius : 10;
     var dot_array = [];
     for (var dot_pos in pos_array){
-        dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1],radius))
+        if (pos_array.hasOwnProperty(dot_pos)) {
+            dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1], radius));
+        }
     }
     dot_array = shuffle(dot_array);
     return dot_array;
@@ -203,7 +207,7 @@ function canvas_on_click(event) {
     var mouse = {x:x,y:y};
     if (collide_mouse(mouse, curr_object) === false) return;
     switch(current_task) {
-    case "calibration": 
+    case "calibration":
         if (calibration_settings.method === 'click'){
             create_new_dot_calibration();
         }
@@ -338,7 +342,8 @@ function create_gazer_database_table() {
  * send data to server
  * @param {*} data - the type of data to be sent to server. 
  */
-function send_data_to_database(data = {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array}){ 
+function send_data_to_database(data){
+    data = (typeof data !== "undefined") ? data : {"url": cur_url, "gaze_x": x_array, "gaze_y":y_array};
     var params = {
         TableName :tableName,
         Item: {
@@ -441,7 +446,7 @@ function start_calibration() {
         clear_canvas();
         delete_elem("instruction");
         current_task = 'calibration';
-        if (objects_array.length == 0) {
+        if (objects_array.length === 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
         }
         curr_object = objects_array.pop();
@@ -462,7 +467,7 @@ function create_new_dot_calibration(){
     var context = canvas.getContext("2d");
     clear_canvas();
     // if run out of dots, create a new dots array
-    if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(calibration_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -487,7 +492,7 @@ function start_validation(){
     var context = canvas.getContext("2d");
     clear_canvas();
     current_task = 'validation';
-    if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -507,7 +512,7 @@ function create_new_dot_validation(){
     var context = canvas.getContext("2d");
     clear_canvas();
     // if run out of dots, create a new dots array
-    if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -518,7 +523,11 @@ function create_new_dot_validation(){
 function validation_event_handler(data) {
     var dist = parseInt(Math.sqrt(((data.x - curr_object.x) * (d.x - curr_object.x)) + ((data.y - curr_object.y) * (data.y - curr_object.y))));
     if (dist < validation_settings.distance) {
-
+        if (curr_object.hit_count < validation_settings.duration) {
+            curr_object.hit_count += 1;
+        } else {
+            create_new_dot_validation();
+        }
     }
 }
 
@@ -577,7 +586,7 @@ function start_posner_paradigm() {
     var cond = Math.random() >= 0.7 ? 'incongruent' : 'congruent';
 
     var tpos = 'left';
-    if ((cond == 'incongruent' && p == '&lt;&lt;&lt;') || ((cond == 'congruent' && p == '&gt;&gt;&gt;'))) {
+    if ((cond === 'incongruent' && p === '&lt;&lt;&lt;') || ((cond === 'congruent' && p === '&gt;&gt;&gt;'))) {
         tpos = 'right';
     }
 
