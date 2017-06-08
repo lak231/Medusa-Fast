@@ -4,7 +4,7 @@
 
 var randomElements = [];
 var indexArr = [];
-var ctx;
+var context;
 var canvas;
 
 $(document).ready(function() {
@@ -32,14 +32,14 @@ $(document).ready(function() {
     }
 
     function drawHeatmap() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
         for (i = 0; i < randomElements.length; i ++) {
             var elem = randomElements[i].getBoundingClientRect();
-            ctx.beginPath();
-            ctx.lineWidth="5";
-            ctx.strokeStyle="blue";
-            ctx.rect(elem.left, elem.top, elem.width, elem.height);
-            ctx.stroke();
+            context.beginPath();
+            context.lineWidth="5";
+            context.strokeStyle="blue";
+            context.rect(elem.left, elem.top, elem.width, elem.height);
+            context.stroke();
         }
     }
 
@@ -51,7 +51,7 @@ $(document).ready(function() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         document.body.appendChild(canvas);
-        ctx = canvas.getContext("2d");
+        context = canvas.getContext("2d");
     }
 
     function mainLoop() {

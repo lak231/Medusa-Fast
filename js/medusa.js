@@ -35,7 +35,14 @@ pursuit_paradigm_settings = {
     num_trials: 5,
     dot_show_time: 2000,
     target_show_time: 1500
-}
+};
+
+freeview_paradigm_settings = {
+    num_trials: 5,
+    image_show_time: 2000,
+    target_show_time: 1500,
+    image_array: [] //url array for images
+};
 
 /************************************
 * VARIABLES
@@ -612,7 +619,7 @@ function start_pursuit_paradigm() {
     var context = canvas.getContext("2d");
     clear_canvas();
     current_task = 'pursuit_paradigm';
-     if (objects_array.length == 0) {
+    if (objects_array.length === 0) {
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -634,46 +641,58 @@ function end_pursuit_paradigm(){
 /************************************
  * FREE VIEWING PARADIGM
  ************************************/
-var tFreeview = {};
-tFreeview.stimuli = [];
-function freeviewStart() {
-    if (tFreeview.stimuli.length == 0) {
-        for (var k = 1; k <= 30; k++) {
-            if (k < 10) {
-                tFreeview.stimuli.push("stimuli/tolcam_face_0" + k + ".png");
-            } else {
-                tFreeview.stimuli.push("stimuli/tolcam_face_" + k + ".png");
-            }
-        }
-        tFreeview.stimuli = shuffle(tFreeview.stimuli);
+function start_freeview_paradigm() {
+    var canvas = document.getElementById("canvas-overlay");
+    current_task = "freeview_paradigm";
+    clear_canvas();
+    var pos = Math.random() >= 0.5 ? "left" : "right";
+    if (objects_array.length === 0) {
+        objects_array = shuffle(freeview_paradigm_settings.image_array);
     }
-    var img = tFreeview.stimuli.pop();
-    $('#stimuli_fixation').css({
-        'top': '50%',
-        'left': '50%'
-    });
-    var type = Math.random() >= 0.5 ? "left" : "right";
+    curr_object = objects_array.pop();
+    num_objects_shown ++;
+    if (num_objects_shown > freeview_paradigm_settings.num_trials) {
+        end_freeview_paradigm();
+    } else {
+        draw_target();
+        setTimeout("draw_freeview_image(pos);", freeview_paradigm_settings.target_show_time);
+        setTimeout("start_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
+    }
 
-    $('#stimuli_img').css({
-        "left": type == "left" ? "25%" : "75%",
-        "width": "50%",
-        "background-image": "url("+img+")"
-    });
-
-
-    data_current.task = 'freeviewing';
-    data_current.x = $('#stimuli_img').css('left');
-    data_current.y = "0%";
-    data_current.condition = 'view_' + img + '_' + type;
-
-
-    cam.recording = 1;
-    setTimeout("$('#stimuli_fixation').hide(); status = 'fixation_offset';", 1000);
-    setTimeout("freeviewShow();", 1500);
 }
 
-function freeviewShow() {
-    status = 'stimulus_onset';
-    $('#stimuli_img').show();
-    setTimeout("status = 'stimulus_offset'; endTrial();", 3000);
+function draw_freeview_image(pos) {
+    clear_canvas();
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    var width = canvas.width;
+    var height = canvas.height;
+    if (pos === "left") {
+        context.drawImage(curr_object, 0.25*width, 0.25*height);
+    } else {
+        context.drawImage(curr_object, 0.75*width, 0.25*height);
+    }
+}
+
+function draw_target() {
+    clear_canvas();
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    var midX = canvas.width*0.5;
+    var midY = canvas.height*0.5;
+    context.lineWidth = 5;
+    //draw horizontal line
+    context.beginPath();
+    context.moveTo(midX - 15, midY);
+    context.lineTo(midX + 15, midY);
+    context.stroke();
+    //draw vertical line
+    context.beginPath();
+    context.moveTo(midX, midY - 15);
+    context.lineTo(midX, midY + 15);
+    context.stroke();
+}
+
+function end_freeview_paradigm() {
+    //TODO
 }
