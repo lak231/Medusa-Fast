@@ -60,6 +60,7 @@ var time = "";  // time of current webgazer session
 var store_data = {
     url: "",   // url of website
     task: "",   // the current performing task
+    description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
     object_y: [],    // y position of whatever object the current task is using
@@ -67,6 +68,7 @@ var store_data = {
     gaze_y: [] // y position of gaze
 };
 
+var elem_array = [];    // array of elements gazed
 var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
@@ -366,10 +368,11 @@ function initiate_webgazer(){
             else if (current_task === "validation" && validation_settings.method === "watch"){
                 validation_event_handler(data);
             }
-
-            x_array.push(data.x);
-            y_array.push(data.y);
-            get_elements_seen(data.x,data.y);
+            store_data.elapsedTime.push(elapsedTime);
+            store_data.gaze_x.push(data.x);
+            store_data.gaze_y.push(data.y);
+            store_data.object_x.push(curr_object.x);
+            store_data.object_y.push(curr_object.y);
         })
     	.begin()
         .showPredictionPoints(false); /* shows a square every 100 milliseconds where current prediction is */
@@ -378,14 +381,14 @@ function initiate_webgazer(){
 }
 
 /**
- * Checks if webgazer is successfully initiated.
+ * Checks if webgazer is successfully initiated. If yes, then start carrying out tasks.
  */
 function check_webgazer_status() {
     if (webgazer.isReady()) {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        cur_url = window.location.href;
+        store_data.url  = window.location.href;
         time = (new Date).getTime().toString();
         create_gazer_database_table();
         
@@ -509,6 +512,7 @@ function create_consent_form() {
 function create_calibration_instruction() {
     var instruction = document.createElement("div");
     delete_elem("consent_form");
+    load_webgazer();
     instruction.id = "instruction";
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
@@ -529,6 +533,8 @@ function start_calibration() {
         clear_canvas();
         delete_elem("instruction");
         current_task = 'calibration';
+        store_data.task = current_task;
+        store_data.description = calibration_settings.method;
         if (objects_array.length === 0) {
             objects_array = create_dot_array(calibration_settings.position_array);
         }
@@ -579,6 +585,7 @@ function calibration_event_handler(data) {
 function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
+    send_data_to_database();
     start_validation();
 }
 
@@ -593,6 +600,8 @@ function start_validation(){
     var context = canvas.getContext("2d");
     clear_canvas();
     current_task = 'validation';
+    store_data.task = current_task;
+    store_data.description = validation_settings;
     if (objects_array.length === 0) {
         objects_array = create_dot_array(validation_settings.position_array);
     }
