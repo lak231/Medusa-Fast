@@ -65,7 +65,7 @@ var store_data = {
     object_y: [],    // y position of whatever object the current task is using
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
-}
+};
 
 var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
@@ -87,10 +87,11 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     method: "watch",    // validation method, either watch or click.
-    duration: 20,  // duration of a a singe position sampled
+    duration: 5000,  // duration of a a singe position sampled in ms
     num_dots: 10,  // the number of dots used for validation
     position_array: [],    // array of possible positions
-    distance: 100
+    distance: 100,
+    hit_count: 20
 };
 
 /************************************
@@ -139,8 +140,8 @@ function shuffle(array) {
  * @param {*} y2 
  */
 function distance(x1,y1,x2,y2){
-    var a = x1 - x2
-    var b = y1 - y2
+    var a = x1 - x2;
+    var b = y1 - y2;
     return parseInt(Math.sqrt(a*a + b*b));
 }
 
@@ -423,7 +424,6 @@ function create_gazer_database_table() {
 
 /**
  * Sends data to server
- * @param {*} data - the type of data to be sent to server. 
  */
 function send_data_to_database(){
     var params = {
@@ -563,9 +563,9 @@ function create_new_dot_calibration(){
  * @param {*} data 
  */
 function calibration_event_handler(data) {
-    var dist = distance(data.x,data.y,curr_object.x,curr_object.y)
-    if (dist < validation_settings.distance) {
-        if (curr_object.hit_count < validation_settings.duration) {
+    var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
+    if (dist < calibration_settings.distance) {
+        if (curr_object.hit_count < calibration_settings.duration) {
             curr_object.hit_count += 1;
         } else {
             create_new_dot_calibration();
@@ -626,22 +626,27 @@ function create_new_dot_validation(){
  * @param {*} data 
  */
 function validation_event_handler(data) {
-    var dist = distance(data.x,data.y,curr_object.x,curr_object.y)
+    var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
     if (dist < validation_settings.distance) {
-        if (curr_object.hit_count < validation_settings.duration) {
+        if (curr_object.hit_count < validation_settings.hit_count) {
             curr_object.hit_count += 1;
         } else {
             create_new_dot_validation();
         }
     }
+    clearTimeout();
+    setTimeout("finish_validation(false);", validation_settings.duration);
 }
 
 /**
  * Triggered when validation ends
  */
-function finish_validation(){
+function finish_validation(succeed){
     objects_array = [];
     num_objects_shown = 0;
+    if (succeed === false) {
+        console.log("Validation failed.")
+    }
 }
 
 /************************************
