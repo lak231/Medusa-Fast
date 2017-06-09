@@ -10210,7 +10210,7 @@ var mosseFilterResponses = function() {
     /**
      * records click data and passes it to the regression model
      */
-    var watchListener = function(x, y) {
+    var addWatchListener = function(x, y) {
         if (paused) {
             return;
         }
@@ -10223,6 +10223,26 @@ var mosseFilterResponses = function() {
             regs[reg].addData(features, [x, y], eventTypes[2]);
         }
     }
+
+    /**
+     * Add event listeners for mouse click and move.
+     */
+    var addMouseEventListeners = function() {
+        //third argument set to true so that we get event on 'capture' instead of 'bubbling'
+        //this prevents a client using event.stopPropagation() preventing our access to the click
+        document.addEventListener('click', clickListener, true);
+        document.addEventListener('mousemove', moveListener, true);
+    };
+
+    /**
+     * Remove event listeners for mouse click and move.
+     */
+    var removeMouseEventListeners = function() {
+        // must set third argument to same value used in addMouseEventListeners
+        // for this to work.
+        document.removeEventListener('click', clickListener, true);
+        document.removeEventListener('mousemove', moveListener, true);
+    };
 
     /** loads the global data and passes it to the regression model
      *
@@ -10284,14 +10304,6 @@ var mosseFilterResponses = function() {
             document.body.appendChild(videoElementCanvas);
         }
         videoElementCanvas.style.display = 'none';
-
-
-
-        //third argument set to true so that we get event on 'capture' instead of 'bubbling'
-        //this prevents a client using event.stopPropagation() preventing our access to the click
-        //document.addEventListener('click', clickListener, true);
-        //document.addEventListener('mousemove', moveListener, true);
-
         document.body.appendChild(gazeDot);
 
         //BEGIN CALLBACK LOOP
@@ -10558,12 +10570,32 @@ var mosseFilterResponses = function() {
         return getPrediction();
     }
 
+ /**
+     *  Add the mouse click and move listeners that add training data.
+     *  @return {webgazer} this
+     */
+    webgazer.addMouseEventListeners = function() {
+        addMouseEventListeners();
+        return webgazer;
+    };
+
+    /**
+     *  Remove the mouse click and move listeners that add training data.
+     *  @return {webgazer} this
+     */
+    webgazer.removeMouseEventListeners = function() {
+        removeMouseEventListeners();
+        return webgazer;
+    };
+
 
     /**
      * pseudo Listener to generate data points while not interacting, e.g. when passively watching
      */
-    webgazer.watchListener = function(x, y) {
-        watchListener(x, y);
+    webgazer.addWatchListener = function(x, y) {
+        addWatchListener(x, y);
+        console.log("watching ",x,y);
+        return webgazer;
     }
 
     /**
