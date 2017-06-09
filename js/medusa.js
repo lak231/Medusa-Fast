@@ -35,12 +35,9 @@ var paradigm = "pursuit";  // the paradigm to use for the test
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-<<<<<<< HEAD
     duration: 20,  // duration of a a singe position sampled
-=======
     method: "watch",    // calibration method, either watch or click.
     duration: 10,  // duration of a a singe position sampled
->>>>>>> 74ea20e5333b78891fcc2b111a7d3ecdade9a067
     num_dots: 2,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
