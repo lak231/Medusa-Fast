@@ -80,7 +80,8 @@ var num_objects_shown = 0; //number of objects shown
 var calibration_settings = {
     method: "watch",    // calibration method, either watch or click.
     duration: 20,  // duration of a a singe position sampled
-    num_dots: 10,  // the number of dots used for calibration
+    num_dots: 2,  // the number of dots used for calibration
+    distance: 100,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
 
@@ -90,9 +91,10 @@ var calibration_settings = {
 var validation_settings = {
     method: "watch",    // validation method, either watch or click.
     duration: 5000,  // duration of a a singe position sampled in ms
-    num_dots: 10,  // the number of dots used for validation
-    position_array: [],    // array of possible positions
-    distance: 100,
+    num_dots: 2,  // the number of dots used for validation
+    position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
+    // array of possible positions
+    distance: 100,  // radius of acceptable gaze data around validation dot
     hit_count: 20
 };
 
@@ -224,12 +226,11 @@ var Dot = function (x, y, r) {
  * @return{*} dot_array - the array of dots
  */
 function create_dot_array(pos_array, radius){
+    var canvas = document.getElementById("canvas-overlay");
     radius = (typeof radius !== "undefined") ? radius : DEFAULT_DOT_RADIUS;
     var dot_array = [];
     for (var dot_pos in pos_array){
-        if (pos_array.hasOwnProperty(dot_pos)) {
-            dot_array.push(new Dot(canvas.width * dot_pos[0], canvas.height * dot_pos[1], radius));
-        }
+        dot_array.push(new Dot(canvas.width * pos_array[dot_pos][0], canvas.height * pos_array[dot_pos][1], radius));
     }
     dot_array = shuffle(dot_array);
     return dot_array;
@@ -362,7 +363,7 @@ function initiate_webgazer(){
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
             if (data === null) return;
-            if (current_task === "calibration" && calibration_settings.method === "watch"){
+            if ((current_task === "calibration") && (calibration_settings.method === "watch")){
                 calibration_event_handler(data);
             }
             else if (current_task === "validation" && validation_settings.method === "watch"){
@@ -375,7 +376,7 @@ function initiate_webgazer(){
             store_data.object_y.push(curr_object.y);
         })
     	.begin()
-        .showPredictionPoints(false); /* shows a square every 100 milliseconds where current prediction is */
+        .showPredictionPoints(true); /* shows a square every 100 milliseconds where current prediction is */
     // setInterval(function(){ record_gaze_location() }, 1000);
     check_webgazer_status();
 }
@@ -510,38 +511,40 @@ function create_consent_form() {
  * Shows calibration instruction
  */
 function create_calibration_instruction() {
-    var instruction = document.createElement("div");
-    delete_elem("consent_form");
-    load_webgazer();
-    instruction.id = "instruction";
-    instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;
-    instruction.innerHTML += "<header class=\"form__header\">" +
-                                "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
-                             "</header>" +
-                             "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
-    document.body.appendChild(instruction);
+     if ($("#consent-yes").is(':checked')) {
+        var instruction = document.createElement("div");
+        delete_elem("consent_form");
+        load_webgazer();
+        instruction.id = "instruction";
+        instruction.className += "overlay-div";
+        instruction.style.zIndex = 12;
+        instruction.innerHTML += "<header class=\"form__header\">" +
+                                    "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
+                                "</header>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
+        document.body.appendChild(instruction);    
+    }
+ 
 }
 
 /**
  * Start the calibration
  */
 function start_calibration() {
-    if ($("#consent-yes").is(':checked')) {
-        var canvas = document.getElementById("canvas-overlay");
-        var context = canvas.getContext("2d");
-        clear_canvas();
-        delete_elem("instruction");
-        current_task = 'calibration';
-        store_data.task = current_task;
-        store_data.description = calibration_settings.method;
-        if (objects_array.length === 0) {
-            objects_array = create_dot_array(calibration_settings.position_array);
-        }
-        curr_object = objects_array.pop();
-        draw_dot(context, curr_object, "#EEEFF7");
-        num_objects_shown ++;
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    clear_canvas();
+    delete_elem("instruction");
+    current_task = 'calibration';
+    store_data.task = current_task;
+    store_data.description = calibration_settings.method;
+    if (objects_array.length === 0) {
+        objects_array = create_dot_array(calibration_settings.position_array);
     }
+    curr_object = objects_array.pop();
+    webgazer.watchListener(curr_object.x, curr_object.y);
+    draw_dot(context, curr_object, "#EEEFF7");
+    num_objects_shown++;
 }
 
 /**
@@ -560,6 +563,7 @@ function create_new_dot_calibration(){
         objects_array = create_dot_array(calibration_settings.position_array);
     }
     curr_object = objects_array.pop();
+    webgazer.watchListener(curr_object.x, curr_object.y);
     draw_dot(context, curr_object, "#EEEFF7");
     num_objects_shown++;
 }
