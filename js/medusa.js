@@ -795,7 +795,6 @@ function end_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function loop_pursuit_paradigm() {
-    console.log(num_objects_shown);
      if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
         end_pursuit_paradigm();
     }
@@ -805,7 +804,6 @@ function loop_pursuit_paradigm() {
     clear_canvas();
     current_task = 'pursuit_paradigm';
     if (objects_array.length === 0) {
-        console.log(objects_array.length);
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
         for (var i=0; i < objects_array.length; i++) {
         objects_array[i].x = canvas.width * parseFloat(objects_array[i].x) / 100.0;
