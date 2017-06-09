@@ -4,7 +4,8 @@
 ************************************/
 const TABLE_NAME = "Gazers"; // name of table in database
 const DEFAULT_DOT_RADIUS = 25;
-const SAMPLING_RATE = 300;   //number of data collected per second.
+const SAMPLING_RATE = 60;   // number of call to function once webgazer got data per second
+const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
 
 /************************************
 * VARIABLES
@@ -167,7 +168,8 @@ function create_overlay(){
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
     document.body.appendChild(canvas);
-    // loop_pursuit_paradigm();
+    loop_pursuit_paradigm();
+    
 }
 
 /**
@@ -248,7 +250,6 @@ function create_dot_array(pos_array, radius){
 function draw_dot(context, dot, color) {
     if (current_task === "calibration") {
         time_stamp = new Date().getTime();
-        console.log(time_stamp);
         draw_dot_countdown(context, dot, color);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
@@ -256,12 +257,13 @@ function draw_dot(context, dot, color) {
         context.beginPath();
         context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
         context.strokeStyle = color;
+        context.fillStyle = 'green';
         context.fill();
     }
-
 }
 
 function draw_track(context, dot, color) {
+    console.log(dot);
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
     context.strokeStyle = color;
@@ -298,15 +300,13 @@ function draw_dot_countup(context, dot, color) {
 }
 
 function draw_dot_countdown(context, dot, color) {
-
     var time = new Date().getTime();
     var delta = time - time_stamp;
+    console.log(delta);
     var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
     clear_canvas();
-
     //base circle
     draw_track(context, dot, color);
-
     //animated circle
     context.lineWidth = 7;
     context.beginPath();
@@ -328,7 +328,7 @@ function draw_dot_countdown(context, dot, color) {
     context.textBaseline = "middle";
     context.fillText("abc", dot.x, dot.y);
     //animation
-    requestAnimationFrame(function () {
+    request_anim_frame(function () {
         draw_dot_countdown(context, dot, color);
     });
 }
@@ -379,6 +379,14 @@ window.request_anim_frame = (function(callback) {
         };
       })();
 
+window.cancel_anim_frame = (function() {
+    return window.cancelCancelRequestAnimationFrame ||
+        window.webkitCancelRequestAnimationFrame ||
+        window.mozCancelRequestAnimationFrame ||
+        window.oCancelRequestAnimationFrame ||
+        window.msCancelRequestAnimationFrame ||
+        window.clearTimeout;
+})();
 
 /**
  * draw a target in the middle of the screen
@@ -446,12 +454,13 @@ function initiate_webgazer(){
     webgazer.clearData()
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
-        .setGazeListener(function(data, elapsedTime) {
+        .setGazeListener(function(data, elapsedTime) {        
             if (data === null) return;          
+            if (elapsedTime - time_stamp < 1000 / SAMPLING_RATE) return;  
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
-            if (elapsedTime - time_stamp < 1000 / SAMPLING_RATE) return;      
+            if (elapsedTime - time_stamp < 1000 / DATA_COLLECTION_RATE) return;      
             time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
             store_data.gaze_x.push(data.x);
@@ -783,24 +792,16 @@ function loop_pursuit_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-
-   
-      var centerX = canvas.width / 2;
-      var centerY = canvas.height / 2;
-      var radius = 70;
-
-      context.beginPath();
-      context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-      context.fillStyle = 'green';
-      context.fill();
-      context.lineWidth = 5;
-      context.strokeStyle = '#003300';
-      context.stroke();
-        //  draw_moving_dot();
-    // clear_canvas();
+    clear_canvas();
     current_task = 'pursuit_paradigm';
     if (objects_array.length === 0) {
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
+    }
+    for (var i=0; i < objects_array.length; i++) {
+        objects_array[i].x = canvas.width * parseFloat(objects_array[i].x) / 100.0;
+        objects_array[i].tx = canvas.width * parseFloat(objects_array[i].tx) / 100.0;
+        objects_array[i].y = canvas.height * parseFloat(objects_array[i].y) / 100.0;
+        objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
     }
     curr_object = objects_array.pop();
     curr_object.cx = curr_object.x;
@@ -811,13 +812,12 @@ function loop_pursuit_paradigm() {
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
- 
     draw_dot(context, dot, "#EEEFF7");
+    draw_moving_dot();
 }
 
 function draw_moving_dot(){
-    var now = new Date().getTime(),
-        dt = now - (time_stamp || now);
+    var now = new Date().getTime(), dt = now - (time_stamp || now);
     time_stamp = now;
     var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
     var dist_per_frame = distance(curr_object.x,curr_object.y,curr_object.tx,curr_object.ty) /pursuit_paradigm_settings.dot_show_time * dt;
@@ -831,7 +831,9 @@ function draw_moving_dot(){
         r: DEFAULT_DOT_RADIUS
     };
     if (((curr_object.tx - curr_object.x)/(curr_object.tx - curr_object.cx) < 0) || ((curr_object.ty - curr_object.y)/(curr_object.ty - curr_object.cxy < 0))){
+        // cancel_anim_frame(draw_moving_dot);
         loop_pursuit_paradigm();
+       
     }
     else{
         var canvas = document.getElementById("canvas-overlay");
