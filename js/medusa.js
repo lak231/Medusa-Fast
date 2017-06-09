@@ -35,7 +35,12 @@ var paradigm = "pursuit";  // the paradigm to use for the test
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
+<<<<<<< HEAD
     duration: 20,  // duration of a a singe position sampled
+=======
+    method: "watch",    // calibration method, either watch or click.
+    duration: 10,  // duration of a a singe position sampled
+>>>>>>> 74ea20e5333b78891fcc2b111a7d3ecdade9a067
     num_dots: 2,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
@@ -244,10 +249,49 @@ function create_dot_array(pos_array, radius){
  * @param {*} color - color of the dot
  */
 function draw_dot(context, dot, color) {
+    draw_dot_countdown(context, dot, color);
+}
+
+function draw_track(context, dot, color) {
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
+    context.strokeStyle = color;
+    context.lineWidth = 1;
+    context.stroke();
+}
+
+function draw_dot_countdown(context, dot, color) {
+    var time = new Date();
+    clear_canvas();
+
+    //base circle
+    draw_track(context, dot, color);
+
+    //animated circle
+    context.lineWidth = 7;
+    context.beginPath();
+    context.strokeStyle = color;
+    context.arc(
+        dot.x,
+        dot.y,
+        dot.r,
+        Math.PI/-2,
+        ( Math.PI * 2 ) * ( (0 - time.getSeconds() % calibration_settings.duration) / calibration_settings.duration ) + ( Math.PI / -2 ),
+        false
+    );
+    context.stroke();
+
+    //draw countdown number
+    context.font = "20px Source Sans Pro";
     context.fillStyle = color;
-    context.fill();
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText((calibration_settings.duration - time.getSeconds() % calibration_settings.duration).toString(), dot.x, dot.y);
+
+    //animation
+    requestAnimationFrame(function () {
+        draw_dot_countdown(context, dot, color);
+    });
 }
 
 /**
