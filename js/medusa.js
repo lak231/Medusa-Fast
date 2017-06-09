@@ -167,7 +167,7 @@ function create_overlay(){
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
     document.body.appendChild(canvas);
-    loop_pursuit_paradigm();
+    // loop_pursuit_paradigm();
 }
 
 /**
@@ -248,6 +248,7 @@ function create_dot_array(pos_array, radius){
 function draw_dot(context, dot, color) {
     if (current_task === "calibration") {
         time_stamp = new Date().getTime();
+        console.log(time_stamp);
         draw_dot_countdown(context, dot, color);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
@@ -315,7 +316,7 @@ function draw_dot_countdown(context, dot, color) {
         dot.y,
         dot.r,
         Math.PI/-2,
-        1-arc_len,
+        Math.PI * 3/2-arc_len,
         false
     );
     context.stroke();
