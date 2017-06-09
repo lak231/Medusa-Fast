@@ -36,7 +36,7 @@ var paradigm = "pursuit";  // the paradigm to use for the test
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 20,  // duration of a a singe position sampled
+    duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 2,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -272,6 +272,7 @@ function draw_track(context, dot, color) {
 }
 
 function draw_dot_countup(context, dot, color) {
+    console.log(dot.hit_count);
     clear_canvas();
 
     //base circle
@@ -286,7 +287,7 @@ function draw_dot_countup(context, dot, color) {
         dot.y,
         dot.r,
         Math.PI/-2,
-        ( Math.PI * -2 ) * ( (0 - dot.hit_count % validation_settings.hit_count) / validation_settings.hit_count) + ( Math.PI / -2 ),
+        (Math.PI * 2) * (dot.hit_count / validation_settings.hit_count) + Math.PI/-2,
         false
     );
     context.stroke();
@@ -326,9 +327,14 @@ function draw_dot_countdown(context, dot, color) {
     context.fillStyle = color;
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText("abc", dot.x, dot.y);
+    context.fillText(calibration_settings.duration - Math.floor(delta / 1000), dot.x, dot.y);
     //animation
     request_anim_frame(function () {
+    requestAnimationFrame(function () {
+        if (delta >= calibration_settings.duration * 1000) {
+            create_new_dot_calibration();
+            return;
+        }
         draw_dot_countdown(context, dot, color);
     });
 }
@@ -641,6 +647,7 @@ function create_new_dot_calibration(){
     }
     curr_object = objects_array.pop();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
+    time_stamp = new Date().getTime();
     draw_dot(context, curr_object, "#EEEFF7");
     num_objects_shown++;
 }
@@ -701,9 +708,12 @@ function create_new_dot_validation(){
  * @param {*} data 
  */
 function validation_event_handler(data) {
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
     var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
     if (dist < validation_settings.distance) {
-        if (curr_object.hit_count < validation_settings.hit_count) {
+        if (curr_object.hit_count <= validation_settings.hit_count) {
+            draw_dot(context, curr_object, "#FFFFFF");
             curr_object.hit_count += 1;
         } else {
             create_new_dot_validation();
@@ -726,7 +736,7 @@ function finish_validation(succeed){
     objects_array = [];
     num_objects_shown = 0;
     if (succeed === false) {
-        store_data.description = "fail"
+        store_data.description = "fail";
         send_data_to_database();
         
     }
