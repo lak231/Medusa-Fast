@@ -881,7 +881,6 @@ function loop_freeview_paradigm() {
     current_task = "freeview_paradigm";
     webgazer.resume();
     clear_canvas();
-    var pos = Math.random() >= 0.5 ? "left" : "right";
     if (objects_array.length === 0) {
         objects_array = shuffle(freeview_paradigm_settings.image_array);
     }
@@ -891,13 +890,14 @@ function loop_freeview_paradigm() {
         end_freeview_paradigm();
     } else {
         draw_target();
-        setTimeout("draw_freeview_image(pos);", freeview_paradigm_settings.target_show_time);
-        setTimeout("start_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
+        setTimeout("draw_freeview_image();", freeview_paradigm_settings.target_show_time);
+        setTimeout("loop_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
     }
 
 }
 
 function draw_freeview_image(pos) {
+    var pos = Math.random() >= 0.5 ? "left" : "right";
     clear_canvas();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
