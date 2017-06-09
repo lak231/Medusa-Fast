@@ -30,7 +30,8 @@ var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
-var paradigm = "pursuit";  // the paradigm to use for the test
+var paradigm = "simple";  // the paradigm to use for the test
+var possible_paradigm = ["simple","pursuit","freeview","heatmap"]
 
 /************************************
 * CALIBRATION PARAMETERS
@@ -117,6 +118,15 @@ freeview_paradigm_settings = {
 * COMMON FUNCTIONS
 ************************************/
 
+/**
+ * The only function needed to call when deploy. Simple call this function when you want to start up the program
+ */
+function start_medusa(parad){
+    paradigm = (typeof parad !== "undefined") ? parad : "simple";
+    if (!paradigm in possible_paradigm) {
+        paradigm = "simple";
+    }
+}
 /**
  * Shuffles array in place.
  * @param array items The array containing the items.
