@@ -168,6 +168,7 @@ function create_overlay(){
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
     document.body.appendChild(canvas);
+    loop_pursuit_paradigm();
 }
 
 /**
@@ -406,9 +407,6 @@ function initiate_webgazer(){
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
             if (data === null) return;          
-            if (current_task === "calibration"){
-                calibration_event_handler(data);
-            }
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
@@ -598,21 +596,6 @@ function create_new_dot_calibration(){
 }
 
 /**
- * Handler for 'watch' procedure. 
- * @param {*} data 
- */
-function calibration_event_handler(data) {
-    var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
-    if (dist < calibration_settings.distance) {
-        if (curr_object.hit_count < calibration_settings.duration) {
-            curr_object.hit_count += 1;
-        } else {
-            create_new_dot_calibration();
-        }
-    }
-}
-
-/**
  * Triggered once the calibration process finishes. Clean up things and go on to next step
  */
 function finish_calibration(){
@@ -702,13 +685,13 @@ function finish_validation(succeed){
         send_data_to_database();
         switch (paradigm){
             case "simple":
-                start_simple_paradigm();
+                loop_simple_paradigm();
                 break;
             case "pursuit":
-                start_pursuit_paradigm();
+                loop_pursuit_paradigm();
                 break;
             case "freeview":
-                start_freeview_paradigm();
+                loop_freeview_paradigm();
                 break;
             case "heatmap":
                 start_heatmap_paradigm();
@@ -722,7 +705,7 @@ function finish_validation(succeed){
  * SIMPLE DOT VIEWING PARADIGM
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
-function start_simple_paradigm() {
+function loop_simple_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
@@ -742,6 +725,7 @@ function start_simple_paradigm() {
         setTimeout("start_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
 }
+
 function end_simple_paradigm(){
     //TODO: finish this function
     objects_array = [];
@@ -751,11 +735,28 @@ function end_simple_paradigm(){
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
-function start_pursuit_paradigm() {
+function loop_pursuit_paradigm() {
+     if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
+        end_pursuit_paradigm();
+    }
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    clear_canvas();
+
+   
+      var centerX = canvas.width / 2;
+      var centerY = canvas.height / 2;
+      var radius = 70;
+
+      context.beginPath();
+      context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+      context.fillStyle = 'green';
+      context.fill();
+      context.lineWidth = 5;
+      context.strokeStyle = '#003300';
+      context.stroke();
+        //  draw_moving_dot();
+    // clear_canvas();
     current_task = 'pursuit_paradigm';
     if (objects_array.length === 0) {
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
@@ -764,11 +765,14 @@ function start_pursuit_paradigm() {
     curr_object.cx = curr_object.x;
     curr_object.cy = curr_object.y;
     num_objects_shown ++;
-    if (num_objects_shown > pursuit_paradigm_settings.num_trials) {
-        end_pursuit_paradigm();
-    }
+    var dot = {
+        x: curr_object.cx,
+        y: curr_object.cy,
+        r: DEFAULT_DOT_RADIUS
+    };
+ 
+    draw_dot(context, dot, "#EEEFF7");
 }
-
 
 function draw_moving_dot(){
     var now = new Date().getTime(),
@@ -778,24 +782,24 @@ function draw_moving_dot(){
     var dist_per_frame = distance(curr_object.x,curr_object.y,curr_object.tx,curr_object.ty) /pursuit_paradigm_settings.dot_show_time * dt;
     var x_dist_per_frame = Math.cos(angle) * dist_per_frame;
     var y_dist_per_frame = Math.sin(angle) * dist_per_frame;
-    curr_object.cx = cx + x_dist_per_frame;
-    curr_object.cy = xy + y_dist_per_frame;
+    curr_object.cx = curr_object.cx + x_dist_per_frame;
+    curr_object.cy = curr_object.cy + y_dist_per_frame;
     var dot = {
         x: curr_object.cx,
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
     if (((curr_object.tx - curr_object.x)/(curr_object.tx - curr_object.cx) < 0) || ((curr_object.ty - curr_object.y)/(curr_object.ty - curr_object.cxy < 0))){
-        end_pursuit_paradigm();
+        loop_pursuit_paradigm();
     }
     else{
         var canvas = document.getElementById("canvas-overlay");
         var context = canvas.getContext("2d");
         clear_canvas();
         draw_dot(context, dot, "#EEEFF7");
+        // webgazer.addWatchListener(curr_object.cx, curr_object.cy);
         request_anim_frame(draw_moving_dot);    
     }
-    draw_dot(context, dot, "#EEEFF7"); 
 }
 
 function end_pursuit_paradigm(){
@@ -807,7 +811,7 @@ function end_pursuit_paradigm(){
 /************************************
  * FREE VIEWING PARADIGM
  ************************************/
-function start_freeview_paradigm() {
+function loop_freeview_paradigm() {
     var canvas = document.getElementById("canvas-overlay");
     current_task = "freeview_paradigm";
     clear_canvas();
