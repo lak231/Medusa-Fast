@@ -330,7 +330,6 @@ function draw_dot_countdown(context, dot, color) {
     context.fillText(calibration_settings.duration - Math.floor(delta / 1000), dot.x, dot.y);
     //animation
     request_anim_frame(function () {
-    requestAnimationFrame(function () {
         if (delta >= calibration_settings.duration * 1000) {
             create_new_dot_calibration();
             return;
@@ -796,6 +795,7 @@ function end_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function loop_pursuit_paradigm() {
+    console.log(num_objects_shown);
      if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
         end_pursuit_paradigm();
     }
@@ -805,14 +805,16 @@ function loop_pursuit_paradigm() {
     clear_canvas();
     current_task = 'pursuit_paradigm';
     if (objects_array.length === 0) {
+        console.log(objects_array.length);
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
-    }
-    for (var i=0; i < objects_array.length; i++) {
+        for (var i=0; i < objects_array.length; i++) {
         objects_array[i].x = canvas.width * parseFloat(objects_array[i].x) / 100.0;
         objects_array[i].tx = canvas.width * parseFloat(objects_array[i].tx) / 100.0;
         objects_array[i].y = canvas.height * parseFloat(objects_array[i].y) / 100.0;
         objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
+        }
     }
+    console.log(curr_object);
     curr_object = objects_array.pop();
     curr_object.cx = curr_object.x;
     curr_object.cy = curr_object.y;
@@ -840,14 +842,12 @@ function draw_moving_dot(){
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
-    if (((curr_object.tx - curr_object.x)/(curr_object.tx - curr_object.cx) < 0) || ((curr_object.ty - curr_object.y)/(curr_object.ty - curr_object.cxy < 0))){
-        // cancel_anim_frame(draw_moving_dot);
+    if (distance(curr_object.cx,curr_object.cy,curr_object.tx,curr_object.ty) < 20){
         loop_pursuit_paradigm();
-       
     }
     else{
         var canvas = document.getElementById("canvas-overlay");
-        var context = canvas.getContext("2d");
+        var context = canvas.getContext("2d");      
         clear_canvas();
         draw_dot(context, dot, "#EEEFF7");
         // webgazer.addWatchListener(curr_object.cx, curr_object.cy);
