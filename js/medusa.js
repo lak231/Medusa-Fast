@@ -4,7 +4,8 @@
 ************************************/
 const TABLE_NAME = "Gazers"; // name of table in database
 const DEFAULT_DOT_RADIUS = 25;
-const SAMPLING_RATE = 300;   //number of data collected per second.
+const SAMPLING_RATE = 60;   // number of call to function once webgazer got data per second
+const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
 
 /************************************
 * VARIABLES
@@ -29,7 +30,8 @@ var current_task = "calibration";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
-var paradigm = "pursuit";  // the paradigm to use for the test
+var paradigm = "simple";  // the paradigm to use for the test
+var possible_paradigm = ["simple","pursuit","freeview","heatmap"]
 
 /************************************
 * CALIBRATION PARAMETERS
@@ -115,6 +117,16 @@ freeview_paradigm_settings = {
 /************************************
 * COMMON FUNCTIONS
 ************************************/
+
+/**
+ * The only function needed to call when deploy. Simple call this function when you want to start up the program
+ */
+function start_medusa(parad){
+    paradigm = (typeof parad !== "undefined") ? parad : "simple";
+    if (!paradigm in possible_paradigm) {
+        paradigm = "simple";
+    }
+}
 /**
  * Shuffles array in place.
  * @param array items The array containing the items.
@@ -167,7 +179,7 @@ function create_overlay(){
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
     document.body.appendChild(canvas);
-    // loop_pursuit_paradigm();
+    loop_freeview_paradigm();
 }
 
 /**
@@ -255,12 +267,13 @@ function draw_dot(context, dot, color) {
         context.beginPath();
         context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
         context.strokeStyle = color;
+        context.fillStyle = 'green';
         context.fill();
     }
-
 }
 
 function draw_track(context, dot, color) {
+    console.log(dot);
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
     context.strokeStyle = color;
@@ -298,15 +311,13 @@ function draw_dot_countup(context, dot, color) {
 }
 
 function draw_dot_countdown(context, dot, color) {
-
     var time = new Date().getTime();
     var delta = time - time_stamp;
+    console.log(delta);
     var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
     clear_canvas();
-
     //base circle
     draw_track(context, dot, color);
-
     //animated circle
     context.lineWidth = 7;
     context.beginPath();
@@ -328,7 +339,7 @@ function draw_dot_countdown(context, dot, color) {
     context.textBaseline = "middle";
     context.fillText(calibration_settings.duration - Math.floor(delta / 1000), dot.x, dot.y);
     //animation
-    requestAnimationFrame(function () {
+    request_anim_frame(function () {
         if (delta >= calibration_settings.duration * 1000) {
             create_new_dot_calibration();
             return;
@@ -337,6 +348,23 @@ function draw_dot_countdown(context, dot, color) {
     });
 }
 
+/**
+ * reset the data sent to server. Should be called after each step to reduce the amount of data needed 
+ * to send to server each time. 
+ */
+function reset_store_data(){
+     store_data = {
+    url: "",   // url of website
+    task: "",   // the current performing task
+    description: "",    // a description of the task. Depends on the type of task
+    elapsedTime: [], // time since webgazer.begin() is called
+    object_x: [], // x position of whatever object the current task is using
+    object_y: [],    // y position of whatever object the current task is using
+    gaze_x: [], // x position of gaze
+    gaze_y: [] // y position of gaze
+};
+
+}
 /**
  * Checks if an object collides with a mouse click
  * @param {*} mouse 
@@ -383,6 +411,14 @@ window.request_anim_frame = (function(callback) {
         };
       })();
 
+window.cancel_anim_frame = (function() {
+    return window.cancelCancelRequestAnimationFrame ||
+        window.webkitCancelRequestAnimationFrame ||
+        window.mozCancelRequestAnimationFrame ||
+        window.oCancelRequestAnimationFrame ||
+        window.msCancelRequestAnimationFrame ||
+        window.clearTimeout;
+})();
 
 /**
  * draw a target in the middle of the screen
@@ -450,12 +486,13 @@ function initiate_webgazer(){
     webgazer.clearData()
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
-        .setGazeListener(function(data, elapsedTime) {
+        .setGazeListener(function(data, elapsedTime) {        
             if (data === null) return;          
+            if (elapsedTime - time_stamp < 1000 / SAMPLING_RATE) return;  
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
-            if (elapsedTime - time_stamp < 1000 / SAMPLING_RATE) return;      
+            if (elapsedTime - time_stamp < 1000 / DATA_COLLECTION_RATE) return;      
             time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
             store_data.gaze_x.push(data.x);
@@ -477,7 +514,6 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        store_data.url  = window.location.href;
         time = (new Date).getTime().toString();
         create_calibration_instruction(); 
         create_gazer_database_table();
@@ -515,9 +551,11 @@ function create_gazer_database_table() {
 }
 
 /**
- * Sends data to server
+ * Sends data to database. necessary data are collected before sending. 
+ * Some data are set along the calculation.
  */
 function send_data_to_database(){
+    store_data.url  = window.location.href;
     var params = {
         TableName :TABLE_NAME,
         Item: {
@@ -527,23 +565,13 @@ function send_data_to_database(){
         }
     };
     docClient.put(params, function(err, data) {
+        reset_store_data();
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
         }
     });
-}
-
-/**
- * Cleans up webgazer and sends data to server
- * Must call once validation ends
- */
-function end_experiment(){
-    // end web gazer 
-    // webgazer.end(); 
-    // send data to server
-    sendGazerToServer();
 }
 
 /************************************
@@ -612,7 +640,7 @@ function start_calibration() {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
-    delete_elem("instruction");
+    delete_elem("instruction");    
     current_task = 'calibration';
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
@@ -648,6 +676,7 @@ function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
     send_data_to_database();
+    webgazer.pause();
     start_validation();
 }
 
@@ -666,6 +695,7 @@ function start_validation(){
     current_task = 'validation';
     store_data.task = current_task;
     store_data.description = validation_settings;
+    webgazer.resume();
     create_new_dot_validation();
 }
 
@@ -724,6 +754,7 @@ function finish_validation(succeed){
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
     num_objects_shown = 0;
+    webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
         send_data_to_database();
@@ -750,6 +781,7 @@ function finish_validation(succeed){
     }
 }
 
+
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
@@ -758,6 +790,7 @@ function loop_simple_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    webgazer.resume();
     clear_canvas();
     current_task = 'simple_paradigm';
      if (objects_array.length === 0) {
@@ -791,25 +824,19 @@ function loop_pursuit_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-
-   
-      var centerX = canvas.width / 2;
-      var centerY = canvas.height / 2;
-      var radius = 70;
-
-      context.beginPath();
-      context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-      context.fillStyle = 'green';
-      context.fill();
-      context.lineWidth = 5;
-      context.strokeStyle = '#003300';
-      context.stroke();
-        //  draw_moving_dot();
-    // clear_canvas();
+    webgazer.resume();
+    clear_canvas();
     current_task = 'pursuit_paradigm';
     if (objects_array.length === 0) {
         objects_array = shuffle(pursuit_paradigm_settings.position_array);
+        for (var i=0; i < objects_array.length; i++) {
+        objects_array[i].x = canvas.width * parseFloat(objects_array[i].x) / 100.0;
+        objects_array[i].tx = canvas.width * parseFloat(objects_array[i].tx) / 100.0;
+        objects_array[i].y = canvas.height * parseFloat(objects_array[i].y) / 100.0;
+        objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
+        }
     }
+    console.log(curr_object);
     curr_object = objects_array.pop();
     curr_object.cx = curr_object.x;
     curr_object.cy = curr_object.y;
@@ -819,13 +846,12 @@ function loop_pursuit_paradigm() {
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
- 
     draw_dot(context, dot, "#EEEFF7");
+    draw_moving_dot();
 }
 
 function draw_moving_dot(){
-    var now = new Date().getTime(),
-        dt = now - (time_stamp || now);
+    var now = new Date().getTime(), dt = now - (time_stamp || now);
     time_stamp = now;
     var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
     var dist_per_frame = distance(curr_object.x,curr_object.y,curr_object.tx,curr_object.ty) /pursuit_paradigm_settings.dot_show_time * dt;
@@ -838,15 +864,15 @@ function draw_moving_dot(){
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
-    if (((curr_object.tx - curr_object.x)/(curr_object.tx - curr_object.cx) < 0) || ((curr_object.ty - curr_object.y)/(curr_object.ty - curr_object.cxy < 0))){
+    if (distance(curr_object.cx,curr_object.cy,curr_object.tx,curr_object.ty) < 20){
         loop_pursuit_paradigm();
     }
     else{
         var canvas = document.getElementById("canvas-overlay");
-        var context = canvas.getContext("2d");
+        var context = canvas.getContext("2d");      
         clear_canvas();
         draw_dot(context, dot, "#EEEFF7");
-        // webgazer.addWatchListener(curr_object.cx, curr_object.cy);
+        webgazer.addWatchListener(curr_object.cx, curr_object.cy);
         request_anim_frame(draw_moving_dot);    
     }
 }
@@ -863,8 +889,8 @@ function end_pursuit_paradigm(){
 function loop_freeview_paradigm() {
     var canvas = document.getElementById("canvas-overlay");
     current_task = "freeview_paradigm";
+    webgazer.resume();
     clear_canvas();
-    var pos = Math.random() >= 0.5 ? "left" : "right";
     if (objects_array.length === 0) {
         objects_array = shuffle(freeview_paradigm_settings.image_array);
     }
@@ -874,13 +900,14 @@ function loop_freeview_paradigm() {
         end_freeview_paradigm();
     } else {
         draw_target();
-        setTimeout("draw_freeview_image(pos);", freeview_paradigm_settings.target_show_time);
-        setTimeout("start_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
+        setTimeout("draw_freeview_image();", freeview_paradigm_settings.target_show_time);
+        setTimeout("loop_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
     }
 
 }
 
 function draw_freeview_image(pos) {
+    var pos = Math.random() >= 0.5 ? "left" : "right";
     clear_canvas();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
