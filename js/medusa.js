@@ -750,7 +750,6 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
-    current_task = "task_" + paradigm;
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
     num_objects_shown = 0;
@@ -758,7 +757,7 @@ function finish_validation(succeed){
     if (succeed === false) {
         store_data.description = "fail";
         send_data_to_database();
-        
+            
     }
     else{
         store_data.description = "success";
@@ -809,9 +808,10 @@ function loop_simple_paradigm() {
 }
 
 function end_simple_paradigm(){
-    //TODO: finish this function
     objects_array = [];
     num_objects_shown = 0;
+    send_data_to_database();
+    webgazer.pause();
 }
 
 /************************************
