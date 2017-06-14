@@ -16,6 +16,12 @@ var time = "";  // time of current webgazer session
 var store_data = {
     url: "",   // url of website
     task: "",   // the current performing task
+    canvasWidth: "",    // the width of the canvas
+    canvasHeight: "",   // the height of the canvas
+    caliration_position_array: [],  // the array of all calibration positions
+    validation_position_array: [],  // the array of all validation positions
+    simple_position_array: [],  // the array of all simple positions
+    pursuit_position_array: [], // the array of all pursuit positions
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -173,7 +179,7 @@ function create_overlay(){
     canvas.addEventListener("mousedown", canvas_on_click, false);
     // style the newly created canvas
     canvas.style.zIndex   = 10;
-    canvas.style.position = "fixed";
+    canvas.style.position = "fixed";;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     canvas.style.backgroundColor = "#1c1d21";
@@ -556,6 +562,12 @@ function create_gazer_database_table() {
  */
 function send_data_to_database(){
     store_data.url  = window.location.href;
+    store_data.canvasWidth = canvas.width; 
+    store_data.canvasHeight = canvas.height;
+    store_data.caliration_position_array = calibration_settings.position_array;
+    store_data.validation_position_array = validation_settings.position_array;
+    store_data.simple_position_array = simple_paradigm_settings.position_array;
+    store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
     var params = {
         TableName :TABLE_NAME,
         Item: {
@@ -836,7 +848,6 @@ function loop_pursuit_paradigm() {
         objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
         }
     }
-    console.log(curr_object);
     curr_object = objects_array.pop();
     curr_object.cx = curr_object.x;
     curr_object.cy = curr_object.y;
