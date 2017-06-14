@@ -185,7 +185,6 @@ function create_overlay(){
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
     document.body.appendChild(canvas);
-    loop_freeview_paradigm();
 }
 
 /**
