@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,900');
+
+:root {
+    --font-color: #EEEFF7;
+    --submit-color: #445878;
+    --submit-color-darker: #31353D;
+}
+
+html, body {
+    margin: 0;
+    font-family: 'Source Sans Pro', sans-serif;
+    color: var(--font-color);
+}
+
+/* Form Styles */
+
+.overlay-div {
+    position: fixed;
+    margin: 60px auto;
+    max-width: 720px;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.form__header {
+    padding-bottom: 30px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed rgba(199, 206, 207,.25);
+}
+
+.form__title {
+    font-size: 45px;
+    margin: 10px 0;
+}
+
+.form__instruction {
+    font-size: 22px;
+}
+
+.form__options {
+    border: none;
+    padding: 0;
+}
+
+.form__question {
+    font-size: 25px;
+}
+
+.form__answer {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 47%;
+    margin: 20px 1% 20px 0;
+    font-size: 22px;
+    text-align: left;
+}
+
+label {
+    border: 1px solid rgba(199, 206, 207,.25);
+    box-sizing: border-box;
+    display: block;
+    height: 100%;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    opacity: .5;
+    transition: all .5s ease-in-out;
+}
+
+label:hover, label:focus, label:active {
+    border: 1px solid rgba(199, 206, 207,.75);
+}
+
+.form__button {
+    height: 40px;
+    border: none;
+    color: var(--font-color);
+    background-color: var(--submit-color);
+    text-transform: uppercase;
+    font-family: 'Source Sans Pro', sans-serif;
+    padding: 0 20px;
+    border-radius: 20px;
+    font-weight: 900;
+    cursor: pointer;
+    margin: 30px 0;
+    transition: all .25s ease-in-out;
+}
+
+.form__button:hover, .form__button:focus {
+    background-color: var(--submit-color-darker);
+    text-shadow: 1px 1px 1px rgba(0,0,0,.25);
+    outline: none;
+}
+/* Input style */
+
+input[type="radio"] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+input[type="radio"]:active ~ label {
+    opacity: 1;
+}
+
+input[type="radio"]:checked ~ label {
+    opacity: 1;
+    border: 1px solid var(--font-color);
+}
