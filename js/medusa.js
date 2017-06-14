@@ -11,11 +11,17 @@ const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
 * VARIABLES
 ************************************/
 var gazer_id = "";  // id of user
-var time = "";  // time of current webgazer session
+var session_time = "";  // time of current webgazer session
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
     url: "",   // url of website
     task: "",   // the current performing task
+    canvasWidth: "",    // the width of the canvas
+    canvasHeight: "",   // the height of the canvas
+    caliration_position_array: [],  // the array of all calibration positions
+    validation_position_array: [],  // the array of all validation positions
+    simple_position_array: [],  // the array of all simple positions
+    pursuit_position_array: [], // the array of all pursuit positions
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -25,6 +31,7 @@ var store_data = {
 };
 
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
+var webgazer_time_stamp;    // time stamp. Used specifically to control the sampling rate of webgazer
 var elem_array = [];    // array of elements gazed
 var current_task = "instruction";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
@@ -218,7 +225,9 @@ function get_elements_seen(x,y){
  */
 function delete_elem(id) {
     var elem = document.getElementById(id);
-    elem.parentNode.removeChild(elem);
+    if (elem){
+        elem.parentNode.removeChild(elem);
+    }
 }
 
 /**
@@ -278,7 +287,6 @@ function draw_dot(context, dot, color) {
 }
 
 function draw_track(context, dot, color) {
-    console.log(dot);
     context.beginPath();
     context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
     context.strokeStyle = color;
@@ -287,7 +295,6 @@ function draw_track(context, dot, color) {
 }
 
 function draw_dot_countup(context, dot, color) {
-    console.log(dot.hit_count);
     clear_canvas();
 
     //base circle
@@ -318,7 +325,6 @@ function draw_dot_countup(context, dot, color) {
 function draw_dot_countdown(context, dot, color) {
     var time = new Date().getTime();
     var delta = time - time_stamp;
-    console.log(delta);
     var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
     clear_canvas();
     //base circle
@@ -488,18 +494,18 @@ function load_webgazer() {
  * Starts WebGazer and collects data
  */
 function initiate_webgazer(){
-    time_stamp = 0;
+    webgazer_time_stamp = 0;
     webgazer.clearData()
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {        
             if (data === null) return;          
-            if (elapsedTime - time_stamp < 1000 / SAMPLING_RATE) return;  
+            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
-            if (elapsedTime - time_stamp < 1000 / DATA_COLLECTION_RATE) return;      
-            time_stamp = elapsedTime;
+            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
+            webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
             store_data.gaze_x.push(data.x);
             store_data.gaze_y.push(data.y);
@@ -520,7 +526,6 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        time = (new Date).getTime().toString();
         create_calibration_instruction(); 
         create_gazer_database_table();
     } else {
@@ -561,12 +566,21 @@ function create_gazer_database_table() {
  * Some data are set along the calculation.
  */
 function send_data_to_database(){
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
     store_data.url  = window.location.href;
+    store_data.canvasWidth = canvas.width;
+    store_data.canvasHeight = canvas.height;
+    store_data.caliration_position_array = calibration_settings.position_array;
+    store_data.validation_position_array = validation_settings.position_array;
+    store_data.simple_position_array = simple_paradigm_settings.position_array;
+    store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
+    console.log(store_data);
     var params = {
         TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
-            "time_collected":time,
+            "time_collected":session_time,
             "info":store_data
         }
     };
@@ -645,6 +659,7 @@ function create_calibration_instruction() {
  */
 function start_calibration() {
     hide_face_tracker();
+    session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
@@ -701,7 +716,6 @@ function start_validation(){
     objects_array = [];
     num_objects_shown = 0;
     current_task = 'validation';
-    store_data.task = current_task;
     store_data.description = validation_settings;
     webgazer.resume();
     create_new_dot_validation();
@@ -768,11 +782,13 @@ function finish_validation(succeed){
     webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
+        store_data.task = current_task;
         send_data_to_database();
-            
+        start_calibration();
     }
     else{
         store_data.description = "success";
+        store_data.task = current_task;
         send_data_to_database();
         switch (paradigm){
             case "simple":
@@ -815,9 +831,7 @@ function loop_simple_paradigm() {
     else{
         draw_target();
         setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, "#EEEFF7");},simple_paradigm_settings.target_show_time);
-        setTimeout(function () {
-            loop_simple_paradigm();
-        },simple_paradigm_settings.dot_show_time);
+        setTimeout("loop_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
 }
 
@@ -850,7 +864,6 @@ function loop_pursuit_paradigm() {
         objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
         }
     }
-    //console.log(curr_object);
     curr_object = objects_array.pop();
     curr_object.cx = curr_object.x;
     curr_object.cy = curr_object.y;
