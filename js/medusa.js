@@ -26,13 +26,14 @@ var store_data = {
 
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
 var elem_array = [];    // array of elements gazed
-var current_task = "calibration";    // current running task.
+var current_task = "instruction";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
 var possible_paradigm = ["simple","pursuit","freeview","heatmap"]
-
+var cam_width = 320;
+var cam_height = 240;
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
@@ -74,8 +75,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 5,
-    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial, in ms
-    target_show_time: 1500 // amount of time 'target' will appear on screen with each trial, in ms
+    target_show_time: 1500, // amount of time 'target' will appear on screen with each trial, in ms
+    dot_show_time: 3000    // amount of time dot will appear on screen with each trial, in ms
+
 };
 
 /************************************
@@ -178,8 +180,11 @@ function create_overlay(){
     canvas.height = window.innerHeight;
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
+    window.addEventListener("resize", function () {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
     document.body.appendChild(canvas);
-    loop_freeview_paradigm();
 }
 
 /**
@@ -267,7 +272,7 @@ function draw_dot(context, dot, color) {
         context.beginPath();
         context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
         context.strokeStyle = color;
-        context.fillStyle = 'green';
+        context.fillStyle = color;
         context.fill();
     }
 }
@@ -429,6 +434,7 @@ function draw_target() {
     var context = canvas.getContext("2d");
     var midX = canvas.width*0.5;
     var midY = canvas.height*0.5;
+    context.strokeStyle = "black";
     context.lineWidth = 5;
     //draw horizontal line
     context.beginPath();
@@ -625,10 +631,11 @@ function create_calibration_instruction() {
         instruction.className += "overlay-div";
         instruction.style.zIndex = 12;
         instruction.innerHTML += "<header class=\"form__header\">" +
-                                    "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
+                                    "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
-        document.body.appendChild(instruction);    
+        document.body.appendChild(instruction);
+        show_video_feed();
     }
  
 }
@@ -637,6 +644,7 @@ function create_calibration_instruction() {
  * Start the calibration
  */
 function start_calibration() {
+    hide_face_tracker();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
@@ -697,6 +705,8 @@ function start_validation(){
     store_data.description = validation_settings;
     webgazer.resume();
     create_new_dot_validation();
+    var gazeDot = document.getElementById("gazeDot");
+    gazeDot.style.zIndex = 14;
 }
 
 /**
@@ -750,6 +760,8 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
+    var gazeDot = document.getElementById("gazeDot");
+    gazeDot.style.display = "None";
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
     num_objects_shown = 0;
@@ -803,7 +815,9 @@ function loop_simple_paradigm() {
     else{
         draw_target();
         setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, "#EEEFF7");},simple_paradigm_settings.target_show_time);
-        setTimeout("start_simple_paradigm();",simple_paradigm_settings.dot_show_time);
+        setTimeout(function () {
+            loop_simple_paradigm();
+        },simple_paradigm_settings.dot_show_time);
     }
 }
 
@@ -836,7 +850,7 @@ function loop_pursuit_paradigm() {
         objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
         }
     }
-    console.log(curr_object);
+    //console.log(curr_object);
     curr_object = objects_array.pop();
     curr_object.cx = curr_object.x;
     curr_object.cy = curr_object.y;
@@ -846,8 +860,12 @@ function loop_pursuit_paradigm() {
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
-    draw_dot(context, dot, "#EEEFF7");
-    draw_moving_dot();
+    draw_dot(context, dot, "red");
+    setTimeout( function () {
+        time_stamp = null;
+        draw_moving_dot();
+    }, pursuit_paradigm_settings.target_show_time);
+
 }
 
 function draw_moving_dot(){
@@ -935,4 +953,80 @@ function start_heatmap_paradigm(){
 
 function end_heatmap_paradigm(){
     //TODO: 
+}
+
+
+/************************************
+ * WAITING FOR REFRACTORING
+ ************************************/
+
+function create_survey() {
+    var survey = document.createEleement("div");
+    delete_elem("consent_form");
+    survey.id = "survey";
+    survey.className += "overlay-div";
+    survey.style.zIndex = 12;
+    survey.innerHTML += "<select required>" +
+                            "<option value=\"\" disabled selected>Question 1</option>" +
+                        "</select>" +
+                        "</br>" +
+                        "<select required>" +
+                            "<option value=\"\" disabled selected>Question 1</option>" +
+                        "</select>" +
+                        "</br>" +
+                        "<select required>" +
+                        "<option value=\"\" disabled selected>Question 1</option>" +
+                        "</select>" +
+                        "<button class=\"form__button\" type=\"button\"> Next > </button>";
+
+}
+
+function show_video_feed () {
+    var video = document.getElementById('webgazerVideoFeed');
+    video.style.display = 'block';
+    video.style.position = 'absolute';
+    video.style.top = "50%";
+    video.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
+    video.width = cam_width;
+    video.height = cam_height;
+    video.style.margin = '0px';
+    video.style.zIndex = 13;
+
+    webgazer.params.imgWidth = cam_width;
+    webgazer.params.imgHeight = cam_height;
+
+    var overlay = document.createElement('canvas');
+    overlay.id = 'face_tracker';
+    overlay.style.position = 'absolute';
+    overlay.width = cam_width;
+    overlay.height = cam_height;
+    overlay.style.top = "50%";
+    overlay.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
+    overlay.style.margin = '0px';
+    overlay.style.zIndex = 14;
+
+    document.body.appendChild(overlay);
+
+    draw_face_tracker();
+}
+
+
+function draw_face_tracker() {
+    if (current_task !== "instruction") {
+        return;
+    }
+    requestAnimFrame(draw_face_tracker);
+    var overlay = document.getElementById('face_tracker');
+    var cl = webgazer.getTracker().clm;
+    overlay.getContext('2d').clearRect(0,0, cam_width, cam_height);
+    if (cl.getCurrentPosition()) {
+        cl.draw(overlay);
+    }
+}
+
+function hide_face_tracker() {
+    delete_elem("face_tracker");
+    var video = document.getElementById('webgazerVideoFeed');
+    video.style.display = "None";
+
 }
