@@ -33,20 +33,22 @@ var store_data = {
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
 var webgazer_time_stamp;    // time stamp. Used specifically to control the sampling rate of webgazer
 var elem_array = [];    // array of elements gazed
-var current_task = "calibration";    // current running task.
+var current_task = "instruction";    // current running task.
 var curr_object = null;     // current object on screen. Can be anything. Used to check collision
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
-var possible_paradigm = ["simple","pursuit","freeview","heatmap"]
-
+var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
+var screen_timeout = 3000;
+var cam_width = 320;
+var cam_height = 240;
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 5,  // duration of a a singe position sampled
+    duration: 10,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 2,  // the number of dots used for calibration
+    num_dots: 5,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -56,11 +58,11 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     duration: 5000,  // duration of a a singe position sampled in ms
-    num_dots: 2,  // the number of dots used for validation
+    num_dots: 5,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
     distance: 200,  // radius of acceptable gaze data around validation dot
-    hit_count: 20
+    hit_count: 10
 };
 
 /************************************
@@ -81,8 +83,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 5,
-    dot_show_time: 2000,     // amount of time dot will appear on screen with each trial, in ms
-    target_show_time: 1500 // amount of time 'target' will appear on screen with each trial, in ms
+    target_show_time: 1500, // amount of time 'target' will appear on screen with each trial, in ms
+    dot_show_time: 3000    // amount of time dot will appear on screen with each trial, in ms
+
 };
 
 /************************************
@@ -180,11 +183,15 @@ function create_overlay(){
     canvas.addEventListener("mousedown", canvas_on_click, false);
     // style the newly created canvas
     canvas.style.zIndex   = 10;
-    canvas.style.position = "fixed";;
+    canvas.style.position = "fixed";
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     canvas.style.backgroundColor = "#1c1d21";
     // add the canvas to web page
+    window.addEventListener("resize", function () {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
     document.body.appendChild(canvas);
 }
 
@@ -275,7 +282,7 @@ function draw_dot(context, dot, color) {
         context.beginPath();
         context.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
         context.strokeStyle = color;
-        context.fillStyle = 'green';
+        context.fillStyle = color;
         context.fill();
     }
 }
@@ -434,6 +441,7 @@ function draw_target() {
     var context = canvas.getContext("2d");
     var midX = canvas.width*0.5;
     var midY = canvas.height*0.5;
+    context.strokeStyle = "black";
     context.lineWidth = 5;
     //draw horizontal line
     context.beginPath();
@@ -493,11 +501,11 @@ function initiate_webgazer(){
   	    .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {        
             if (data === null) return;          
-            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;  
+            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
-            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;      
+            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
             store_data.gaze_x.push(data.x);
@@ -506,7 +514,7 @@ function initiate_webgazer(){
             store_data.object_y.push(curr_object.y);
         })
     	.begin()
-        .showPredictionPoints(false); /* shows a square every 100 milliseconds where current prediction is */
+        .showPredictionPoints(true); /* shows a square every 100 milliseconds where current prediction is */
     // setInterval(function(){ record_gaze_location() }, 1000);
     check_webgazer_status();
 }
@@ -518,7 +526,7 @@ function check_webgazer_status() {
     if (webgazer.isReady()) {
         console.log('webgazer is ready.');
         // Create database
-        createID();       
+        createID();
         create_calibration_instruction(); 
         create_gazer_database_table();
     } else {
@@ -562,13 +570,13 @@ function send_data_to_database(){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     store_data.url  = window.location.href;
-    store_data.canvasWidth = canvas.width; 
+    store_data.canvasWidth = canvas.width;
     store_data.canvasHeight = canvas.height;
     store_data.caliration_position_array = calibration_settings.position_array;
     store_data.validation_position_array = validation_settings.position_array;
     store_data.simple_position_array = simple_paradigm_settings.position_array;
     store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
-    console.log(store_data);
+    //console.log(store_data);
     var params = {
         TableName :TABLE_NAME,
         Item: {
@@ -638,10 +646,11 @@ function create_calibration_instruction() {
         instruction.className += "overlay-div";
         instruction.style.zIndex = 12;
         instruction.innerHTML += "<header class=\"form__header\">" +
-                                    "<h2 class=\"form__title\">Thank you for participating. </br> Please click at the dots while looking at them.</h2>" +
+                                    "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
-        document.body.appendChild(instruction);    
+        document.body.appendChild(instruction);
+        show_video_feed();
     }
  
 }
@@ -650,6 +659,8 @@ function create_calibration_instruction() {
  * Start the calibration
  */
 function start_calibration() {
+    hide_face_tracker();
+    webgazer.resume();
     session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
@@ -691,32 +702,48 @@ function finish_calibration(){
     num_objects_shown = 0;
     send_data_to_database();
     webgazer.pause();
-    start_validation();
+    create_validation_instruction();
 }
 
 /************************************
 * VALIDATION
 ************************************/
+function create_validation_instruction() {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Validation...</h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
+    setTimeout(function() {
+        start_validation();
+    }, screen_timeout);
+}
+
 /**
  * Prepares validation process
  */
 function start_validation(){
+    clear_canvas();
+    delete_elem("instruction");
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    clear_canvas();
-    objects_array = [];
-    num_objects_shown = 0;
     current_task = 'validation';
     store_data.description = validation_settings;
     webgazer.resume();
     create_new_dot_validation();
+    var gazeDot = document.getElementById("gazeDot");
+    gazeDot.style.zIndex = 14;
+    gazeDot.style.display = "block"
 }
 
 /**
  * Create new dots for validation
  */
 function create_new_dot_validation(){
-    time_stamp = new Date().getTime();
     if (num_objects_shown >= validation_settings.num_dots) {
         finish_validation(true);
         return;
@@ -740,6 +767,7 @@ function create_new_dot_validation(){
  * @param {*} data 
  */
 function validation_event_handler(data) {
+    if (current_task !== "validation") {return}
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
@@ -763,38 +791,73 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
+    current_task = "instruction";
+    var gazeDot = document.getElementById("gazeDot");
+    gazeDot.style.display = "none";
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
     num_objects_shown = 0;
     webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
-        store_data.task = current_task;
+        store_data.task = "validation";
         send_data_to_database();
-        start_calibration();
+        create_validation_fail_screen();
     }
     else{
         store_data.description = "success";
-        store_data.task = current_task;
+        store_data.task = "validation";
         send_data_to_database();
-        switch (paradigm){
-            case "simple":
-                loop_simple_paradigm();
-                break;
-            case "pursuit":
-                loop_pursuit_paradigm();
-                break;
-            case "freeview":
-                loop_freeview_paradigm();
-                break;
-            case "heatmap":
-                start_heatmap_paradigm();
-            default:
-                start_heatmap_paradigm();
-        }
+        create_validation_success_screen();
+        setTimeout( function () {
+            switch (paradigm){
+                case "simple":
+                    loop_simple_paradigm();
+                    break;
+                case "pursuit":
+                    loop_pursuit_paradigm();
+                    break;
+                case "freeview":
+                    loop_freeview_paradigm();
+                    break;
+                case "heatmap":
+                    start_heatmap_paradigm();
+                default:
+                    start_heatmap_paradigm();
+            }
+        }, screen_timeout);
     }
 }
 
+function create_validation_fail_screen() {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Validation failed. </br> Restarting calibration.</h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
+    setTimeout(function() {
+        start_calibration();
+    }, screen_timeout);
+}
+
+function create_validation_success_screen() {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Task...</h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
+    setTimeout(function() {
+        delete_elem("instruction");
+    }, screen_timeout);
+}
 
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
@@ -860,8 +923,12 @@ function loop_pursuit_paradigm() {
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
-    draw_dot(context, dot, "#EEEFF7");
-    draw_moving_dot();
+    draw_dot(context, dot, "red");
+    setTimeout( function () {
+        time_stamp = null;
+        draw_moving_dot();
+    }, pursuit_paradigm_settings.target_show_time);
+
 }
 
 function draw_moving_dot(){
@@ -949,4 +1016,80 @@ function start_heatmap_paradigm(){
 
 function end_heatmap_paradigm(){
     //TODO: 
+}
+
+
+/************************************
+ * WAITING FOR REFRACTORING
+ ************************************/
+
+function create_survey() {
+    var survey = document.createEleement("div");
+    delete_elem("consent_form");
+    survey.id = "survey";
+    survey.className += "overlay-div";
+    survey.style.zIndex = 12;
+    survey.innerHTML += "<select required>" +
+                            "<option value=\"\" disabled selected>Question 1</option>" +
+                        "</select>" +
+                        "</br>" +
+                        "<select required>" +
+                            "<option value=\"\" disabled selected>Question 1</option>" +
+                        "</select>" +
+                        "</br>" +
+                        "<select required>" +
+                        "<option value=\"\" disabled selected>Question 1</option>" +
+                        "</select>" +
+                        "<button class=\"form__button\" type=\"button\"> Next > </button>";
+
+}
+
+function show_video_feed () {
+    var video = document.getElementById('webgazerVideoFeed');
+    video.style.display = 'block';
+    video.style.position = 'absolute';
+    video.style.top = "50%";
+    video.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
+    video.width = cam_width;
+    video.height = cam_height;
+    video.style.margin = '0px';
+    video.style.zIndex = 13;
+
+    webgazer.params.imgWidth = cam_width;
+    webgazer.params.imgHeight = cam_height;
+
+    var overlay = document.createElement('canvas');
+    overlay.id = 'face_tracker';
+    overlay.style.position = 'absolute';
+    overlay.width = cam_width;
+    overlay.height = cam_height;
+    overlay.style.top = "50%";
+    overlay.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
+    overlay.style.margin = '0px';
+    overlay.style.zIndex = 14;
+
+    document.body.appendChild(overlay);
+
+    draw_face_tracker();
+}
+
+
+function draw_face_tracker() {
+    if (current_task !== "instruction") {
+        return;
+    }
+    requestAnimFrame(draw_face_tracker);
+    var overlay = document.getElementById('face_tracker');
+    var cl = webgazer.getTracker().clm;
+    overlay.getContext('2d').clearRect(0,0, cam_width, cam_height);
+    if (cl.getCurrentPosition()) {
+        cl.draw(overlay);
+    }
+}
+
+function hide_face_tracker() {
+    delete_elem("face_tracker");
+    var video = document.getElementById('webgazerVideoFeed');
+    video.style.display = "None";
+
 }
