@@ -46,9 +46,9 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 10,  // duration of a a singe position sampled
+    duration: 1,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 5,  // the number of dots used for calibration
+    num_dots: 1,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -136,7 +136,11 @@ function start_medusa(parad){
     if (!paradigm in possible_paradigm) {
         paradigm = "simple";
     }
+    create_consent_form();
+
 }
+
+
 /**
  * Shuffles array in place.
  * @param array items The array containing the items.
