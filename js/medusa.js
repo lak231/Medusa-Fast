@@ -603,6 +603,10 @@ function send_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));   
+            store_data.object_x = [];
+            store_data.object_y = [];
+            store_data.gaze_x = [];
+            store_data.gaze_y = [];
             callback();         
         }
     });
