@@ -38,16 +38,17 @@ var curr_object = null;     // current object on screen. Can be anything. Used t
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
-var possible_paradigm = ["simple","pursuit","freeview","heatmap"]
+var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
+var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 5,  // duration of a a singe position sampled
+    duration: 10,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 2,  // the number of dots used for calibration
+    num_dots: 5,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -57,11 +58,11 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     duration: 5000,  // duration of a a singe position sampled in ms
-    num_dots: 2,  // the number of dots used for validation
+    num_dots: 5,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
     distance: 200,  // radius of acceptable gaze data around validation dot
-    hit_count: 20
+    hit_count: 10
 };
 
 /************************************
@@ -575,7 +576,7 @@ function send_data_to_database(){
     store_data.validation_position_array = validation_settings.position_array;
     store_data.simple_position_array = simple_paradigm_settings.position_array;
     store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
-    console.log(store_data);
+    //console.log(store_data);
     var params = {
         TableName :TABLE_NAME,
         Item: {
@@ -659,6 +660,7 @@ function create_calibration_instruction() {
  */
 function start_calibration() {
     hide_face_tracker();
+    webgazer.resume();
     session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
@@ -700,34 +702,48 @@ function finish_calibration(){
     num_objects_shown = 0;
     send_data_to_database();
     webgazer.pause();
-    start_validation();
+    create_validation_instruction();
 }
 
 /************************************
 * VALIDATION
 ************************************/
+function create_validation_instruction() {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Validation...</h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
+    setTimeout(function() {
+        start_validation();
+    }, screen_timeout);
+}
+
 /**
  * Prepares validation process
  */
 function start_validation(){
+    clear_canvas();
+    delete_elem("instruction");
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    clear_canvas();
-    objects_array = [];
-    num_objects_shown = 0;
     current_task = 'validation';
     store_data.description = validation_settings;
     webgazer.resume();
     create_new_dot_validation();
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.zIndex = 14;
+    gazeDot.style.display = "block"
 }
 
 /**
  * Create new dots for validation
  */
 function create_new_dot_validation(){
-    time_stamp = new Date().getTime();
     if (num_objects_shown >= validation_settings.num_dots) {
         finish_validation(true);
         return;
@@ -751,6 +767,7 @@ function create_new_dot_validation(){
  * @param {*} data 
  */
 function validation_event_handler(data) {
+    if (current_task !== "validation") {return}
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
@@ -774,40 +791,73 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
+    current_task = "instruction";
     var gazeDot = document.getElementById("gazeDot");
-    gazeDot.style.display = "None";
+    gazeDot.style.display = "none";
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
     num_objects_shown = 0;
     webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
-        store_data.task = current_task;
+        store_data.task = "validation";
         send_data_to_database();
-        start_calibration();
+        create_validation_fail_screen();
     }
     else{
         store_data.description = "success";
-        store_data.task = current_task;
+        store_data.task = "validation";
         send_data_to_database();
-        switch (paradigm){
-            case "simple":
-                loop_simple_paradigm();
-                break;
-            case "pursuit":
-                loop_pursuit_paradigm();
-                break;
-            case "freeview":
-                loop_freeview_paradigm();
-                break;
-            case "heatmap":
-                start_heatmap_paradigm();
-            default:
-                start_heatmap_paradigm();
-        }
+        create_validation_success_screen();
+        setTimeout( function () {
+            switch (paradigm){
+                case "simple":
+                    loop_simple_paradigm();
+                    break;
+                case "pursuit":
+                    loop_pursuit_paradigm();
+                    break;
+                case "freeview":
+                    loop_freeview_paradigm();
+                    break;
+                case "heatmap":
+                    start_heatmap_paradigm();
+                default:
+                    start_heatmap_paradigm();
+            }
+        }, screen_timeout);
     }
 }
 
+function create_validation_fail_screen() {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Validation failed. </br> Restarting calibration.</h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
+    setTimeout(function() {
+        start_calibration();
+    }, screen_timeout);
+}
+
+function create_validation_success_screen() {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Task...</h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
+    setTimeout(function() {
+        delete_elem("instruction");
+    }, screen_timeout);
+}
 
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
