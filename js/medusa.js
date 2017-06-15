@@ -4,8 +4,8 @@
 ************************************/
 const TABLE_NAME = "Gazers"; // name of table in database
 const DEFAULT_DOT_RADIUS = 25;
-const SAMPLING_RATE = 60;   // number of call to function once webgazer got data per second
-const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
+const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
+const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
 
 /************************************
 * VARIABLES
@@ -42,13 +42,14 @@ var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
+
 /************************************
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 1,  // duration of a a singe position sampled
+    duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 1,  // the number of dots used for calibration
+    num_dots: 13,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -57,12 +58,12 @@ var calibration_settings = {
 * VALIDATION PARAMETERS
 ************************************/
 var validation_settings = {
-    duration: 5000,  // duration of a a singe position sampled in ms
-    num_dots: 5,  // the number of dots used for validation
+    duration: 10000,  // duration of a a singe position sampled in ms
+    num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
     distance: 200,  // radius of acceptable gaze data around validation dot
-    hit_count: 10,
+    hit_count: 20,
     listener: false
 };
 
@@ -510,6 +511,9 @@ function initiate_webgazer(){
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
+            if (current_task === "calibration"){
+                 webgazer.addWatchListener(curr_object.x, curr_object.y);
+            }
             if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
@@ -664,6 +668,9 @@ function create_calibration_instruction() {
  * Start the calibration
  */
 function start_calibration() {
+    var gazeDot = document.getElementById("gazeDot");
+    gazeDot.style.zIndex = 14;
+    gazeDot.style.display = "block";
     hide_face_tracker();
     webgazer.resume();
     session_time = (new Date).getTime().toString();
@@ -742,7 +749,7 @@ function start_validation(){
     create_new_dot_validation();
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.zIndex = 14;
-    gazeDot.style.display = "block"
+    gazeDot.style.display = "block";
 }
 
 /**
@@ -781,6 +788,7 @@ function validation_event_handler(data) {
         if (curr_object.hit_count <= validation_settings.hit_count) {
             draw_dot(context, curr_object, "#FFFFFF");
             curr_object.hit_count += 1;
+             webgazer.addWatchListener(curr_object.x, curr_object.y);
         } else {
             create_new_dot_validation();
         }
@@ -896,6 +904,7 @@ function end_simple_paradigm(){
     num_objects_shown = 0;
     send_data_to_database();
     webgazer.pause();
+    create_survey();
 }
 
 /************************************
@@ -968,6 +977,7 @@ function end_pursuit_paradigm(){
     //TODO: 
     objects_array = [];
     num_objects_shown = 0;
+        webgazer.pause();
 }
 
 /************************************
