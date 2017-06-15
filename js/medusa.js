@@ -51,9 +51,9 @@ var light_color = "#5C832F";
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 5,  // duration of a a singe position sampled
+    duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 13,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -62,7 +62,7 @@ var calibration_settings = {
 * VALIDATION PARAMETERS
 ************************************/
 var validation_settings = {
-    duration: 10000,  // duration of a a singe position sampled in ms
+    duration: 20000,  // duration of a a singe position sampled in ms
     num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
@@ -143,7 +143,6 @@ function start_medusa(parad){
         paradigm = "simple";
     }
     create_consent_form();
-
 }
 
 
@@ -716,6 +715,7 @@ function create_new_dot_calibration(){
 function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
+    store_data.current_task = "calibration";
     send_data_to_database();
     webgazer.pause();
     create_validation_instruction();
@@ -792,7 +792,6 @@ function validation_event_handler(data) {
         if (curr_object.hit_count <= validation_settings.hit_count) {
             draw_dot(context, curr_object, dark_color);
             curr_object.hit_count += 1;
-             webgazer.addWatchListener(curr_object.x, curr_object.y);
         } else {
             create_new_dot_validation();
         }
@@ -815,16 +814,15 @@ function finish_validation(succeed){
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
     num_objects_shown = 0;
+    store_data.task = "validation";
     webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
-        store_data.task = current_task;
         send_data_to_database();
         create_validation_fail_screen();
     }
     else{
         store_data.description = "success";
-        store_data.task = current_task;
         send_data_to_database();
         create_validation_success_screen();
         setTimeout( function () {
@@ -980,8 +978,11 @@ function draw_moving_dot(){
 function end_pursuit_paradigm(){
     //TODO: 
     objects_array = [];
+     send_data_to_database();
     num_objects_shown = 0;
         webgazer.pause();
+    send_data_to_database();
+    create_survey();
 }
 
 /************************************
@@ -1044,7 +1045,7 @@ function end_heatmap_paradigm(){
  ************************************/
 
 function create_survey() {
-    var survey = document.createEleement("div");
+    var survey = document.createElement("div");
     delete_elem("consent_form");
     survey.id = "survey";
     survey.className += "overlay-div";
@@ -1062,6 +1063,7 @@ function create_survey() {
                         "</select>" +
                         "</br>" +
                         "<button class=\"form__button\" type=\"button\"> Next > </button>";
+      document.body.appendChild(survey);
 
 }
 
