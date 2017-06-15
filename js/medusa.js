@@ -1056,19 +1056,24 @@ function create_survey() {
     survey.id = "survey";
     survey.className += "overlay-div";
     survey.style.zIndex = 12;
-    survey.innerHTML += "<select required>" +
+    survey.innerHTML += "<header class=\"form__header\">" +
+                            "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
+                        "</header>" +
+                        "<form>" +
+                            "<select required>" +
+                                "<option value=\"\" disabled selected>Question 1</option>" +
+                            "</select>" +
+                            "</br>" +
+                            "<select required>" +
+                                "<option value=\"\" disabled selected>Question 1</option>" +
+                            "</select>" +
+                            "</br>" +
+                            "<select required>" +
                             "<option value=\"\" disabled selected>Question 1</option>" +
-                        "</select>" +
-                        "</br>" +
-                        "<select required>" +
-                            "<option value=\"\" disabled selected>Question 1</option>" +
-                        "</select>" +
-                        "</br>" +
-                        "<select required>" +
-                        "<option value=\"\" disabled selected>Question 1</option>" +
-                        "</select>" +
-                        "</br>" +
-                        "<button class=\"form__button\" type=\"button\"> Next > </button>";
+                            "</select>" +
+                            "</br>" +
+                            "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
+                        "</form>";
       document.body.appendChild(survey);
 
 }
