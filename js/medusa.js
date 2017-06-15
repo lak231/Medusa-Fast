@@ -42,6 +42,10 @@ var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
+var background_color = "#D8CAA8";
+var font_color = "#363942";
+var dark_color = "#284907";
+var light_color = "#5C832F";
 
 /************************************
 * CALIBRATION PARAMETERS
@@ -192,7 +196,7 @@ function create_overlay(){
     canvas.style.position = "fixed";
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    canvas.style.backgroundColor = "#1c1d21";
+    canvas.style.backgroundColor = background_color;
     // add the canvas to web page
     window.addEventListener("resize", function () {
         canvas.width = window.innerWidth;
@@ -447,7 +451,7 @@ function draw_target() {
     var context = canvas.getContext("2d");
     var midX = canvas.width*0.5;
     var midY = canvas.height*0.5;
-    context.strokeStyle = "black";
+    context.strokeStyle = font_color;
     context.lineWidth = 5;
     //draw horizontal line
     context.beginPath();
@@ -702,7 +706,7 @@ function create_new_dot_calibration(){
     curr_object = objects_array.pop();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
-    draw_dot(context, curr_object, "#EEEFF7");
+    draw_dot(context, curr_object, dark_color);
     num_objects_shown++;
 }
 
@@ -768,7 +772,7 @@ function create_new_dot_validation(){
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
-    draw_dot(context, curr_object, "#FFFFFF");
+    draw_dot(context, curr_object, dark_color);
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     validation_settings.listener = true;
     time_stamp = new Date().getTime();
@@ -786,7 +790,7 @@ function validation_event_handler(data) {
     var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
     if (dist < validation_settings.distance) {
         if (curr_object.hit_count <= validation_settings.hit_count) {
-            draw_dot(context, curr_object, "#FFFFFF");
+            draw_dot(context, curr_object, dark_color);
             curr_object.hit_count += 1;
              webgazer.addWatchListener(curr_object.x, curr_object.y);
         } else {
@@ -894,7 +898,7 @@ function loop_simple_paradigm() {
     }
     else{
         draw_target();
-        setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, "#EEEFF7");},simple_paradigm_settings.target_show_time);
+        setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, dark_color);},simple_paradigm_settings.target_show_time);
         setTimeout("loop_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
 }
@@ -967,7 +971,7 @@ function draw_moving_dot(){
         var canvas = document.getElementById("canvas-overlay");
         var context = canvas.getContext("2d");      
         clear_canvas();
-        draw_dot(context, dot, "#EEEFF7");
+        draw_dot(context, dot, light_color);
         webgazer.addWatchListener(curr_object.cx, curr_object.cy);
         request_anim_frame(draw_moving_dot);    
     }
@@ -1056,6 +1060,7 @@ function create_survey() {
                         "<select required>" +
                         "<option value=\"\" disabled selected>Question 1</option>" +
                         "</select>" +
+                        "</br>" +
                         "<button class=\"form__button\" type=\"button\"> Next > </button>";
 
 }

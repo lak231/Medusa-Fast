@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,900');
 
 :root {
-    --font-color: #EEEFF7;
-    --submit-color: #445878;
-    --submit-color-darker: #31353D;
+    --font-color: #363942;
+    --submit-color: #5C832F;
+    --submit-color-darker: #284907;
 }
 
 html, body {
@@ -24,7 +24,7 @@ html, body {
 .form__header {
     padding-bottom: 30px;
     margin-bottom: 10px;
-    border-bottom: 1px dashed rgba(199, 206, 207,.25);
+    border-bottom: 1px dashed rgba(54, 57, 66, 0.25);
 }
 
 .form__title {
@@ -55,7 +55,7 @@ html, body {
 }
 
 label {
-    border: 1px solid rgba(199, 206, 207,.25);
+    border: 1px solid rgba(51, 102, 51, 0.25);
     box-sizing: border-box;
     display: block;
     height: 100%;
@@ -67,7 +67,7 @@ label {
 }
 
 label:hover, label:focus, label:active {
-    border: 1px solid rgba(199, 206, 207,.75);
+    border: 1px solid rgba(54, 57, 66, 0.75);
 }
 
 .form__button {
