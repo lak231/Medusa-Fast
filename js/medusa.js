@@ -53,7 +53,7 @@ var light_color = "#5C832F";
 var calibration_settings = {
     duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 39,  // the number of dots used for calibration
+    num_dots: 13,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -980,7 +980,7 @@ function draw_moving_dot(){
         var canvas = document.getElementById("canvas-overlay");
         var context = canvas.getContext("2d");      
         clear_canvas();
-        draw_dot(context, dot, light_color);
+        draw_dot(context, dot, dark_color);
         webgazer.addWatchListener(curr_object.cx, curr_object.cy);
         request_anim_frame(draw_moving_dot);    
     }
