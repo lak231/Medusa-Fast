@@ -51,9 +51,9 @@ var light_color = "#5C832F";
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 1,  // duration of a a singe position sampled
+    duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 1,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -607,7 +607,9 @@ function send_data_to_database(callback){
             store_data.object_y = [];
             store_data.gaze_x = [];
             store_data.gaze_y = [];
-            callback();         
+            if (typeof callback !== "undefined") {
+                callback();         
+            }
         }
     });
 }
@@ -822,7 +824,7 @@ function finish_validation(succeed){
     webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
-        send_data_to_database(create_validation_fail_screen;
+        send_data_to_database(create_validation_fail_screen);
         
     }
     else{
@@ -909,7 +911,7 @@ function finish_simple_paradigm(){
     num_objects_shown = 0;
     store_data.task = "simple";
     store_data.description = "success";
-    send_data_to_database();
+    send_data_to_database(create_survey);
     webgazer.pause();
     // create_survey();
 }
@@ -919,7 +921,7 @@ function finish_simple_paradigm(){
  ************************************/
 function loop_pursuit_paradigm() {
      if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
-        end_pursuit_paradigm();
+        finish_pursuit_paradigm();
     }
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
@@ -980,13 +982,13 @@ function draw_moving_dot(){
     }
 }
 
-function end_pursuit_paradigm(){
-    //TODO: 
+function finish_pursuit_paradigm(){
     objects_array = [];
     num_objects_shown = 0;
-        webgazer.pause();
-    send_data_to_database();
-    create_survey();
+    store_data.task = "pursuit";
+    store_data.description = "success";
+    send_data_to_database(create_survey);
+    webgazer.pause();
 }
 
 /************************************
