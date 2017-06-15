@@ -51,7 +51,7 @@ var light_color = "#5C832F";
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 5,  // duration of a a singe position sampled
+    duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -377,6 +377,12 @@ function reset_store_data(){
      store_data = {
     url: "",   // url of website
     task: "",   // the current performing task
+    canvasWidth: "",    // the width of the canvas
+    canvasHeight: "",   // the height of the canvas
+    caliration_position_array: [],  // the array of all calibration positions
+    validation_position_array: [],  // the array of all validation positions
+    simple_position_array: [],  // the array of all simple positions
+    pursuit_position_array: [], // the array of all pursuit positions
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -597,17 +603,14 @@ function send_data_to_database(callback){
             "info":store_data
         }
     };
-    docClient.put(params, function(err, data) {
-        reset_store_data();
+    docClient.put(params, function(err, data) { 
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
-        } else {
+        } else {    
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));   
-            store_data.object_x = [];
-            store_data.object_y = [];
-            store_data.gaze_x = [];
-            store_data.gaze_y = [];
+            reset_store_data();
             if (typeof callback !== "undefined") {
+                session_time = (new Date).getTime().toString();
                 callback();         
             }
         }
@@ -723,6 +726,7 @@ function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
     store_data.current_task = "calibration";
+    store_data.description = "success";
     webgazer.pause();
     send_data_to_database(create_validation_instruction);
 }
@@ -779,7 +783,6 @@ function create_new_dot_validation(){
     }
     curr_object = objects_array.pop();
     draw_dot(context, curr_object, dark_color);
-    webgazer.addWatchListener(curr_object.x, curr_object.y);
     validation_settings.listener = true;
     time_stamp = new Date().getTime();
     num_objects_shown++;
@@ -819,15 +822,16 @@ function finish_validation(succeed){
     gazeDot.style.display = "none";
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
-    num_objects_shown = 0;
-    store_data.task = "validation";
+    num_objects_shown = 0;   
     webgazer.pause();
     if (succeed === false) {
+         store_data.task = "validation";
         store_data.description = "fail";
         send_data_to_database(create_validation_fail_screen);
         
     }
     else{
+         store_data.task = "validation";
         store_data.description = "success";
         create_validation_success_screen();
         setTimeout( function () {
