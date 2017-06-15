@@ -55,7 +55,7 @@ html, body {
 }
 
 label {
-    border: 1px solid rgba(51, 102, 51, 0.25);
+    border: 1px solid rgba(54, 57, 66, 0.25);
     box-sizing: border-box;
     display: block;
     height: 100%;
@@ -105,4 +105,23 @@ input[type="radio"]:active ~ label {
 input[type="radio"]:checked ~ label {
     opacity: 1;
     border: 1px solid var(--font-color);
+}
+
+select {
+    border: 1px solid rgba(54, 57, 66, 0.25);
+    box-sizing: border-box;
+    width: 100%;
+    display: block;
+    padding: 10px;
+    opacity: .5;
+    transition: all .5s ease-in-out;
+    background: transparent;
+    color: var(--font-color);
+    cursor: pointer;
+}
+
+select:hover, select:focus {
+    opacity: 1;
+    text-shadow: 1px 1px 1px rgba(0,0,0,.25);
+    outline: none;
 }

@@ -53,7 +53,7 @@ var light_color = "#5C832F";
 var calibration_settings = {
     duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 39,  // the number of dots used for calibration
+    num_dots: 13,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -951,7 +951,7 @@ function loop_pursuit_paradigm() {
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
-    draw_dot(context, dot, "red");
+    draw_dot(context, dot, light_color);
     setTimeout( function () {
         time_stamp = null;
         draw_moving_dot();
@@ -980,7 +980,7 @@ function draw_moving_dot(){
         var canvas = document.getElementById("canvas-overlay");
         var context = canvas.getContext("2d");      
         clear_canvas();
-        draw_dot(context, dot, light_color);
+        draw_dot(context, dot, dark_color);
         webgazer.addWatchListener(curr_object.cx, curr_object.cy);
         request_anim_frame(draw_moving_dot);    
     }
@@ -1060,19 +1060,24 @@ function create_survey() {
     survey.id = "survey";
     survey.className += "overlay-div";
     survey.style.zIndex = 12;
-    survey.innerHTML += "<select required>" +
+    survey.innerHTML += "<header class=\"form__header\">" +
+                            "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
+                        "</header>" +
+                        "<form>" +
+                            "<select required>" +
+                                "<option value=\"\" disabled selected>Question 1</option>" +
+                            "</select>" +
+                            "</br>" +
+                            "<select required>" +
+                                "<option value=\"\" disabled selected>Question 1</option>" +
+                            "</select>" +
+                            "</br>" +
+                            "<select required>" +
                             "<option value=\"\" disabled selected>Question 1</option>" +
-                        "</select>" +
-                        "</br>" +
-                        "<select required>" +
-                            "<option value=\"\" disabled selected>Question 1</option>" +
-                        "</select>" +
-                        "</br>" +
-                        "<select required>" +
-                        "<option value=\"\" disabled selected>Question 1</option>" +
-                        "</select>" +
-                        "</br>" +
-                        "<button class=\"form__button\" type=\"button\"> Next > </button>";
+                            "</select>" +
+                            "</br>" +
+                            "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
+                        "</form>";
       document.body.appendChild(survey);
 
 }
