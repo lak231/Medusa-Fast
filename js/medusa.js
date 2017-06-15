@@ -940,7 +940,7 @@ function loop_pursuit_paradigm() {
         y: curr_object.cy,
         r: DEFAULT_DOT_RADIUS
     };
-    draw_dot(context, dot, "red");
+    draw_dot(context, dot, light_color);
     setTimeout( function () {
         time_stamp = null;
         draw_moving_dot();
