@@ -62,7 +62,8 @@ var validation_settings = {
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
     distance: 200,  // radius of acceptable gaze data around validation dot
-    hit_count: 10
+    hit_count: 10,
+    listener: false
 };
 
 /************************************
@@ -762,6 +763,7 @@ function create_new_dot_validation(){
     curr_object = objects_array.pop();
     draw_dot(context, curr_object, "#FFFFFF");
     webgazer.addWatchListener(curr_object.x, curr_object.y);
+    validation_settings.listener = true;
     time_stamp = new Date().getTime();
     num_objects_shown++;
 }
@@ -771,7 +773,7 @@ function create_new_dot_validation(){
  * @param {*} data 
  */
 function validation_event_handler(data) {
-    if (current_task !== "validation") {return}
+    if (validation_settings.listener === false) {return}
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     var dist = distance(data.x,data.y,curr_object.x,curr_object.y);
@@ -795,7 +797,7 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
-    current_task = "instruction";
+    validation_settings.listener = false;
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.display = "none";
     success = (typeof succeed !== "undefined") ? succeed : true;
@@ -804,13 +806,13 @@ function finish_validation(succeed){
     webgazer.pause();
     if (succeed === false) {
         store_data.description = "fail";
-        store_data.task = "validation";
+        store_data.task = current_task;
         send_data_to_database();
         create_validation_fail_screen();
     }
     else{
         store_data.description = "success";
-        store_data.task = "validation";
+        store_data.task = current_task;
         send_data_to_database();
         create_validation_success_screen();
         setTimeout( function () {
