@@ -134,6 +134,27 @@ freeview_paradigm_settings = {
 ************************************/
 
 /**
+ * @data: the data to store
+ * @return: an html link to the download file
+ */
+function download_calibration_data(el) {
+    var data = webgazer.getTrainingData();
+    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    el.setAttribute("href", "data:"+data);
+    el.setAttribute("download", "calibration_data.json");
+  
+}
+
+/**
+ * Function to upload data for calibration
+ */
+function upload_calibration_data(files){
+    var file = files[0];    //only 1 file is needed
+    var calibration_data = JSON.parse(file);
+}
+
+
+/**
  * The only function needed to call when deploy. Simple call this function when you want to start up the program
  */
 function start_medusa(parad){
@@ -469,6 +490,12 @@ function draw_target() {
     context.stroke();
 }
 
+/**
+ * Create the instruction form
+ * @param {*} title 
+ * @param {*} button_label 
+ * @param {*} next_function 
+ */
 function create_instruction(title, button_label, next_function) {
     clear_canvas();
     var instruction = document.createElement("div");
