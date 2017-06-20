@@ -704,7 +704,7 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"function(){document.getElementById('fileinput').click();}\">> Upload previous calibration data </button>";
+                                "<button class=\"form__button\" type=\"button\" onclick=\"function(){document.getElementById('fileinput').click();}\"> Upload previous calibration data </button>";
         a = <input id='fileinput' type='file' hidden/>
         document.body.appendChild(a);
         document.body.appendChild(instruction);
