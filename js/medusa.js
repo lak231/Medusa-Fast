@@ -45,10 +45,6 @@ var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
-var background_color = "#D8CAA8";
-var font_color = "#363942";
-var dark_color = "#284907";
-var light_color = "#5C832F";
 
 /************************************
 * CALIBRATION PARAMETERS

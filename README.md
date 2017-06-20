@@ -15,7 +15,7 @@ This framework strictly uses Amazon DynamoDB for backend for consistency. To set
     - Select **Create pool**. 
 6. Select **Allow**. 
 7. In the **Platform** dropdown selection, choose Javascript. It will show example code for Javascript. In the first code box, under *Get AWS Credentials*, There is a line with 
-**IdentityPoolId**. It will look something like *'us-east-2:6f89cc95-78a6-4d78-9ec1-4eb5fab8b86f'*. Replace the value of var *IdentityPoolId* in gaze_config.js with the id. 
+**IdentityPoolId**. It will look something like *'us-east-2:6f89cc95-78a6-4d78-9ec1-4eb5fab8b86f'*. Replace the value of var *IdentityPoolId* in settings.js with the id. 
 8. Go to **https://console.aws.amazon.com/iam/home#/roles**. Or alternatively, you can go to AWS console and search for **IAM**, go to IAM page, then click on **roles**, which is located on the left dashboard.
 9. In the list of roles on the right, select **Cognito_**"yourappname"****Unauth**_Role**.  *yourappname* is what you entered in the *identity pool name* box above. 
 10. Select **Create role policy**.
@@ -27,7 +27,7 @@ This framework strictly uses Amazon DynamoDB for backend for consistency. To set
     - Select **Add Statement**. 
 13. Select **Next Step**. 
 14. Select **Apply policy**.
-15. It will go back to the policy page. Find the line **Role ARN** at the top of the page, and copy the information there, which looks something like **arn:aws:iam::345518382834:role/Cognito_whateverUnauth_Role**. Replace the value of the var *RoleArn* in gaze_config.js with the id. 
+15. It will go back to the policy page. Find the line **Role ARN** at the top of the page, and copy the information there, which looks something like **arn:aws:iam::345518382834:role/Cognito_whateverUnauth_Role**. Replace the value of the var *RoleArn* in settings.js with the id. 
 16. You are all set!!!
 
 ## Frontend Installation

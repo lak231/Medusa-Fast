@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,900');
 
 :root {
-    --font-color: #363942;
-    --submit-color: #5C832F;
-    --submit-color-darker: #284907;
+    --font-color: #585858;
+    --submit-color: #585858;
+    --submit-color-darker: #f2849e;
 }
 
 html, body {
@@ -55,7 +55,7 @@ html, body {
 }
 
 label {
-    border: 1px solid rgba(54, 57, 66, 0.25);
+    border: 1px solid rgba(88, 88, 88, 0.25);
     box-sizing: border-box;
     display: block;
     height: 100%;
@@ -67,18 +67,18 @@ label {
 }
 
 label:hover, label:focus, label:active {
-    border: 1px solid rgba(54, 57, 66, 0.75);
+    border: 1px solid rgba(88, 88, 88, 0.75);
 }
 
 .form__button {
     height: 40px;
     border: none;
-    color: var(--font-color);
+    color: white;
     background-color: var(--submit-color);
     text-transform: uppercase;
     font-family: 'Source Sans Pro', sans-serif;
     padding: 0 20px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-weight: 900;
     cursor: pointer;
     margin: 30px 0;
@@ -108,7 +108,7 @@ input[type="radio"]:checked ~ label {
 }
 
 select {
-    border: 1px solid rgba(54, 57, 66, 0.25);
+    border: 1px solid rgba(88, 88, 88, 0.25);
     box-sizing: border-box;
     width: 100%;
     display: block;
