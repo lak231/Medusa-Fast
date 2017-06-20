@@ -2,7 +2,8 @@
 /************************************
 * CONSTANTS
 ************************************/
-const TABLE_NAME = "Gazers"; // name of table in database
+const TABLE_NAME = "Gazers"; // name of table in database. Store eye location data
+const WEBGAZER_TABLE_NAME = "Webgazer"; // name of table in database. Store training data for webgazer
 const DEFAULT_DOT_RADIUS = 25;
 const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
 const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
@@ -10,6 +11,7 @@ const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
 /************************************
 * VARIABLES
 ************************************/
+var params = {};
 var gazer_id = "";  // id of user
 var session_time = "";  // time of current webgazer session
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
@@ -29,7 +31,8 @@ var store_data = {
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
 };
-
+var webgazer_training_data = [];
+var webgazer_training_data_index = 0;
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
 var webgazer_time_stamp;    // time stamp. Used specifically to control the sampling rate of webgazer
 var elem_array = [];    // array of elements gazed
@@ -129,26 +132,9 @@ freeview_paradigm_settings = {
 /************************************
 * COMMON FUNCTIONS
 ************************************/
-/**
- * @data: the data to store
- * @return: an html link to the download file
- */
-function download_calibration_data(el) {
-    var data = webgazer.getTrainingData();
-    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    el.setAttribute("href", "data:"+data);
-    el.setAttribute("download", "calibration_data.json");
-  
-}
 
-/**
- * Function to upload data for calibration
- */
-function upload_calibration_data(files){
-    var file = files[0];    //only 1 file is needed
-    var calibration_data = JSON.parse(file);
-    webgazer_training_data = calibration_data;
-}
+
+
 
 /**
  * The only function needed to call when deploy. Simple call this function when you want to start up the program
@@ -203,15 +189,12 @@ function distance(x1,y1,x2,y2){
  * Creates overlay over website
  */
 function create_overlay(){
-    document.styleSheets[0].disabled = true;
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
     canvas.addEventListener("mousedown", canvas_on_click, false);
     // style the newly created canvas
     canvas.style.zIndex   = 10;
     canvas.style.position = "fixed";
-    canvas.style.left = 0;
-    canvas.style.top = 0;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     canvas.style.backgroundColor = background_color;
@@ -489,6 +472,12 @@ function draw_target() {
     context.stroke();
 }
 
+/**
+ * Create the instruction form
+ * @param {*} title 
+ * @param {*} button_label 
+ * @param {*} next_function 
+ */
 function create_instruction(title, button_label, next_function) {
     clear_canvas();
     var instruction = document.createElement("div");
@@ -508,12 +497,18 @@ function create_instruction(title, button_label, next_function) {
 /**
  * Creates unique ID from time + RNG. Loads the ID from local storage if it's already there.
  */
-function createID() {
+function createID(callback) {
     // check if there is a gazer_id already stored
     if (typeof(Storage) !== "undefined") {
         console.log(localStorage.getItem("gazer_id"));
         if (localStorage.getItem("gazer_id") !== null){
             gazer_id = localStorage.getItem("gazer_id");
+            params = {
+                TableName: WEBGAZER_TABLE_NAME,
+                Key:{
+                    "gazer_id": gazer_id
+                }
+            };
         }
         else{
             gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
@@ -523,50 +518,123 @@ function createID() {
     else{
         gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
     }
+    callback();
 }
 
 /**
  * Loads Webgazer. Once loaded, starts the collect data procedure
  */
 function load_webgazer() {
-    $.getScript("../assets/js/webgazer.js")
+    $.getScript("js/webgazer.js")
         .done(function( script, textStatus ) {
-            initiate_webgazer();
+            createID(initiate_webgazer);
         })  
         .fail(function( jqxhr, settings, exception ) {
             $( "div.log" ).text( "Triggered ajaxError handler." );
         });
 }
 
+
+/**
+ * pull webgazer training data from the database
+ * @param {*} err 
+ * @param {*} data 
+ */
+function onScan(err, data) {
+    if (err) {
+        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+    } else {
+        // print all the movies
+        console.log("Scan succeeded.");
+        data.Items.forEach(function(adata) {
+           all_data[i] = adata;
+           i++;
+        });
+        if (typeof data.LastEvaluatedKey != "undefined") {
+            console.log("Scanning for more...");
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            docClient.scan(params, onScan);
+        }
+        else{
+          process_data();
+        }
+    }
+}
+
+function process_data(){
+  all_data = JSON.stringify(all_data);
+  fs.writeFile('data.json', all_data, function (err) {
+  if (err) throw err;
+  console.log('It\'s saved!');
+});
+}
 /**
  * Starts WebGazer and collects data
  */
 function initiate_webgazer(){
     webgazer_time_stamp = 0;
-    webgazer.clearData()
-        .setRegression('ridge') 
-  	    .setTracker('clmtrackr')
-        .setGazeListener(function(data, elapsedTime) {        
-            if (data === null) return;          
-            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
-            else if (current_task === "validation"){
-                validation_event_handler(data);
-            }
-            if (current_task === "calibration"){
-                 webgazer.addWatchListener(curr_object.x, curr_object.y);
-            }
-            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
-            webgazer_time_stamp = elapsedTime;
-            store_data.elapsedTime.push(elapsedTime);
-            store_data.gaze_x.push(data.x);
-            store_data.gaze_y.push(data.y);
-            store_data.object_x.push(curr_object.x);
-            store_data.object_y.push(curr_object.y);
-        })
-    	.begin()
-        .showPredictionPoints(true); /* shows a square every 100 milliseconds where current prediction is */
-    // setInterval(function(){ record_gaze_location() }, 1000);
-    check_webgazer_status();
+    params = {
+          TableName: WEBGAZER_TABLE_NAME,
+                Key:{
+                    "gazer_id": gazer_id,
+                    "index": 1
+                }
+            };
+    docClient.get(params, function(err, data) {
+        if (err) {
+            console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+            webgazer.clearData()
+            .setRegression('ridge') 
+            .setTracker('clmtrackr')
+            .setGazeListener(function(data, elapsedTime) {        
+                if (data === null) return;          
+                if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
+                else if (current_task === "validation"){
+                    validation_event_handler(data);
+                }
+                if (current_task === "calibration"){
+                    webgazer.addWatchListener(curr_object.x, curr_object.y);
+                }
+                if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
+                webgazer_time_stamp = elapsedTime;
+                store_data.elapsedTime.push(elapsedTime);
+                store_data.gaze_x.push(data.x);
+                store_data.gaze_y.push(data.y);
+                store_data.object_x.push(curr_object.x);
+                store_data.object_y.push(curr_object.y);
+            })
+            .begin()
+            .showPredictionPoints(true);  
+            check_webgazer_status();
+        } else {
+            console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+            training_data = data;
+            webgazer.clearData()
+            .setRegression('ridge') 
+            .setTracker('clmtrackr')
+            .setGazeListener(function(data, elapsedTime) {        
+                if (data === null) return;          
+                if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
+                else if (current_task === "validation"){
+                    validation_event_handler(data);
+                }
+                if (current_task === "calibration"){
+                    webgazer.addWatchListener(curr_object.x, curr_object.y);
+                }
+                if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
+                webgazer_time_stamp = elapsedTime;
+                store_data.elapsedTime.push(elapsedTime);
+                store_data.gaze_x.push(data.x);
+                store_data.gaze_y.push(data.y);
+                store_data.object_x.push(curr_object.x);
+                store_data.object_y.push(curr_object.y);
+            })
+            .loadTrainingData(training_data)
+            .begin()
+            .showPredictionPoints(true); 
+            check_webgazer_status();
+        }
+    });
 }
 
 /**
@@ -575,9 +643,9 @@ function initiate_webgazer(){
 function check_webgazer_status() {
     if (webgazer.isReady()) {
         console.log('webgazer is ready.');
-        // Create database
-        createID();
+        // Create database     
         create_calibration_instruction(); 
+        // create_webgazer_training_table();
         create_gazer_database_table();
     } else {
         setTimeout(check_webgazer_status, 100);
@@ -599,8 +667,8 @@ function create_gazer_database_table() {
             { AttributeName: "time_collected", AttributeType: "S" }
         ],
         ProvisionedThroughput: {       
-            ReadCapacityUnits: 5,
-            WriteCapacityUnits: 5
+            ReadCapacityUnits: 20,
+            WriteCapacityUnits: 20
         }
     };
     dynamodb.createTable(params, function(err, data) {
@@ -611,6 +679,36 @@ function create_gazer_database_table() {
         }
     });
 }
+
+
+/**
+ * Creates data table in the database if it hasn't already existed
+ */
+function create_webgazer_training_table() {
+    var params = {
+        TableName : WEBGAZER_TABLE_NAME,
+        KeySchema: [
+            { AttributeName: "gazer_id", KeyType: "HASH"},
+            { AttributeName: "index", KeyType: "RANGE" }  //Sort key
+        ],
+        AttributeDefinitions: [       
+            { AttributeName: "gazer_id", AttributeType: "S" },              
+            { AttributeName: "index", AttributeType: "N" }
+        ],
+        ProvisionedThroughput: {       
+            ReadCapacityUnits: 20,
+            WriteCapacityUnits: 20
+        }
+    };
+    dynamodb.createTable(params, function(err, data) {
+        if (err) {
+            console.log("Unable to create table: " + "\n" + JSON.stringify(err, undefined, 2));
+        } else {
+            console.log("Created table: " + "\n" + JSON.stringify(data, undefined, 2));
+        }
+    });
+}
+
 
 /**
  * Sends data to database. necessary data are collected before sending. 
@@ -649,6 +747,42 @@ function send_data_to_database(callback){
     });
 }
 
+/**
+ * Sends data to database. necessary data are collected before sending. 
+ * Some data are set along the calculation.
+ */
+function send_webgazer_to_database(){
+    webgazer_training_data = webgazer.getTrainingData(); 
+    webgazer_training_data = webgazer_training_data.slice(webgazer_training_data_index,webgazer_training_data.length);
+    console.log(webgazer_training_data);
+    data = [];
+    if (webgazer_training_data.length <= 10) {
+        setTimeout(send_data_to_database,200);
+        return;
+    }
+    for (var i = 0; i <= 10; i ++){
+        t = webgazer_training_data.pop();
+        data.push(t);   
+        webgazer_training_data_index += 1; 
+    }
+    var params = {
+        TableName :WEBGAZER_TABLE_NAME,
+        Item: {
+            "gazer_id": gazer_id,
+            "index": webgazer_training_data_index,
+            "info":data
+        }
+    };
+    docClient.put(params, function(err, data) { 
+        if (err) {
+            console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
+        } else {    
+            console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2)); 
+            setTimeout(send_data_to_database,200);
+            return;
+        }
+    });   
+}
 /************************************
 * CALIBRATION
 ************************************/
@@ -703,10 +837,11 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"upload_calibration_data()\">> Upload previous calibration data </button>";
-        document.body.appendChild(instruction);
+                                "<button class=\"form__button\" type=\"button\"> Upload previous calibration data </button>";
+         document.body.appendChild(instruction);
         show_video_feed();
     }
+ 
 }
 
 /**
@@ -727,12 +862,13 @@ function start_calibration() {
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
     create_new_dot_calibration();
+    // send_webgazer_to_database();
 }
 
 /**
  * Create a new dot for calibration
  */
-function create_new_dot_calibration(){
+function create_new_dot_calibration(){   
     if (num_objects_shown >= calibration_settings.num_dots) {
         finish_calibration();
         return;
@@ -758,9 +894,10 @@ function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
     store_data.current_task = "calibration";
-    store_data.description = "success";
-    webgazer.pause();
+    store_data.description = "success";   
+    webgazer.pause();  
     send_data_to_database(create_validation_instruction);
+  
 }
 
 /************************************
@@ -888,26 +1025,11 @@ function create_validation_success_screen() {
     instruction.id = "instruction";
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
-    var task_description = "";
-    switch (paradigm) {
-        case "simple":
-            task_description = "Look at the cross then look at the dots.";
-            break;
-        case "pursuit":
-            task_description = "Follow the dots when they change color.";
-            break;
-        case "freeview":
-            task_description = "Look at the cross then look at the dots.";
-            break;
-        case "heatmap":
-            task_description = "Look at the cross then look at the dots.";
-        default:
-            start_heatmap_paradigm();
-    }
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">" + task_description + "</h2>" +
+        "<h2 class=\"form__title\">Task...</h2>" +
+
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue > </button>";
     document.body.appendChild(instruction);
 }
 
@@ -1122,7 +1244,6 @@ function create_survey() {
                             "</select>" +
                             "</br>" +
                             "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
-                            "<button class=\"form__button\" type=\"button\"> Download calibration data and bye </button>" +
                         "</form>";
       document.body.appendChild(survey);
 
