@@ -683,7 +683,7 @@ function create_consent_form() {
                                     "</p>" +
                                 "</fieldset>" +
 
-                                "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer() \">Next ></button>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer() \">Next</button>" +
                             "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
