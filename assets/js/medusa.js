@@ -703,7 +703,7 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"upload_calibration_data()\">> Upload previous calibration data </button>";
+                                "<button class=\"form__button\" type=\"button\" onclick=\"upload_calibration_data()\"> Upload previous calibration data </button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
