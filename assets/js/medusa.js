@@ -529,7 +529,7 @@ function createID() {
  * Loads Webgazer. Once loaded, starts the collect data procedure
  */
 function load_webgazer() {
-    $.getScript("assets/js/webgazer.js")
+    $.getScript("../assets/js/webgazer.js")
         .done(function( script, textStatus ) {
             initiate_webgazer();
         })  
@@ -891,9 +891,24 @@ function create_validation_success_screen() {
     instruction.id = "instruction";
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
+    var task_description = "";
+    switch (paradigm) {
+        case "simple":
+            task_description = "Look at the cross then look at the dots.";
+            break;
+        case "pursuit":
+            task_description = "Follow the dots when they change color.";
+            break;
+        case "freeview":
+            task_description = "Look at the cross then look at the dots.";
+            break;
+        case "heatmap":
+            task_description = "Look at the cross then look at the dots.";
+        default:
+            start_heatmap_paradigm();
+    }
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">Task...</h2>" +
-
+        "<h2 class=\"form__title\">" + task_description + "</h2>" +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue </button>";
     document.body.appendChild(instruction);
