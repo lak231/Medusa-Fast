@@ -129,6 +129,26 @@ freeview_paradigm_settings = {
 /************************************
 * COMMON FUNCTIONS
 ************************************/
+/**
+ * @data: the data to store
+ * @return: an html link to the download file
+ */
+function download_calibration_data(el) {
+    var data = webgazer.getTrainingData();
+    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    el.setAttribute("href", "data:"+data);
+    el.setAttribute("download", "calibration_data.json");
+  
+}
+
+/**
+ * Function to upload data for calibration
+ */
+function upload_calibration_data(files){
+    var file = files[0];    //only 1 file is needed
+    var calibration_data = JSON.parse(file);
+    webgazer_training_data = calibration_data;
+}
 
 /**
  * The only function needed to call when deploy. Simple call this function when you want to start up the program
@@ -683,11 +703,10 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<button class=\"form__button\" type=\"button\"> Upload previous calibration data </button>";
+                                "<button class=\"form__button\" type=\"button\" onclick=\"upload_calibration_data()\">> Upload previous calibration data </button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
- 
 }
 
 /**

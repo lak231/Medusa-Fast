@@ -133,25 +133,7 @@ freeview_paradigm_settings = {
 * COMMON FUNCTIONS
 ************************************/
 
-/**
- * @data: the data to store
- * @return: an html link to the download file
- */
-function download_calibration_data(el) {
-    var data = webgazer.getTrainingData();
-    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    el.setAttribute("href", "data:"+data);
-    el.setAttribute("download", "calibration_data.json");
-  
-}
 
-/**
- * Function to upload data for calibration
- */
-function upload_calibration_data(files){
-    var file = files[0];    //only 1 file is needed
-    var calibration_data = JSON.parse(file);
-}
 
 
 /**
