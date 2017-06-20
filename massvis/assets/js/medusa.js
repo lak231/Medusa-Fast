@@ -190,6 +190,8 @@ function create_overlay(){
     // style the newly created canvas
     canvas.style.zIndex   = 10;
     canvas.style.position = "fixed";
+    canvas.style.left = 0;
+    canvas.style.top = 0;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     canvas.style.backgroundColor = background_color;
@@ -680,7 +682,8 @@ function create_calibration_instruction() {
         instruction.innerHTML += "<header class=\"form__header\">" +
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>";
+                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
+                                "<button class=\"form__button\" type=\"button\"> Upload previous calibration data </button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
@@ -1085,6 +1088,7 @@ function create_survey() {
                             "</select>" +
                             "</br>" +
                             "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
+                            "<button class=\"form__button\" type=\"button\"> Download calibration data and bye </button>" +
                         "</form>";
       document.body.appendChild(survey);
 
