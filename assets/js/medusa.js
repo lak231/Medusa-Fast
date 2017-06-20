@@ -682,7 +682,7 @@ function create_calibration_instruction() {
         instruction.innerHTML += "<header class=\"form__header\">" +
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
                                 "<button class=\"form__button\" type=\"button\"> Upload previous calibration data </button>";
         document.body.appendChild(instruction);
         show_video_feed();
@@ -873,7 +873,7 @@ function create_validation_success_screen() {
         "<h2 class=\"form__title\">Task...</h2>" +
 
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue > </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue </button>";
     document.body.appendChild(instruction);
 }
 
