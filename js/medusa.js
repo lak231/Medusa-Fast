@@ -56,7 +56,7 @@ var light_color = "#5C832F";
 var calibration_settings = {
     duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 6,  // the number of dots used for calibration
+    num_dots: 1,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -69,8 +69,8 @@ var validation_settings = {
     num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 200,  // radius of acceptable gaze data around validation dot
-    hit_count: 20,
+    distance: 2000,  // radius of acceptable gaze data around validation dot
+    hit_count: 2,
     listener: false
 };
 
@@ -471,6 +471,19 @@ function draw_target() {
     context.moveTo(midX, midY - 15);
     context.lineTo(midX, midY + 15);
     context.stroke();
+}
+
+function create_instruction(title, button_label, next_function) {
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">" + title + "</h2>" +
+        "</header>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"" + next_function + "\">" + button_label + "</button>";
+    document.body.appendChild(instruction);
 }
 
 /************************************
@@ -891,12 +904,10 @@ function create_validation_instruction() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">Validation...</h2>" +
-        "</header>";
+        "<h2 class=\"form__title\"> Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready. </h2>" +
+        "</header>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra > </button>";
     document.body.appendChild(instruction);
-    setTimeout(function() {
-        start_validation();
-    }, screen_timeout);
 }
 
 /**
@@ -984,23 +995,6 @@ function finish_validation(succeed){
          store_data.task = "validation";
         store_data.description = "success";
         create_validation_success_screen();
-        setTimeout( function () {
-            switch (paradigm){
-                case "simple":
-                    send_data_to_database(loop_simple_paradigm);
-                    break;
-                case "pursuit":
-                    send_data_to_database(loop_pursuit_paradigm);
-                    break;
-                case "freeview":
-                    send_data_to_database(create_validation_fail_screen());
-                    break;
-                case "heatmap":
-                    send_data_to_database(create_validation_fail_screen());
-                default:
-                    start_heatmap_paradigm();
-            }
-        }, screen_timeout);
     }
 }
 
@@ -1011,7 +1005,7 @@ function create_validation_fail_screen() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">Validation failed. </br> Restarting calibration.</h2>" +
+        "<h2 class=\"form__title\"> Your magic is weak. </br> Returning to training. </h2>" +
         "</header>";
     document.body.appendChild(instruction);
     setTimeout(function() {
@@ -1027,13 +1021,30 @@ function create_validation_success_screen() {
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
         "<h2 class=\"form__title\">Task...</h2>" +
-        "</header>";
+
+        "</header>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue > </button>";
     document.body.appendChild(instruction);
-    setTimeout(function() {
-        delete_elem("instruction");
-    }, screen_timeout);
 }
 
+function start_task() {
+    delete_elem("instruction");
+    switch (paradigm) {
+        case "simple":
+            send_data_to_database(loop_simple_paradigm);
+            break;
+        case "pursuit":
+            send_data_to_database(loop_pursuit_paradigm);
+            break;
+        case "freeview":
+            send_data_to_database(create_validation_fail_screen());
+            break;
+        case "heatmap":
+            send_data_to_database(create_validation_fail_screen());
+        default:
+            start_heatmap_paradigm();
+    }
+}
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
