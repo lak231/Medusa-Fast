@@ -702,7 +702,7 @@ function create_calibration_instruction() {
         instruction.innerHTML += "<header class=\"form__header\">" +
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"upload_calibration_data()\"> Upload previous calibration data </button>";
         document.body.appendChild(instruction);
         show_video_feed();
@@ -775,7 +775,7 @@ function create_validation_instruction() {
     instruction.innerHTML += "<header class=\"form__header\">" +
         "<h2 class=\"form__title\"> Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready. </h2>" +
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra > </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra </button>";
     document.body.appendChild(instruction);
 }
 
