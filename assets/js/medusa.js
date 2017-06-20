@@ -892,7 +892,7 @@ function create_validation_success_screen() {
         "<h2 class=\"form__title\">Task...</h2>" +
 
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue > </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue </button>";
     document.body.appendChild(instruction);
 }
 
