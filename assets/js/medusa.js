@@ -47,7 +47,7 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 3,  // duration of a a singe position sampled
+    duration: 1,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 1,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -59,11 +59,11 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 10,  // the number of dots used for validation
+    num_dots: 1,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
     distance: 2000,  // radius of acceptable gaze data around validation dot
-    hit_count: 2,
+    hit_count: 1,
     listener: false
 };
 
@@ -84,9 +84,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 5,
-    target_show_time: 1500, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 3000    // amount of time dot will appear on screen with each trial, in ms
+    num_trials: 1,
+    target_show_time: 1, // amount of time 'target' will appear on screen with each trial, in ms
+    dot_show_time: 1    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -138,16 +138,21 @@ function download_calibration_data(el) {
     var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     el.setAttribute("href", "data:"+data);
     el.setAttribute("download", "calibration_data.json");
-  
 }
 
 /**
  * Function to upload data for calibration
  */
 function upload_calibration_data(files){
-    var file = files[0];    //only 1 file is needed
-    var calibration_data = JSON.parse(file);
-    webgazer_training_data = calibration_data;
+    try {
+        var file = files[0];    //only 1 file is needed
+        var calibration_data = JSON.parse(file);
+        webgazer_training_data = calibration_data;
+    }
+    catch(err) {
+        console.log("error");
+        webgazer_training_data = [];
+    } 
 }
 
 /**
@@ -693,7 +698,6 @@ function create_consent_form() {
  * Shows calibration instruction
  */
 function create_calibration_instruction() {
-    
      if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
         delete_elem("consent_form");
@@ -704,8 +708,11 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"function(){document.getElementById('fileinput').click();}\"> Upload previous calibration data </button>";
-        a = <input id='fileinput' type='file' hidden/>
+                                "<input class=\"form__button\" type=\"file\" onchange=\"upload_calibration_data(this.files)\"> Upload previous calibration data </button>";
+        var a = document.createElement("input");
+        a.id = "fileinput";
+        a.name = "files";
+        a.style.display = "none";
         document.body.appendChild(a);
         document.body.appendChild(instruction);
         show_video_feed();
@@ -1125,7 +1132,7 @@ function create_survey() {
                             "</select>" +
                             "</br>" +
                             "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
-                            "<button class=\"form__button\" type=\"button\"> Download calibration data and bye </button>" +
+                            "<button class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data and bye </button>" +
                         "</form>";
       document.body.appendChild(survey);
 
