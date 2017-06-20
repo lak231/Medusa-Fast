@@ -48,6 +48,15 @@ names(calibration_positions) <- c("x","y")
 names(simple_positions) <- c("x","y")
 names(pursuit_positions) <- c("x","y")
 
+remove_outliers <- function(x, na.rm = TRUE, ...) {
+  qnt <- quantile(x, probs=c(.25, .75), na.rm = na.rm, ...)
+  H <- 1.5 * IQR(x, na.rm = na.rm)
+  y <- x
+  y[x < (qnt[1] - H)] <- NA
+  y[x > (qnt[2] + H)] <- NA
+  y
+}
+
 ```
 
 Clean the data, and add some necessary variables.
@@ -75,12 +84,16 @@ gaze_df <- gaze_df[gaze_df$description == "success",]
 Summary of data of calibration process, in percentage.
 ```{r}
 summary(gaze_df_cal$dist_per)
-ggplot(gaze_df_cal,aes(dist_per)) + geom_histogram()
+boxplot(remove_outliers(gaze_df_cal$dist_per), outlier = FALSE)
 ```
 
 Distance overtime in percentage, to see whether the data gets worse or gets better overtime. 
 ```{r}
-ggplot(gaze_df_cal,aes(elapsed_time,dist_per)) + geom_point(shape  = 1) + geom_smooth()
+qnt <- quantile(gaze_df_cal$dist_per, probs=c(.25, .75), na.rm = TRUE)
+  H <- 1.5 * IQR(gaze_df_cal$dist_per, na.rm = TRUE)
+  lq <- qnt[1] - H
+  hq <- (qnt[2] + H)
+ggplot(gaze_df_cal[hq > gaze_df_cal$dist_per & gaze_df_cal$dist_per> lq,],aes(elapsed_time,dist_per)) + geom_point(shape  = 1) + geom_smooth()
 ```
 
 
@@ -109,16 +122,18 @@ ggplot(gaze_df_cal,aes(x=gaze_x_per,y=gaze_y_per)) +
 Summary of data of validation process, in percentage.
 ```{r}
 summary(gaze_df_val$dist_per)
-ggplot(gaze_df_val,aes(dist_per)) + geom_histogram()
+boxplot(remove_outliers(gaze_df_val$dist_per), outlier = FALSE)
 ```
 
 Distance overtime in percentage, to see whether the data gets worse or gets better overtime. 
 ```{r}
-ggplot(gaze_df_val,aes(elapsed_time,dist_per)) + geom_point(shape  = 1) + geom_smooth()
+qnt <- quantile(gaze_df_val$dist_per, probs=c(.25, .75), na.rm = TRUE)
+  H <- 1.5 * IQR(gaze_df_val$dist_per, na.rm = TRUE)
+  lq <- qnt[1] - H
+  hq <- (qnt[2] + H)
+ggplot(gaze_df_val[hq > gaze_df_val$dist_per & gaze_df_val$dist_per> lq,],aes(elapsed_time,dist_per)) + geom_point(shape  = 1) + geom_smooth()
 ```
-
-
-Heatmap of the calibration process.
+Heatmap of the validation process.
 
 ```{r}
 #graph - heatmap
@@ -137,23 +152,11 @@ ggplot(gaze_df_val,aes(x=gaze_x_per,y=gaze_y_per)) +
 ```
 
 
-Summary of data of calibration process, in percentage.
-```{r}
-summary(gaze_df_val$dist_per)
-ggplot(gaze_df_val,aes(dist_per)) + geom_histogram()
-```
-
-Distance overtime in percentage, to see whether the data gets worse or gets better overtime. 
-```{r}
-ggplot(gaze_df_val,aes(elapsed_time,dist_per)) + geom_point(shape  = 1) + geom_smooth()
-```
-
-
-Heatmap of the calibration process.
+Heatmap of the simple process.
 
 ```{r}
 #graph - heatmap
-ggplot(gaze_df_cal,aes(x=gaze_x_per,y=gaze_y_per)) +
+ggplot(gaze_df,aes(x=gaze_x_per,y=gaze_y_per)) +
   theme(strip.text.x = element_text(size = 16)) + 
   stat_density2d(aes(fill=..level.., alpha = ..level..), geom="polygon", bins = 5, size = 0.01) +
   scale_fill_gradient(low="green", high="red") +
@@ -161,7 +164,7 @@ ggplot(gaze_df_cal,aes(x=gaze_x_per,y=gaze_y_per)) +
   scale_x_continuous(limits = c(0, 1), breaks = c(0.2, 0.5, 0.8)) +
   scale_y_reverse( lim=c(1,0), breaks = c(0.2, 0.5, 0.8)) + 
   scale_alpha_continuous(range=c(0.1,0.8)) +
-  geom_point(data = calibration_positions, aes(x = x, y = y), shape = 3, size = 3) +
+  geom_point(data = simple_positions, aes(x = x, y = y), shape = 3, size = 3) +
   guides(fill = FALSE, group = FALSE, colour=FALSE, alpha = FALSE) +
   labs("y" = "position of target in % of screen height", "x" = "position of target in % of screen width")
 

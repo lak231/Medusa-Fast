@@ -21,7 +21,6 @@
  */
 var objectdetect = (function() {
     "use strict";
-
     var /**
          * Converts from a 4-channel RGBA source image to a 1-channel grayscale
          * image. Corresponds to the CV_RGB2GRAY OpenCV color space conversion.
@@ -10320,8 +10319,6 @@ var mosseFilterResponses = function() {
      * starts all state related to webgazer -> dataLoop, video collection, click listener
      */
     webgazer.begin = function() {
-        loadGlobalData();
-
         if (debugVideoLoc) {
             init(debugVideoLoc);
             return webgazer;
@@ -10398,6 +10395,22 @@ var mosseFilterResponses = function() {
         }
 
         //setGlobalData();
+        return webgazer;
+    }
+
+/**
+ * save webgazer data
+ */
+    webgazer.getTrainingData = function(){
+       storage = regs[0].getData() || data
+        return (storage);
+    }
+
+    webgazer.loadTrainingData = function(storage){
+        storage = (jQuery.isEmptyObject(storage)) ? defaults : storage;
+        for (var reg in regs) {
+            regs[reg].setData(storage);
+        }
         return webgazer;
     }
 
@@ -10594,7 +10607,6 @@ var mosseFilterResponses = function() {
      */
     webgazer.addWatchListener = function(x, y) {
         addWatchListener(x, y);
-        console.log("watching ",x,y);
         return webgazer;
     }
 
