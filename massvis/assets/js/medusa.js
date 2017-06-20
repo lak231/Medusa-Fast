@@ -510,7 +510,7 @@ function createID() {
  * Loads Webgazer. Once loaded, starts the collect data procedure
  */
 function load_webgazer() {
-    $.getScript("js/webgazer.js")
+    $.getScript("assets/js/webgazer.js")
         .done(function( script, textStatus ) {
             initiate_webgazer();
         })  
