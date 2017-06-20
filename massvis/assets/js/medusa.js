@@ -42,10 +42,6 @@ var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
-var background_color = "#D8CAA8";
-var font_color = "#363942";
-var dark_color = "#284907";
-var light_color = "#5C832F";
 
 /************************************
 * CALIBRATION PARAMETERS
@@ -187,6 +183,7 @@ function distance(x1,y1,x2,y2){
  * Creates overlay over website
  */
 function create_overlay(){
+    document.styleSheets[0].disabled = true;
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
     canvas.addEventListener("mousedown", canvas_on_click, false);
