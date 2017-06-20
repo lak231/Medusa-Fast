@@ -29,7 +29,7 @@ var store_data = {
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
 };
-
+var webgazer_training_data;
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
 var webgazer_time_stamp;    // time stamp. Used specifically to control the sampling rate of webgazer
 var elem_array = [];    // array of elements gazed
@@ -143,16 +143,15 @@ function download_calibration_data(el) {
 /**
  * Function to upload data for calibration
  */
-function upload_calibration_data(files){
-    try {
-        var file = files[0];    //only 1 file is needed
-        var calibration_data = JSON.parse(file);
-        webgazer_training_data = calibration_data;
-    }
-    catch(err) {
-        console.log("error");
-        webgazer_training_data = [];
-    } 
+function upload_calibration_data(data){
+    var input = event.target;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var data = reader.result;
+      webgazer_training_data = JSON.parse(data);
+      console.log(webgazer_training_data);
+    };
+    reader.readAsText(input.files[0]);
 }
 
 /**
@@ -708,7 +707,7 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<input class=\"form__button\" type=\"file\" onchange=\"upload_calibration_data(this.files)\"> Upload previous calibration data </button>";
+                                "<input class=\"form__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> Upload previous calibration data </button>";
         var a = document.createElement("input");
         a.id = "fileinput";
         a.name = "files";
@@ -1129,10 +1128,10 @@ function create_survey() {
                             "</br>" +
                             "<select required>" +
                             "<option value=\"\" disabled selected>Question 1</option>" +
-                            "</select>" +
+                            "</select>" +   
                             "</br>" +
                             "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
-                            "<button class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data and bye </button>" +
+                            "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data and bye </a>" +
                         "</form>";
       document.body.appendChild(survey);
 
