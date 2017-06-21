@@ -112,9 +112,9 @@ pursuit_paradigm_settings = {
         {x: "80%", y: "80%", tx: "80%", ty: "20%"},
         {x: "80%", y: "80%", tx: "20%", ty: "80%"}
     ],
-    num_trials: 5,
-    dot_show_time: 2000,
-    target_show_time: 1500
+    num_trials: 1,
+    dot_show_time: 1,
+    target_show_time: 1
 };
 
 
@@ -785,9 +785,9 @@ function create_calibration_break_form(){
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;  
     instruction.innerHTML += "<header class=\"form__header\">" +
-                                "<h2 class=\"form__title\"> Break time!!!!  </br></h2>" + '<p class=\"information\">' + 
+                                "<h2 class=\"form__title\"> Break time!!!!  </br></h2>" +
                             "</header>" +
-                            "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>" +
+                            "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>";
     document.body.appendChild(instruction);
     show_video_feed();
 }
@@ -821,12 +821,13 @@ function start_calibration() {
  * Create a new dot for calibration
  */
 function create_new_dot_calibration(){
-    hide_face_tracker();
-    delete_elem("instruction");    
-    if (num_objects_shown >= calibration_settings.num_dots / 3) {
+     num_objects_shown++;   
+    if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
         create_calibration_break_form();
         return;
     }
+    hide_face_tracker();
+    delete_elem("instruction");       
     if (num_objects_shown >= calibration_settings.num_dots) {
         finish_calibration();
         return;
@@ -841,8 +842,7 @@ function create_new_dot_calibration(){
     curr_object = objects_array.pop();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
-    draw_dot(context, curr_object, dark_color);
-    num_objects_shown++;
+    draw_dot(context, curr_object, dark_color);   
     webgazer.resume();
    
 }
@@ -1159,7 +1159,7 @@ function finish_pursuit_paradigm(){
     store_data.task = "pursuit";
     store_data.description = "success";
     paradigm = "massvis";
-    send_data_to_database(loop_massvis_paradigm);
+    send_data_to_database(create_survey);
     webgazer.pause();
 }
 
