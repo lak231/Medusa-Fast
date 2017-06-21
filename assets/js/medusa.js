@@ -29,6 +29,8 @@ var store_data = {
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
 };
+var collect_data = true;
+var face_tracker;
 var iframe_link = "https://www.testable.org/t/9990d06c9";
 var webgazer_training_data;
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
@@ -571,16 +573,18 @@ function initiate_webgazer(){
     webgazer.clearData()
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
-        .setGazeListener(function(data, elapsedTime) {      
+        .setGazeListener(function(data, elapsedTime) {            
             if (data === null) return;          
             if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
-            if (curr_object === undefined || curr_object === null) return;
-            else if (current_task === "validation"){              
-                validation_event_handler(data);
-            }
+            if (curr_object === undefined || curr_object === null) return;           
+            if (collect_data === false) return;          
             if (current_task === "calibration"){
                 webgazer.addWatchListener(curr_object.x, curr_object.y);               
-            }
+            }       
+            else if (current_task === "validation"){              
+                validation_event_handler(data);
+            }    
+            console.log(data);
             if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
@@ -774,11 +778,11 @@ function create_calibration_instruction() {
                                 "<span>Upload previous calibration data</span>" +
                             "</label>";
     document.body.appendChild(instruction);
-    show_video_feed();
 }
 
 function create_calibration_break_form(){
-    webgazer.pause();
+    show_video_feed();
+    collect_data = false;
     clear_canvas();
     var instruction = document.createElement("div");
     instruction.id = "instruction";
@@ -789,7 +793,6 @@ function create_calibration_break_form(){
                             "</header>" +
                             "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>";
     document.body.appendChild(instruction);
-    show_video_feed();
 }
 /**
  * Start the calibration
@@ -799,6 +802,7 @@ function start_calibration() {
     gazeDot.style.zIndex = 14;
     gazeDot.style.display = "block";
     hide_face_tracker();
+    collect_data = true;
     webgazer.resume();
     session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
@@ -821,6 +825,7 @@ function start_calibration() {
  * Create a new dot for calibration
  */
 function create_new_dot_calibration(){
+    collect_data = true;
      num_objects_shown++;   
     if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
         create_calibration_break_form();
@@ -843,7 +848,6 @@ function create_new_dot_calibration(){
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
     draw_dot(context, curr_object, dark_color);   
-    webgazer.resume();
    
 }
 
@@ -856,6 +860,7 @@ function finish_calibration(){
     store_data.task = "calibration";
     store_data.description = "success";
     webgazer.pause();
+    collect_data = false;
     reset_store_data(create_validation_instruction);   
 }
 
@@ -886,6 +891,7 @@ function start_validation(){
     var context = canvas.getContext("2d");
     current_task = 'validation';
     store_data.description = validation_settings;
+    collect_data = true;
     webgazer.resume();
     create_new_dot_validation();
     var gazeDot = document.getElementById("gazeDot");
@@ -951,6 +957,7 @@ function finish_validation(succeed){
     objects_array = [];
     num_objects_shown = 0;   
     webgazer.pause();
+    collect_data = false;
     if (succeed === false) {
         store_data.task = "validation";
         store_data.description = "fail";
@@ -1040,6 +1047,7 @@ function start_task() {
 function loop_iframe_paradigm(){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    collect_data = true;
     webgazer.resume();
     clear_canvas();
     current_task = "iframe";
@@ -1051,6 +1059,7 @@ function finish_iframe_paradigm(){
     store_data.task = iframe_link;
     store_data.description = "success";
     webgazer.pause();
+    collect_data = false;
     send_data_to_database(start_task);
 }
 
@@ -1062,6 +1071,7 @@ function loop_simple_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    collect_data = true;
     webgazer.resume();
     clear_canvas();
     current_task = 'simple_paradigm';
@@ -1087,6 +1097,7 @@ function finish_simple_paradigm(){
     store_data.description = "success";
     paradigm = "pursuit";
     webgazer.pause();
+    collect_data = false;
     send_data_to_database(start_task);
 }
 /************************************
@@ -1099,6 +1110,7 @@ function loop_pursuit_paradigm() {
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    collect_data = true;
     webgazer.resume();
     clear_canvas();
     current_task = 'pursuit_paradigm';
@@ -1162,6 +1174,7 @@ function finish_pursuit_paradigm(){
     paradigm = "massvis";
     send_data_to_database(create_survey);
     webgazer.pause();
+    collect_data = false;
 }
 
 /************************************
@@ -1170,6 +1183,7 @@ function finish_pursuit_paradigm(){
 function loop_massvis_paradigm() {
     var canvas = document.getElementById("canvas-overlay");
     current_task = "freeview_paradigm";
+    collect_data = true;
     webgazer.resume();
     clear_canvas();
     if (objects_array.length === 0) {
@@ -1278,18 +1292,13 @@ function show_video_feed () {
     overlay.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
     overlay.style.margin = '0px';
     overlay.style.zIndex = 14;
-
     document.body.appendChild(overlay);
-
-    draw_face_tracker();
+    face_tracker = requestAnimFrame(draw_face_tracker);
 }
 
 
 function draw_face_tracker() {
-    if (current_task !== "instruction") {
-        return;
-    }
-    requestAnimFrame(draw_face_tracker);
+    face_tracker = requestAnimFrame(draw_face_tracker);
     var overlay = document.getElementById('face_tracker');
     var cl = webgazer.getTracker().clm;
     overlay.getContext('2d').clearRect(0,0, cam_width, cam_height);
@@ -1302,4 +1311,5 @@ function hide_face_tracker() {
     delete_elem("face_tracker");
     var video = document.getElementById('webgazerVideoFeed');
     video.style.display = "None";
+    cancelAnimationFrame(face_tracker);
 }
