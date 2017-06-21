@@ -29,6 +29,7 @@ var store_data = {
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
 };
+var iframe_link = "https://www.testable.org/t/9990d06c9"
 var webgazer_training_data;
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
 var webgazer_time_stamp;    // time stamp. Used specifically to control the sampling rate of webgazer
@@ -116,15 +117,6 @@ pursuit_paradigm_settings = {
     target_show_time: 1500
 };
 
-/************************************
-* FREEVIEW_PARADIGM PARAMETERS
-************************************/
-freeview_paradigm_settings = {
-    num_trials: 5,
-    image_show_time: 2000,
-    target_show_time: 1500,
-    image_array: [] //url array for images
-};
 
 /************************************
 * COMMON FUNCTIONS
@@ -141,9 +133,25 @@ function download_calibration_data(el) {
 }
 
 /**
- * Function to upload data for calibration
+ * Save webgazer data to csv. Used specifically for iframe cases
  */
-function upload_calibration_data(data){
+function save_to_csv(){
+    var data = [];
+    data.push(store_data.elapsedTime, store_data.gaze_x,store_data.gaze_y,store_data.object_x,store_data.object_y);
+    var csv_content = "data:text/csv;charset=utf-8,";
+    data.forEach(function(infoArray, index){
+        dataString = infoArray.join(",");
+        csv_content += index < data.length ? dataString+ "\n" : dataString;
+    });
+    el = encodeURI(csv_content);
+    el.setAttribute("href", "data:"+data);
+    el.setAttribute("download", iframe_link + ".csv");
+}
+
+/**
+ * Function to upload event for calibration
+ */
+function upload_calibration_data(event){
     var input = event.target;
     var reader = new FileReader();
     reader.onload = function(){
@@ -648,14 +656,30 @@ function send_data_to_database(callback){
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {    
-            console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));   
-            reset_store_data();
+            console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));              
             if (typeof callback !== "undefined") {
                 session_time = (new Date).getTime().toString();
-                callback();         
+                 reset_store_data(callback);         
             }
         }
     });
+}
+
+
+/************************************
+* CALIBRATION
+************************************/
+/**
+ * iframe containment. Create an iframe to contain another website
+ */
+function create_iframe_testable(){
+    var iframe = document.createElement("iframe");
+    iframe.source = iframe_link;
+    iframe.id = "iframe";
+    var innerDoc = (iframe.contentDocument) ? iframe.contentDocument : iframe.contentWindow.document;
+    
+    document.appendChild(iframe);
+    //TODO: format iframe here
 }
 
 /************************************
@@ -777,10 +801,10 @@ function create_new_dot_calibration(){
 function finish_calibration(){
     objects_array = [];
     num_objects_shown = 0;
-    store_data.current_task = "calibration";
+    store_data.task = "calibration";
     store_data.description = "success";
     webgazer.pause();
-    reset_store_data( create_validation_instruction());   
+    reset_store_data(create_validation_instruction);   
 }
 
 /************************************
@@ -875,15 +899,14 @@ function finish_validation(succeed){
     num_objects_shown = 0;   
     webgazer.pause();
     if (succeed === false) {
-         store_data.task = "validation";
+        store_data.task = "validation";
         store_data.description = "fail";
-        send_data_to_database(create_validation_fail_screen);
-        
+        create_validation_fail_screen();
     }
     else{
-         store_data.task = "validation";
+        store_data.task = "validation";
         store_data.description = "success";
-        create_validation_success_screen();
+        send_data_to_database(create_validation_success_screen);
     }
 }
 
@@ -916,13 +939,13 @@ function create_validation_success_screen() {
         case "pursuit":
             task_description = "Follow the dots when they change color.";
             break;
-        case "freeview":
+        case "massive":
             task_description = "Look at the cross then look at the dots.";
             break;
-        case "heatmap":
+        case "iframe":
             task_description = "Look at the cross then look at the dots.";
         default:
-            start_heatmap_paradigm();
+            task_description = "Look at the cross then look at the dots.";
     }
     instruction.innerHTML += "<header class=\"form__header\">" +
         "<h2 class=\"form__title\">" + task_description + "</h2>" +
@@ -931,23 +954,51 @@ function create_validation_success_screen() {
     document.body.appendChild(instruction);
 }
 
+/**
+ * start running task based on paradigm
+ */
 function start_task() {
     delete_elem("instruction");
     switch (paradigm) {
         case "simple":
-            send_data_to_database(loop_simple_paradigm);
+            loop_simple_paradigm();
             break;
         case "pursuit":
-            send_data_to_database(loop_pursuit_paradigm);
+            loop_pursuit_paradigm();
             break;
-        case "freeview":
-            send_data_to_database(create_validation_fail_screen());
+        case "massvis":
+            loop_massvis_paradigm();
             break;
-        case "heatmap":
-            send_data_to_database(create_validation_fail_screen());
+        case "iframe":
+            create_iframe_testable();
         default:
-            start_heatmap_paradigm();
+            loop_iframe_paradigm();
     }
+}
+
+/************************************
+ * IFRAME PARADIGM
+ * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
+ ************************************/
+
+/**
+ * Create an iframe to contain other websites, and then monitor the usage of the websites
+ */
+function loop_iframe_paradigm(){
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    webgazer.resume();
+    clear_canvas();
+    current_task = "iframe";
+}
+
+function finish_iframe_paradigm(){
+    objects_array = [];
+    num_objects_shown = 0;
+    store_data.task = iframe_link;
+    store_data.description = "success";
+    webgazer.pause();
+    send_data_to_database(start_task);
 }
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
@@ -980,11 +1031,10 @@ function finish_simple_paradigm(){
     num_objects_shown = 0;
     store_data.task = "simple";
     store_data.description = "success";
-    send_data_to_database(create_survey);
+    paradigm = "pursuit";
     webgazer.pause();
-    // create_survey();
-}
-
+    send_data_to_database(start_task);
+    
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
@@ -1055,14 +1105,15 @@ function finish_pursuit_paradigm(){
     num_objects_shown = 0;
     store_data.task = "pursuit";
     store_data.description = "success";
-    send_data_to_database(create_survey);
+    paradigm = "massvis";
+    send_data_to_database(loop_massvis_paradigm);
     webgazer.pause();
 }
 
 /************************************
- * FREE VIEWING PARADIGM
+ * MASSVIS PARADIGM
  ************************************/
-function loop_freeview_paradigm() {
+function loop_massvis_paradigm() {
     var canvas = document.getElementById("canvas-overlay");
     current_task = "freeview_paradigm";
     webgazer.resume();
@@ -1081,8 +1132,11 @@ function loop_freeview_paradigm() {
     }
 
 }
-
-function draw_freeview_image(pos) {
+/**
+ * Draw massvis 
+ * @param {*} pos 
+ */
+function draw_massvis_image(pos) {
     var pos = Math.random() >= 0.5 ? "left" : "right";
     clear_canvas();
     var canvas = document.getElementById("canvas-overlay");
@@ -1096,9 +1150,10 @@ function draw_freeview_image(pos) {
     }
 }
 
-function end_freeview_paradigm() {
+function end_massvis_paradigm() {
     objects_array = [];
     num_objects_shown = 0;
+    send_data_to_database(create_survey);
     //TODO
 }
 
