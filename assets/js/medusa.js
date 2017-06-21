@@ -1258,7 +1258,7 @@ function show_video_feed () {
     var video = document.getElementById('webgazerVideoFeed');
     video.style.display = 'block';
     video.style.position = 'fixed';
-    video.style.top = "60%";
+    video.style.top = "65%";
     video.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
     video.width = cam_width;
     video.height = cam_height;
@@ -1273,7 +1273,7 @@ function show_video_feed () {
     overlay.style.position = 'fixed';
     overlay.width = cam_width;
     overlay.height = cam_height;
-    overlay.style.top = "60%";
+    overlay.style.top = "65%";
     overlay.style.left = "calc(50% - " + (cam_width/2).toString() + "px)";
     overlay.style.margin = '0px';
     overlay.style.zIndex = 14;
