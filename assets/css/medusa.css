@@ -60,6 +60,7 @@ html, body {
     margin: 20px 1% 20px 0;
     font-size: 22px;
     text-align: left;
+    font-weight: 300;
 }
 .form__label {
     border: 1px solid rgba(88, 88, 88, 0.25);
