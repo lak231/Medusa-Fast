@@ -47,9 +47,9 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 1,  // duration of a a singe position sampled
+    duration: 10,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 1,  // the number of dots used for calibration
+    num_dots: 10,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -148,8 +148,14 @@ function upload_calibration_data(data){
     var reader = new FileReader();
     reader.onload = function(){
       var data = reader.result;
-      webgazer_training_data = JSON.parse(data);
-      console.log(webgazer_training_data);
+      try{
+        webgazer_training_data = JSON.parse(data);
+        console.log(webgazer_training_data);
+      }
+      catch( err){
+          webgazer_training_data = undefined;
+      }
+      
     };
     reader.readAsText(input.files[0]);
 }
@@ -396,7 +402,7 @@ function draw_dot_countdown(context, dot, color) {
  * reset the data sent to server. Should be called after each step to reduce the amount of data needed 
  * to send to server each time. 
  */
-function reset_store_data(){
+function reset_store_data(callback){
      store_data = {
     url: "",   // url of website
     task: "",   // the current performing task
@@ -411,9 +417,9 @@ function reset_store_data(){
     object_x: [], // x position of whatever object the current task is using
     object_y: [],    // y position of whatever object the current task is using
     gaze_x: [], // x position of gaze
-    gaze_y: [] // y position of gaze
-};
-
+    gaze_y: [] // y position of gaze 
+    };
+    if (callback !== undefined) callback();
 }
 /**
  * Checks if an object collides with a mouse click
@@ -568,8 +574,7 @@ function initiate_webgazer(){
             store_data.object_y.push(curr_object.y);
         })
     	.begin()
-        .showPredictionPoints(true); /* shows a square every 100 milliseconds where current prediction is */
-    // setInterval(function(){ record_gaze_location() }, 1000);
+        .showPredictionPoints(true); 
     check_webgazer_status();
 }
 
@@ -735,7 +740,13 @@ function start_calibration() {
     current_task = 'calibration';
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
-    create_new_dot_calibration();
+    if (webgazer_training_data !== undefined){
+        finish_calibration();
+    }
+    else{
+         create_new_dot_calibration();
+    }
+   
 }
 
 /**
@@ -769,7 +780,7 @@ function finish_calibration(){
     store_data.current_task = "calibration";
     store_data.description = "success";
     webgazer.pause();
-    send_data_to_database(create_validation_instruction);
+    reset_store_data( create_validation_instruction());   
 }
 
 /************************************
@@ -1035,7 +1046,6 @@ function draw_moving_dot(){
         var context = canvas.getContext("2d");      
         clear_canvas();
         draw_dot(context, dot, dark_color);
-        webgazer.addWatchListener(curr_object.cx, curr_object.cy);
         request_anim_frame(draw_moving_dot);    
     }
 }
@@ -1130,11 +1140,10 @@ function create_survey() {
                             "<option value=\"\" disabled selected>Question 1</option>" +
                             "</select>" +   
                             "</br>" +
-                            "<button class=\"form__button\" type=\"button\"> Bye! </button>" +
-                            "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data and bye </a>" +
+                            "<button class=\"form__button\" type=\"button\"> Bye Bye! </button>" +
+                            "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
                         "</form>";
       document.body.appendChild(survey);
-
 }
 
 function show_video_feed () {
