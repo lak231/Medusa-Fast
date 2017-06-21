@@ -48,9 +48,9 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 10,  // duration of a a singe position sampled
+    duration: 1,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 10,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -735,7 +735,7 @@ function create_consent_form() {
 function create_experiment_instruction() {
      if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
-        var instruction_guide1 = "Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment."
+        var instruction_guide1 = "Please remove all of your glasses and hats. Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment."
         var instruction_guide2 = "There are 5 tasks in total, including a calibration task, a validation task, and three experiments tasks. The whole experiment takes about 10-15 minutes "
         var instruction_guide3 = "We know focusing on the screen for a long time is tiring to the eyes, so there will be break in between sections."
         delete_elem("consent_form");
@@ -759,7 +759,7 @@ function create_calibration_instruction() {
     delete_elem("instruction");    
     var instruction = document.createElement("div");
     var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every 6s. There will be 39 dots in total, divided into 3 parts with breaks inbetween. "
-    var instruction_guide1 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely."
+    var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely."
     delete_elem("consent_form");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
@@ -777,6 +777,20 @@ function create_calibration_instruction() {
     show_video_feed();
 }
 
+function create_calibration_break_form(){
+    webgazer.pause();
+    clear_canvas();
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 12;  
+    instruction.innerHTML += "<header class=\"form__header\">" +
+                                "<h2 class=\"form__title\"> Break time!!!!  </br></h2>" + '<p class=\"information\">' + 
+                            "</header>" +
+                            "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>" +
+    document.body.appendChild(instruction);
+    show_video_feed();
+}
 /**
  * Start the calibration
  */
@@ -807,6 +821,12 @@ function start_calibration() {
  * Create a new dot for calibration
  */
 function create_new_dot_calibration(){
+    hide_face_tracker();
+    delete_elem("instruction");    
+    if (num_objects_shown >= calibration_settings.num_dots / 3) {
+        create_calibration_break_form();
+        return;
+    }
     if (num_objects_shown >= calibration_settings.num_dots) {
         finish_calibration();
         return;
@@ -823,6 +843,8 @@ function create_new_dot_calibration(){
     time_stamp = new Date().getTime();
     draw_dot(context, curr_object, dark_color);
     num_objects_shown++;
+    webgazer.resume();
+   
 }
 
 /**
