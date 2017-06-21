@@ -685,7 +685,6 @@ function create_iframe_testable(){
     iframe.source = iframe_link;
     iframe.id = "iframe";
     var innerDoc = (iframe.contentDocument) ? iframe.contentDocument : iframe.contentWindow.document;
-    
     document.appendChild(iframe);
     //TODO: format iframe here
 }
@@ -988,25 +987,25 @@ function start_task() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 
-/**
- * Create an iframe to contain other websites, and then monitor the usage of the websites
- */
-function loop_iframe_paradigm(){
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    webgazer.resume();
-    clear_canvas();
-    current_task = "iframe";
-}
+// /**
+//  * Create an iframe to contain other websites, and then monitor the usage of the websites
+//  */
+// function loop_iframe_paradigm(){
+//     var canvas = document.getElementById("canvas-overlay");
+//     var context = canvas.getContext("2d");
+//     webgazer.resume();
+//     clear_canvas();
+//     current_task = "iframe";
+// }
 
-function finish_iframe_paradigm(){
-    objects_array = [];
-    num_objects_shown = 0;
-    store_data.task = iframe_link;
-    store_data.description = "success";
-    webgazer.pause();
-    send_data_to_database(start_task);
-}
+// function finish_iframe_paradigm(){
+//     objects_array = [];
+//     num_objects_shown = 0;
+//     store_data.task = iframe_link;
+//     store_data.description = "success";
+//     webgazer.pause();
+//     send_data_to_database(start_task);
+// }
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
@@ -1255,5 +1254,4 @@ function hide_face_tracker() {
     delete_elem("face_tracker");
     var video = document.getElementById('webgazerVideoFeed');
     video.style.display = "None";
-
 }
