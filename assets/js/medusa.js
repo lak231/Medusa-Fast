@@ -602,7 +602,7 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        create_calibration_instruction(); 
+        create_experiment_instruction(); 
         create_gazer_database_table();
     } else {
         setTimeout(check_webgazer_status, 100);
@@ -732,7 +732,7 @@ function create_consent_form() {
 /**
  * Shows calibration instruction
  */
-function create_calibration_instruction() {
+function create_experiment_instruction() {
      if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
         var instruction_guide1 = "Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment."
@@ -744,6 +744,26 @@ function create_calibration_instruction() {
         instruction.style.zIndex = 12;  
         instruction.innerHTML += "<header class=\"form__header\">" +
                                     "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
+                                "</header>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"create_calibration_instruction()\">Start</button>"; 
+        document.body.appendChild(instruction);
+        show_video_feed();
+    }
+}
+
+/**
+ * Shows calibration instruction
+ */
+function create_calibration_instruction() {
+     if ($("#consent-yes").is(':checked')) {
+        var instruction = document.createElement("div");
+        var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every 6s. There will be 39 dots in total, divided into 3 parts with breaks inbetween. "
+        delete_elem("consent_form");
+        instruction.id = "instruction";
+        instruction.className += "overlay-div";
+        instruction.style.zIndex = 12;  
+        instruction.innerHTML += "<header class=\"form__header\">" +
+                                    "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
                                 "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
