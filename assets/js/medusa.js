@@ -39,7 +39,7 @@ var curr_object = null;     // current object on screen. Can be anything. Used t
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
-var possible_paradigm = ["simple","pursuit","freeview","heatmap"];
+var possible_paradigm = ["simple","pursuit","freeview","heatmap", "massvis"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
@@ -166,6 +166,14 @@ function upload_calibration_data(event){
       
     };
     reader.readAsText(input.files[0]);
+    var label	 = event.currentTarget.nextElementSibling,
+        labelVal = label.innerHTML;
+    console.log(label);
+    var fileName = input.value.split( '\\' ).pop();
+    if( fileName )
+        label.querySelector( 'span' ).innerHTML = fileName;
+    else
+        label.innerHTML = labelVal;
 }
 
 /**
@@ -703,14 +711,14 @@ function create_consent_form() {
                                 "<fieldset class=\"form__options\">" +
                                     "<p class=\"form__answer\">" +
                                         "<input name=\"consent\" type=\"radio\" id=\"consent-yes\" value=\"yes\">" +
-                                        "<label for=\"consent-yes\"> Yeah sure. </br>" +
+                                        "<label class='form__label' for=\"consent-yes\"> Yeah sure. </br>" +
                                                                     "I'm cool with that."+
                                         "</label>" +
                                     "</p>" +
 
                                     "<p class=\"form__answer\">" +
                                         "<input name=\"consent\" type=\"radio\" id=\"consent-no\" value=\"no\">" +
-                                        "<label for=\"consent-no\">No thanks. </br>" +
+                                        "<label class='form__label' for=\"consent-no\">No thanks. </br>" +
                                                                 "That sounds creepy..." +
                                         "</label>" +
                                     "</p>" +
@@ -736,12 +744,11 @@ function create_calibration_instruction() {
                                     "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
-                                "<input class=\"form__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> Upload previous calibration data </button>";
-        var a = document.createElement("input");
-        a.id = "fileinput";
-        a.name = "files";
-        a.style.display = "none";
-        document.body.appendChild(a);
+                                "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
+                                "<label for='calibration_file'>" +
+                                    "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='17' viewBox='0 0 20 17'><path d='M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z'/></svg>" +
+                                    "<span>Upload previous calibration data</span>" +
+                                "</label>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
