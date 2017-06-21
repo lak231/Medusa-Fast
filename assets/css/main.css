@@ -3179,6 +3179,7 @@
 
 	#main {
 		padding: 0em 0 6em 0 ;
+		min-height: 90vh;
 	}
 
 		@media screen and (max-width: 736px) {
@@ -3192,7 +3193,7 @@
 /* x` */
 
 	#footer {
-		padding: 5em 0 6em 0 ;
+		padding: 3em 0 3em 0 ;
 		background-color: #f6f6f6;
 	}
 
