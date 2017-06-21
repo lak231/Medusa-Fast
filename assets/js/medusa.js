@@ -29,7 +29,7 @@ var store_data = {
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
 };
-var iframe_link = "https://www.testable.org/t/9990d06c9"
+var iframe_link = "https://www.testable.org/t/9990d06c9";
 var webgazer_training_data;
 var time_stamp;  // current time. For functions that requires time delta for animation or controlling sampling rate.
 var webgazer_time_stamp;    // time stamp. Used specifically to control the sampling rate of webgazer
@@ -158,7 +158,6 @@ function upload_calibration_data(event){
       var data = reader.result;
       try{
         webgazer_training_data = JSON.parse(data);
-        console.log(webgazer_training_data);
       }
       catch( err){
           webgazer_training_data = undefined;
@@ -572,14 +571,15 @@ function initiate_webgazer(){
     webgazer.clearData()
         .setRegression('ridge') 
   	    .setTracker('clmtrackr')
-        .setGazeListener(function(data, elapsedTime) {        
+        .setGazeListener(function(data, elapsedTime) {      
             if (data === null) return;          
             if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
-            else if (current_task === "validation"){
+            if (curr_object === undefined || curr_object === null) return;
+            else if (current_task === "validation"){              
                 validation_event_handler(data);
             }
             if (current_task === "calibration"){
-                 webgazer.addWatchListener(curr_object.x, curr_object.y);
+                webgazer.addWatchListener(curr_object.x, curr_object.y);               
             }
             if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
@@ -675,7 +675,7 @@ function send_data_to_database(callback){
 
 
 /************************************
-* CALIBRATION
+* IFRAME
 ************************************/
 /**
  * iframe containment. Create an iframe to contain another website
@@ -771,12 +771,12 @@ function start_calibration() {
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
     if (webgazer_training_data !== undefined){
+        webgazer.loadTrainingData(webgazer_training_data);
         finish_calibration();
     }
     else{
          create_new_dot_calibration();
     }
-   
 }
 
 /**
@@ -912,7 +912,7 @@ function finish_validation(succeed){
     else{
         store_data.task = "validation";
         store_data.description = "success";
-        send_data_to_database(create_validation_success_screen);
+        create_validation_success_screen();
     }
 }
 
@@ -987,25 +987,26 @@ function start_task() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 
-// /**
-//  * Create an iframe to contain other websites, and then monitor the usage of the websites
-//  */
-// function loop_iframe_paradigm(){
-//     var canvas = document.getElementById("canvas-overlay");
-//     var context = canvas.getContext("2d");
-//     webgazer.resume();
-//     clear_canvas();
-//     current_task = "iframe";
-// }
+/**
+ * Create an iframe to contain other websites, and then monitor the usage of the websites
+ */
+function loop_iframe_paradigm(){
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    webgazer.resume();
+    clear_canvas();
+    current_task = "iframe";
+}
 
-// function finish_iframe_paradigm(){
-//     objects_array = [];
-//     num_objects_shown = 0;
-//     store_data.task = iframe_link;
-//     store_data.description = "success";
-//     webgazer.pause();
-//     send_data_to_database(start_task);
-// }
+function finish_iframe_paradigm(){
+    objects_array = [];
+    num_objects_shown = 0;
+    store_data.task = iframe_link;
+    store_data.description = "success";
+    webgazer.pause();
+    send_data_to_database(start_task);
+}
+
 /************************************
  * SIMPLE DOT VIEWING PARADIGM
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
@@ -1040,7 +1041,7 @@ function finish_simple_paradigm(){
     paradigm = "pursuit";
     webgazer.pause();
     send_data_to_database(start_task);
-    
+}
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/

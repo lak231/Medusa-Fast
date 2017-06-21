@@ -10406,13 +10406,13 @@ var mosseFilterResponses = function() {
         return (storage);
     }
 
-    webgazer.loadTrainingData = function(storage){
-        storage = (jQuery.isEmptyObject(storage)) ? defaults : storage;
-        for (var reg in regs) {
-            regs[reg].setData(storage);
-        }
-        return webgazer;
+webgazer.loadTrainingData = function(storage){
+    storage = (jQuery.isEmptyObject(storage)) ? defaults : storage;
+    for (var reg in regs) {
+        regs[reg].setData(storage);
     }
+    return webgazer;
+}
 
     /**
      * removes all data from gazer
