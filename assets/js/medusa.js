@@ -735,12 +735,13 @@ function create_consent_form() {
 function create_calibration_instruction() {
      if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
+        var instruction_guide = "Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the experiment."
         delete_elem("consent_form");
         instruction.id = "instruction";
         instruction.className += "overlay-div";
-        instruction.style.zIndex = 12;
+        instruction.style.zIndex = 12;  
         instruction.innerHTML += "<header class=\"form__header\">" +
-                                    "<h2 class=\"form__title\">Thank you for participating. </br> Instruction blah blah blah.</h2>" +
+                                    "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide + '<\p>'+
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
                                 "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
