@@ -842,13 +842,14 @@ function finish_calibration(){
 ************************************/
 function create_validation_instruction() {
     clear_canvas();
+    var instruction_guide1 = "Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready.";
     var instruction = document.createElement("div");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready. </h2>" +
-        "</header>" +
+        "<h2 class=\"form__title\"> Validation </h2>" + '<p class=\"information\">' + instruction_guide1 + '<\p>'+
+    "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra </button>";
     document.body.appendChild(instruction);
 }
