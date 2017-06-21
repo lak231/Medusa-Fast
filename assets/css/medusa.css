@@ -17,7 +17,7 @@ html, body {
 .overlay-div {
     position: fixed;
     margin: 60px auto;
-    max-width: 720px;
+    max-width: 50em;
     top: 0; left: 0; bottom: 0; right: 0;
 }
 
