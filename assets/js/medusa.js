@@ -590,7 +590,7 @@ function initiate_webgazer(){
             store_data.object_y.push(curr_object.y);
         })
     	.begin()
-        .showPredictionPoints(true); 
+        .showPredictionPoints(false); 
     check_webgazer_status();
 }
 
@@ -735,13 +735,14 @@ function create_consent_form() {
 function create_calibration_instruction() {
      if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
-        var instruction_guide = "Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the experiment."
+        var instruction_guide1 = "Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment."
+        var instruction_guide2 = "A dot will appear every 6s. Please focus your eyes at the dot during this whole 6s. There are 39 dots total, divided into 3 sections. You can rest inbetween."
         delete_elem("consent_form");
         instruction.id = "instruction";
         instruction.className += "overlay-div";
         instruction.style.zIndex = 12;  
         instruction.innerHTML += "<header class=\"form__header\">" +
-                                    "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide + '<\p>'+
+                                    "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+
                                 "</header>" +
                                 "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start ></button>" +
                                 "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
