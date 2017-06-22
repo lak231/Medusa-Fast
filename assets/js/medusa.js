@@ -1216,7 +1216,7 @@ function loop_massvis_paradigm() {
     clear_canvas();
     objects_array = shuffle(massvis_paradigm_settings.image_array);
     curr_object = new Image();
-    curr_object.src = objects_array.pop();    
+    curr_object.src = objects_array.pop();
     draw_target();
     num_objects_shown ++;
     webgazer.pause();
@@ -1232,14 +1232,18 @@ function draw_massvis_image() {
     collect_data = true;
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    var spacing = 10;
     context.drawImage(curr_object,
-        canvas.width / 2 - curr_object.width / 2,
-        canvas.height / 2 - curr_object.height / 2
+        canvas.width / 2 - (curr_object.width/curr_object.height * (canvas.height - spacing * 2))/2,
+        spacing,
+        curr_object.width/curr_object.height * (canvas.height - spacing * 2),
+        canvas.height - spacing * 2
     );
     setTimeout(loop_massvis_paradigm, massvis_paradigm_settings.image_show_time);
 }
 
 function finish_massvis_paradigm() {
+    clear_canvas();
     num_objects_shown = 0;
     store_data.task = "massvis";
     store_data.description = "success";
