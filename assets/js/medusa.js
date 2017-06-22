@@ -2,7 +2,8 @@
 /************************************
 * CONSTANTS
 ************************************/
-const TABLE_NAME = "Gazers"; // name of table in database
+const TABLE_NAME = "GAZE_DATA"; // name of data table of gaze data
+const USER_TABLE_NAME = "USERS" // name of data table of users
 const DEFAULT_DOT_RADIUS = 25;
 const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
 const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
@@ -29,6 +30,17 @@ var store_data = {
     gaze_x: [], // x position of gaze
     gaze_y: [] // y position of gaze
 };
+
+var user = {
+    gender:"",    // the gender of the user
+    age: 20,    // age of the user
+    main_country:"",  // country where the user spends the most time in
+    current_country:"",   // the current country the user is living in
+    education_level:"",   // the education level of the user
+    main_hand:"",     // the main hand (left, right or ambidextrous) of the user
+    eye_sight:"", // the eye sight of the user. either near-sight, far-sight or normal
+}
+
 var collect_data = true;
 var face_tracker;
 var iframe_link = "https://www.testable.org/t/9990d06c9";
@@ -50,9 +62,9 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 3,  // duration of a a singe position sampled
+    duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 4,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -115,7 +127,7 @@ pursuit_paradigm_settings = {
         {x: "80%", y: "80%", tx: "20%", ty: "80%"}
     ],
     num_trials: 1,
-    dot_show_time: 1000,
+    dot_show_time: 2000,
     fixation_rest_time: 500
 };
 
@@ -124,9 +136,9 @@ pursuit_paradigm_settings = {
  ************************************/
 massvis_paradigm_settings = {
     image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
-    num_trials: 2,
-    fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
-    image_show_time: 5000   // amount of time dot will appear on screen with each trial, in ms
+    num_trials: 1,
+    fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
+    image_show_time: 1000   // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -139,8 +151,8 @@ massvis_paradigm_settings = {
  */
 function download_calibration_data(el) {
     var data = webgazer.getTrainingData();
-    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-    el.setAttribute("href", "data:"+data);
+    var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    el.setAttribute("href", data);
     el.setAttribute("download", "calibration_data.json");
 }
 
@@ -188,18 +200,6 @@ function upload_calibration_data(event){
 }
 
 /**
- * The only function needed to call when deploy. Simple call this function when you want to start up the program
- */
-function start_medusa(parad){
-    paradigm = (typeof parad !== "undefined") ? parad : "simple";
-    if (!paradigm in possible_paradigm) {
-        paradigm = "simple";
-    }
-    create_consent_form();    
-}
-
-
-/**
  * Shuffles array in place.
  * @param array items The array containing the items.
  * @author http://stackoverflow.com/a/2450976/4175553
@@ -243,7 +243,7 @@ function create_overlay(){
     document.styleSheets[0].disabled = true;
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
-    canvas.addEventListener("mousedown", canvas_on_click, false);
+    // canvas.addEventListener("mousedown", canvas_on_click, false);
     // style the newly created canvas
     canvas.style.zIndex   = 10;
     canvas.style.position = "fixed";
@@ -379,7 +379,6 @@ function draw_dot_countup(context, dot, color) {
         false
     );
     context.stroke();
-
     //draw countup number
     context.font = "20px Source Sans Pro";
     context.fillStyle = color;
@@ -455,40 +454,41 @@ function reset_store_data(callback){
     };
     if (callback !== undefined) callback();
 }
-/**
- * Checks if an object collides with a mouse click
- * @param {*} mouse 
- * @param {*} object 
- */
-function collide_mouse(mouse, object) {
-    return (mouse.x < object.right && mouse.x > object.left && mouse.y > object.top && mouse.y < object.bottom);
-}
 
-/**
- * Handles clicks on canvas
- * @param {*} event 
- */
-function canvas_on_click(event) {
-    var canvas = document.getElementById("canvas-overlay");
-    var x = event.x;
-    var y = event.y;
-    x -= canvas.offsetLeft;
-    y -= canvas.offsetTop;
-    var mouse = {x:x,y:y};
-    if (collide_mouse(mouse, curr_object) === false) return;
-    // switch(current_task) {
-    // case "calibration":
-    //     if (calibration_settings.method === 'click'){
-    //         create_new_dot_calibration();
-    //     }
-    //     break;
-    // case "validation":
-    //     if (validation_settings.method === 'click'){
-    //         create_new_dot_validation();
-    //     }
-    //     break;
-    // }
-}
+// /**
+//  * Checks if an object collides with a mouse click
+//  * @param {*} mouse 
+//  * @param {*} object 
+//  */
+// function collide_mouse(mouse, object) {
+//     return (mouse.x < object.right && mouse.x > object.left && mouse.y > object.top && mouse.y < object.bottom);
+// }
+
+// /**
+//  * Handles clicks on canvas
+//  * @param {*} event 
+//  */
+// function canvas_on_click(event) {
+//     var canvas = document.getElementById("canvas-overlay");
+//     var x = event.x;
+//     var y = event.y;
+//     x -= canvas.offsetLeft;
+//     y -= canvas.offsetTop;
+//     var mouse = {x:x,y:y};
+//     if (collide_mouse(mouse, curr_object) === false) return;
+//     switch(current_task) {
+//     case "calibration":
+//         if (calibration_settings.method === 'click'){
+//             create_new_dot_calibration();
+//         }
+//         break;
+//     case "validation":
+//         if (validation_settings.method === 'click'){
+//             create_new_dot_validation();
+//         }
+//         break;
+//     }
+// }
 
 /**
  * A backward compatibility version of request animation frame
@@ -501,19 +501,10 @@ window.request_anim_frame = (function(callback) {
         };
       })();
 
-window.cancel_anim_frame = (function() {
-    return window.cancelCancelRequestAnimationFrame ||
-        window.webkitCancelRequestAnimationFrame ||
-        window.mozCancelRequestAnimationFrame ||
-        window.oCancelRequestAnimationFrame ||
-        window.msCancelRequestAnimationFrame ||
-        window.clearTimeout;
-})();
-
 /**
  * draw a target in the middle of the screen
  */
-function draw_target() {
+function draw_fixation_cross() {
     clear_canvas();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
@@ -533,135 +524,12 @@ function draw_target() {
     context.stroke();
 }
 
-function create_instruction(title, button_label, next_function) {
-    clear_canvas();
-    var instruction = document.createElement("div");
-    instruction.id = "instruction";
-    instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;
-    instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">" + title + "</h2>" +
-        "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"" + next_function + "\">" + button_label + "</button>";
-    document.body.appendChild(instruction);
-}
-
-/************************************
-* MAIN FUNCTIONS
-************************************/
-/**
- * Creates unique ID from time + RNG. Loads the ID from local storage if it's already there.
- */
-function createID() {
-    // check if there is a gazer_id already stored
-    if (typeof(Storage) !== "undefined") {
-        console.log(localStorage.getItem("gazer_id"));
-        if (localStorage.getItem("gazer_id") !== null){
-            gazer_id = localStorage.getItem("gazer_id");
-        }
-        else{
-            gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
-            localStorage.setItem("gazer_id", gazer_id);
-        }
-    } 
-    else{
-        gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
-    }
-}
 
 /**
- * Loads Webgazer. Once loaded, starts the collect data procedure
- */
-function load_webgazer() {
-    $.getScript("../assets/js/webgazer.js")
-        .done(function( script, textStatus ) {
-            initiate_webgazer();
-        })  
-        .fail(function( jqxhr, settings, exception ) {
-            $( "div.log" ).text( "Triggered ajaxError handler." );
-        });
-}
-
-/**
- * Starts WebGazer and collects data
- */
-function initiate_webgazer(){
-    webgazer_time_stamp = 0;
-    webgazer.clearData()
-        .setRegression('ridge') 
-  	    .setTracker('clmtrackr')
-        .setGazeListener(function(data, elapsedTime) {            
-            if (data === null) return;          
-            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
-            if (curr_object === undefined || curr_object === null) return;           
-            if (collect_data === false) return;          
-            if (current_task === "calibration"){
-                webgazer.addWatchListener(curr_object.x, curr_object.y);               
-            }       
-            else if (current_task === "validation"){              
-                validation_event_handler(data);
-            }    
-            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
-            webgazer_time_stamp = elapsedTime;
-            store_data.elapsedTime.push(elapsedTime);
-            store_data.gaze_x.push(data.x);
-            store_data.gaze_y.push(data.y);
-            store_data.object_x.push(curr_object.x);
-            store_data.object_y.push(curr_object.y);
-        })
-    	.begin()
-        .showPredictionPoints(false); 
-    check_webgazer_status();
-}
-
-/**
- * Checks if webgazer is successfully initiated. If yes, then start carrying out tasks.
- */
-function check_webgazer_status() {
-    if (webgazer.isReady()) {
-        console.log('webgazer is ready.');
-        // Create database
-        createID();
-        create_experiment_instruction(); 
-        create_gazer_database_table();
-    } else {
-        setTimeout(check_webgazer_status, 100);
-    }
-}
-
-/**
- * Creates data table in the database if it hasn't already existed
- */
-function create_gazer_database_table() {
-    var params = {
-        TableName : TABLE_NAME,
-        KeySchema: [
-            { AttributeName: "gazer_id", KeyType: "HASH"},
-            { AttributeName: "time_collected", KeyType: "RANGE" }  //Sort key
-        ],
-        AttributeDefinitions: [       
-            { AttributeName: "gazer_id", AttributeType: "S" },              
-            { AttributeName: "time_collected", AttributeType: "S" }
-        ],
-        ProvisionedThroughput: {       
-            ReadCapacityUnits: 5,
-            WriteCapacityUnits: 5
-        }
-    };
-    dynamodb.createTable(params, function(err, data) {
-        if (err) {
-            console.log("Unable to create table: " + "\n" + JSON.stringify(err, undefined, 2));
-        } else {
-            console.log("Created table: " + "\n" + JSON.stringify(data, undefined, 2));
-        }
-    });
-}
-
-/**
- * Sends data to database. necessary data are collected before sending. 
+ * Sends gaze data to database. necessary data are collected before sending. 
  * Some data are set along the calculation.
  */
-function send_data_to_database(callback){
+function send_gaze_data_to_database(callback){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     store_data.url  = window.location.href;
@@ -693,28 +561,54 @@ function send_data_to_database(callback){
     });
 }
 
-
-/************************************
-* IFRAME
-************************************/
 /**
- * iframe containment. Create an iframe to contain another website
+ * Sends user data to the database
  */
-function create_iframe_testable(){
-    var iframe = document.createElement("iframe");
-    iframe.source = iframe_link;
-    iframe.id = "iframe";
-    var innerDoc = (iframe.contentDocument) ? iframe.contentDocument : iframe.contentWindow.document;
-    document.appendChild(iframe);
-    //TODO: format iframe here
+function send_user_data_to_database(callback){
+    user.age = 12;
+    user.gender = "male";
+    user.current_country = "us";
+    user.main_country = "us";
+    user.main_hand = "left";
+    user.education_level = "high school";
+    user.eye_sight = "normal";
+    var params = {
+        TableName :USER_TABLE_NAME,
+        Item: {
+            "gazer_id": gazer_id,
+            "time_collected":session_time,
+            "info":user
+        }
+    };
+    docClient.put(params, function(err, data) { 
+        if (err) {
+            console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
+        } else {    
+            console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));              
+            if (typeof callback !== "undefined") {
+                session_time = (new Date).getTime().toString();
+                 reset_store_data(callback);         
+            }
+        }
+    });
 }
 
+
+
 /************************************
-* CALIBRATION
+* MAIN FUNCTIONS
 ************************************/
 /**
- * Shows consent form before doing calibration
+ * The only function needed to call when deploy. Simple call this function when you want to start up the program
  */
+function start_medusa(parad){
+    paradigm = (typeof parad !== "undefined") ? parad : "simple";
+    if (!paradigm in possible_paradigm) {
+        paradigm = "simple";
+    }
+    create_consent_form();    
+}
+
 function create_consent_form() {
     // hide the background and create canvas
     create_overlay();
@@ -750,6 +644,144 @@ function create_consent_form() {
 }
 
 /**
+ * Loads Webgazer. Once loaded, starts the collect data procedure
+ */
+function load_webgazer() {
+    $.getScript("../assets/js/webgazer.js")
+        .done(function( script, textStatus ) {
+            initiate_webgazer();
+        })  
+        .fail(function( jqxhr, settings, exception ) {
+            $( "div.log" ).text( "Triggered ajaxError handler." );
+        });
+}
+
+/**
+ * Starts WebGazer and collects data
+ */
+function initiate_webgazer(){
+    webgazer_time_stamp = 0;
+    webgazer.clearData()
+        .setRegression('ridge') 
+  	    .setTracker('clmtrackr')
+        .setGazeListener(function(data, elapsedTime) {          
+        
+            if (data === null) return;          
+            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
+            if (curr_object === undefined || curr_object === null) return;           
+            if (collect_data === false) return;          
+            if (current_task === "calibration"){
+                webgazer.addWatchListener(curr_object.x, curr_object.y);               
+            }       
+            else if (current_task === "validation"){              
+                validation_event_handler(data);
+            }    
+            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
+            webgazer_time_stamp = elapsedTime;
+            store_data.elapsedTime.push(elapsedTime);
+            store_data.gaze_x.push(data.x);
+            store_data.gaze_y.push(data.y);
+            store_data.object_x.push(curr_object.x);
+            store_data.object_y.push(curr_object.y);
+        })
+    	.begin()
+        .showPredictionPoints(false); 
+    check_webgazer_status();
+}
+
+/**
+ * Checks if webgazer is successfully initiated. If yes, then start carrying out tasks.
+ */
+function check_webgazer_status() {
+    if (webgazer.isReady()) {
+        console.log('webgazer is ready.');
+        // Create database
+        createID();
+        create_experiment_instruction(); 
+        create_gaze_database();
+        create_user_database();
+    } else {
+        setTimeout(check_webgazer_status, 100);
+    }
+}
+
+/**
+ * Creates unique ID from time + RNG. Loads the ID from local storage if it's already there.
+ */
+function createID() {
+    // check if there is a gazer_id already stored
+    if (typeof(Storage) !== "undefined") {
+        console.log(localStorage.getItem("gazer_id"));
+        if (localStorage.getItem("gazer_id") !== null){
+            gazer_id = localStorage.getItem("gazer_id");
+        }
+        else{
+            gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
+            localStorage.setItem("gazer_id", gazer_id);
+        }
+    } 
+    else{
+        gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
+    }
+}
+
+/**
+ * Creates data table to store the gaze location data.
+ */
+function create_gaze_database() {
+    var params = {
+        TableName : TABLE_NAME,
+        KeySchema: [
+            { AttributeName: "gazer_id", KeyType: "HASH"},
+            { AttributeName: "time_collected", KeyType: "RANGE" }  //Sort key
+        ],
+        AttributeDefinitions: [       
+            { AttributeName: "gazer_id", AttributeType: "S" },              
+            { AttributeName: "time_collected", AttributeType: "S" }
+        ],
+        ProvisionedThroughput: {       
+            ReadCapacityUnits: 20,
+            WriteCapacityUnits: 20
+        }
+    };
+    dynamodb.createTable(params, function(err, data) {
+        if (err) {
+            console.log("Unable to create table: " + "\n" + JSON.stringify(err, undefined, 2));
+        } else {
+            console.log("Created table: " + "\n" + JSON.stringify(data, undefined, 2));
+        }
+    });
+}
+
+/**
+ * Creates data table to store the information of users.
+ */
+function create_user_database() {
+    var params = {
+        TableName : USER_TABLE_NAME,
+        KeySchema: [
+            { AttributeName: "gazer_id", KeyType: "HASH"},
+            { AttributeName: "time_collected", KeyType: "RANGE" }  //Sort key
+        ],
+        AttributeDefinitions: [       
+            { AttributeName: "gazer_id", AttributeType: "S" },              
+            { AttributeName: "time_collected", AttributeType: "S" }
+        ],
+        ProvisionedThroughput: {       
+            ReadCapacityUnits: 5,
+            WriteCapacityUnits: 5
+        }
+    };
+    dynamodb.createTable(params, function(err, data) {
+        if (err) {
+            console.log("Unable to create table: " + "\n" + JSON.stringify(err, undefined, 2));
+        } else {
+            console.log("Created table: " + "\n" + JSON.stringify(data, undefined, 2));
+        }
+    });
+}
+
+/**
  * Shows calibration instruction
  */
 function create_experiment_instruction() {
@@ -770,6 +802,31 @@ function create_experiment_instruction() {
         show_video_feed();
     }
 }
+
+
+
+/************************************
+* IFRAME
+************************************/
+/**
+ * iframe containment. Create an iframe to contain another website
+ */
+function create_iframe_testable(){
+    var iframe = document.createElement("iframe");
+    iframe.source = iframe_link;
+    iframe.id = "iframe";
+    var innerDoc = (iframe.contentDocument) ? iframe.contentDocument : iframe.contentWindow.document;
+    document.appendChild(iframe);
+    //TODO: format iframe here
+}
+
+/************************************
+* CALIBRATION
+************************************/
+/**
+ * Shows consent form before doing calibration
+ */
+
 
 /**
  * Shows calibration instruction
@@ -1072,7 +1129,7 @@ function finish_iframe_paradigm(){
     store_data.description = "success";
     webgazer.pause();
     collect_data = false;
-    send_data_to_database(navigate_tasks);
+    send_gaze_data_to_database(navigate_tasks);
 }
 
 /************************************
@@ -1098,7 +1155,7 @@ function loop_simple_paradigm() {
     else{
         webgazer.pause();
         collect_data = false;
-        draw_target();
+        draw_fixation_cross();
         setTimeout(function(){
                     clear_canvas(); 
                     webgazer.resume();
@@ -1119,7 +1176,7 @@ function finish_simple_paradigm(){
     webgazer.pause();
     collect_data = false;
     console.log("finish simple paradigm");
-    send_data_to_database(navigate_tasks);
+    send_gaze_data_to_database(navigate_tasks);
 }
 /************************************
  * SMOOTH PURSUIT PARADIGM
@@ -1195,7 +1252,7 @@ function finish_pursuit_paradigm(){
     store_data.task = "pursuit";
     store_data.description = "success";
     paradigm = "massvis";
-    send_data_to_database(navigate_tasks);
+    send_gaze_data_to_database(navigate_tasks);
     webgazer.pause();
     collect_data = false;
     console.log("finish pursuit paradigm");
@@ -1217,7 +1274,8 @@ function loop_massvis_paradigm() {
     objects_array = shuffle(massvis_paradigm_settings.image_array);
     curr_object = new Image();
     curr_object.src = objects_array.pop();
-    draw_target();
+    store_data.description = curr_object.src;
+    draw_fixation_cross();
     num_objects_shown ++;
     webgazer.pause();
     collect_data = false;
@@ -1239,18 +1297,21 @@ function draw_massvis_image() {
         curr_object.width/curr_object.height * (canvas.height - spacing * 2),
         canvas.height - spacing * 2
     );
-    setTimeout(loop_massvis_paradigm, massvis_paradigm_settings.image_show_time);
+    setTimeout(function(){
+        store_data.task = "massvis";
+        paradigm = "massvis";
+        send_gaze_data_to_database(loop_massvis_paradigm);
+        }, massvis_paradigm_settings.image_show_time);
 }
 
 function finish_massvis_paradigm() {
     clear_canvas();
     num_objects_shown = 0;
-    store_data.task = "massvis";
-    store_data.description = "success";
-    paradigm = "massvis";
-    send_data_to_database(create_survey);
+    store_data.task = "massvis";   
+    paradigm = "massvis"; 
     webgazer.pause();
     collect_data = false;
+    create_survey();
     console.log("finish massvis paradigm");
 }
 
@@ -1292,7 +1353,7 @@ function create_survey() {
                             "<option value=\"\" disabled selected>Question 1</option>" +
                             "</select>" +   
                             "</br>" +
-                            "<button class=\"form__button\" type=\"button\"> Bye Bye! </button>" +
+                            "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
                             "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
                         "</form>";
       document.body.appendChild(survey);
