@@ -73,11 +73,11 @@ var calibration_settings = {
 * VALIDATION PARAMETERS
 ************************************/
 var validation_settings = {
-    duration: 2000,  // duration of a a singe position sampled in ms
-    num_dots: 2,  // the number of dots used for validation
+    duration: 20000,  // duration of a a singe position sampled in ms
+    num_dots: 15,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2,  // radius of acceptable gaze data around validation dot
+    distance: 200,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -99,9 +99,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 1,
-    fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
+    num_trials: 20,
+    fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
+    dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -110,25 +110,25 @@ simple_paradigm_settings = {
 ************************************/
 pursuit_paradigm_settings = {
     position_array:[
-        {x: "20%", y: "20%", tx: "80%", ty: "20%"},
-        {x: "20%", y: "20%", tx: "20%", ty: "80%"},
-        {x: "20%", y: "20%", tx: "80%", ty: "80%"},
+        {x: 0.2, y: 0.2, tx: 0.8, ty: 0.2},
+        {x: 0.2, y: 0.2, tx: 0.2, ty: 0.8},
+        {x: 0.2, y: 0.2, tx: 0.8, ty: 0.8},
 
-        {x: "80%", y: "20%", tx: "20%", ty: "20%"},
-        {x: "80%", y: "20%", tx: "20%", ty: "80%"},
-        {x: "80%", y: "20%", tx: "80%", ty: "80%"},
+        {x: 0.8, y: 0.2, tx: 0.2, ty: 0.2},
+        {x: 0.8, y: 0.2, tx: 0.2, ty: 0.8},
+        {x: 0.8, y: 0.2, tx: 0.8, ty: 0.8},
 
-        {x: "20%", y: "80%", tx: "20%", ty: "20%"},
-        {x: "20%", y: "80%", tx: "80%", ty: "20%"},
-        {x: "20%", y: "80%", tx: "80%", ty: "80%"},
+        {x: 0.2, y: 0.8, tx: 0.2, ty: 0.2},
+        {x: 0.2, y: 0.8, tx: 0.8, ty: 0.2},
+        {x: 0.2, y: 0.8, tx: 0.8, ty: 0.8},
 
-        {x: "80%", y: "80%", tx: "20%", ty: "20%"},
-        {x: "80%", y: "80%", tx: "80%", ty: "20%"},
-        {x: "80%", y: "80%", tx: "20%", ty: "80%"}
+        {x: 0.8, y: 0.8, tx: 0.2, ty: 0.2},
+        {x: 0.8, y: 0.8, tx: 0.8, ty: 0.2},
+        {x: 0.8, y: 0.8, tx: 0.2, ty: 0.8}
     ],
-    num_trials: 1,
-    dot_show_time: 2000,
-    fixation_rest_time: 500
+    num_trials: 20,
+    dot_show_time: 7000,
+    fixation_rest_time: 1000
 };
 
 /************************************
@@ -136,9 +136,9 @@ pursuit_paradigm_settings = {
  ************************************/
 massvis_paradigm_settings = {
     image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
-    num_trials: 1,
-    fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
-    image_show_time: 1000   // amount of time dot will appear on screen with each trial, in ms
+    num_trials: 3,
+    fixation_rest_time: 1000, // amount of time fixation cross will appear on screen with each trial, in ms
+    image_show_time: 10000   // amount of time the image will appear on screen with each trial, in ms
 
 };
 
@@ -1192,14 +1192,15 @@ function loop_pursuit_paradigm() {
     collect_data = true;
     webgazer.resume();
     clear_canvas();
-    current_task = 'pursuit_paradigm';
+    current_task = 'pursuit_paradigm';  
     if (objects_array.length === 0) {
-        objects_array = shuffle(pursuit_paradigm_settings.position_array);
+        objects_array = pursuit_paradigm_settings.position_array.slice(0)
+        objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
-        objects_array[i].x = canvas.width * parseFloat(objects_array[i].x) / 100.0;
-        objects_array[i].tx = canvas.width * parseFloat(objects_array[i].tx) / 100.0;
-        objects_array[i].y = canvas.height * parseFloat(objects_array[i].y) / 100.0;
-        objects_array[i].ty = canvas.height * parseFloat(objects_array[i].ty) / 100.0;
+        objects_array[i].x = canvas.width * objects_array[i].x;
+        objects_array[i].tx = canvas.width * objects_array[i].tx;
+        objects_array[i].y = canvas.height * objects_array[i].y;
+        objects_array[i].ty = canvas.height * objects_array[i].ty;
         }
     }
     curr_object = objects_array.pop();
