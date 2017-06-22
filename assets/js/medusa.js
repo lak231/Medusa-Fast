@@ -87,7 +87,7 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 3,
+    num_trials: 1,
     fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
 
@@ -125,8 +125,8 @@ pursuit_paradigm_settings = {
 massvis_paradigm_settings = {
     image_array: ["../assets/images/visMost54.png", "../assets/images/visMost147.png", "../assets/images/visMost282.png", "../assets/images/visMost376.png", "../assets/images/visMost735.png"],
     num_trials: 2,
-    target_show_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
-    image_show_time: 500   // amount of time dot will appear on screen with each trial, in ms
+    fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
+    image_show_time: 5000   // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -1216,20 +1216,25 @@ function loop_massvis_paradigm() {
     if (objects_array.length === 0) {
         objects_array = shuffle(massvis_paradigm_settings.image_array);
     }
+    console.log(objects_array);
     curr_object = new Image();
-    curr_object.source = objects_array.pop(); 
-      
+    curr_object.src = objects_array.pop(); 
     draw_target();
     num_objects_shown ++;
-    setTimeout("draw_massvis_image();", massvis_paradigm_settings.target_show_time);   
+    webgazer.pause();
+    collect_data = false;
+    setTimeout("draw_massvis_image();", massvis_paradigm_settings.fixation_rest_time);   
 }
 /**
  * Draw massvis
  */
 function draw_massvis_image() {
     clear_canvas();
+    webgazer.resume();
+    collect_data = true;
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    console.log(curr_object);
     context.drawImage(curr_object,
         canvas.width / 2 - curr_object.width / 2,
         canvas.height / 2 - curr_object.height / 2
