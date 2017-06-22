@@ -73,11 +73,11 @@ var calibration_settings = {
 * VALIDATION PARAMETERS
 ************************************/
 var validation_settings = {
-    duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 1,  // the number of dots used for validation
+    duration: 2000,  // duration of a a singe position sampled in ms
+    num_dots: 2,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2000,  // radius of acceptable gaze data around validation dot
+    distance: 2,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -1050,7 +1050,7 @@ function create_validation_fail_screen() {
         "</header>";
     document.body.appendChild(instruction);
     setTimeout(function() {
-        start_calibration();
+        create_calibration_instruction();
     }, screen_timeout);
 }
 
