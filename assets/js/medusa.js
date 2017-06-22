@@ -52,7 +52,7 @@ var cam_height = 240;
 var calibration_settings = {
     duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 10,  // the number of dots used for calibration
+    num_dots: 4,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -114,7 +114,7 @@ pursuit_paradigm_settings = {
         {x: "80%", y: "80%", tx: "80%", ty: "20%"},
         {x: "80%", y: "80%", tx: "20%", ty: "80%"}
     ],
-    num_trials: 2,
+    num_trials: 1,
     dot_show_time: 5000,
     fixation_rest_time: 500
 };
@@ -1218,6 +1218,7 @@ function loop_massvis_paradigm() {
         finish_massvis_paradigm();
     } else {
         draw_target();
+        console.log("walla");
         setTimeout("draw_massvis_image();", massvis_paradigm_settings.target_show_time);
         setTimeout("loop_massvis_paradigm();", massvis_paradigm_settings.image_show_time);
     }
@@ -1244,7 +1245,7 @@ function finish_massvis_paradigm() {
     send_data_to_database(create_survey);
     webgazer.pause();
     collect_data = false;
-    console.log("finish pursuit paradigm");
+    console.log("finish massvis paradigm");
 }
 
 /************************************
