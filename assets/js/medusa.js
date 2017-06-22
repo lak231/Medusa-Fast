@@ -832,6 +832,7 @@ function create_iframe_testable(){
  * Shows calibration instruction
  */
 function create_calibration_instruction() {
+    webgazer_training_data = undefined;
     clear_canvas();
     delete_elem("instruction");    
     var instruction = document.createElement("div");
