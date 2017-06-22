@@ -87,7 +87,7 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 1,
+    num_trials: 3,
     fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
 
@@ -1104,9 +1104,9 @@ function loop_simple_paradigm() {
                     webgazer.resume();
                     collect_data = true;
                     draw_dot(context, curr_object, dark_color);
+                    setTimeout("loop_simple_paradigm();",simple_paradigm_settings.dot_show_time);
                 }, 
                 simple_paradigm_settings.fixation_rest_time);
-        setTimeout("loop_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
 }
 
@@ -1204,6 +1204,10 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function loop_massvis_paradigm() {
+    if (num_objects_shown > massvis_paradigm_settings.num_trials) {
+        finish_massvis_paradigm();
+        return;
+    }
     var canvas = document.getElementById("canvas-overlay");
     current_task = "massvis_paradigm";
     collect_data = true;
@@ -1212,17 +1216,12 @@ function loop_massvis_paradigm() {
     if (objects_array.length === 0) {
         objects_array = shuffle(massvis_paradigm_settings.image_array);
     }
-    curr_object = objects_array.pop();
+    curr_object = new Image();
+    curr_object.source = objects_array.pop(); 
+      
+    draw_target();
     num_objects_shown ++;
-    if (num_objects_shown > massvis_paradigm_settings.num_trials) {
-        finish_massvis_paradigm();
-    } else {
-        draw_target();
-        console.log("walla");
-        setTimeout("draw_massvis_image();", massvis_paradigm_settings.target_show_time);
-        setTimeout("loop_massvis_paradigm();", massvis_paradigm_settings.image_show_time);
-    }
-
+    setTimeout("draw_massvis_image();", massvis_paradigm_settings.target_show_time);   
 }
 /**
  * Draw massvis
@@ -1235,6 +1234,7 @@ function draw_massvis_image() {
         canvas.width / 2 - curr_object.width / 2,
         canvas.height / 2 - curr_object.height / 2
     );
+    setTimeout("loop_massvis_paradigm();", massvis_paradigm_settings.image_show_time);
 }
 
 function finish_massvis_paradigm() {
