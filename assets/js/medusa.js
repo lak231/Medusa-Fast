@@ -99,9 +99,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 2,
+    num_trials: 1,
     fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
+    dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -126,8 +126,8 @@ pursuit_paradigm_settings = {
         {x: 0.8, y: 0.8, tx: 0.8, ty: 0.2},
         {x: 0.8, y: 0.8, tx: 0.2, ty: 0.8}
     ],
-    num_trials: 2,
-    dot_show_time: 7000,
+    num_trials: 1,
+    dot_show_time: 1000,
     fixation_rest_time: 1000
 };
 
@@ -136,9 +136,9 @@ pursuit_paradigm_settings = {
  ************************************/
 massvis_paradigm_settings = {
     image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
-    num_trials: 2,
+    num_trials: 1,
     fixation_rest_time: 1000, // amount of time fixation cross will appear on screen with each trial, in ms
-    image_show_time: 10000   // amount of time the image will appear on screen with each trial, in ms
+    image_show_time: 100   // amount of time the image will appear on screen with each trial, in ms
 
 };
 
