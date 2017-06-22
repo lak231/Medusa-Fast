@@ -41,7 +41,7 @@ var curr_object = null;     // current object on screen. Can be anything. Used t
 var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
-var possible_paradigm = ["simple","pursuit","freeview","heatmap", "massvis"];
+var possible_paradigm = ["simple","pursuit","heatmap", "massvis"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
@@ -50,9 +50,9 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 6,  // duration of a a singe position sampled
+    duration: 3,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 39,  // the number of dots used for calibration
+    num_dots: 10,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -62,10 +62,10 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 10,  // the number of dots used for validation
+    num_dots: 1,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 200,  // radius of acceptable gaze data around validation dot
+    distance: 2000,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -87,9 +87,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 10,
+    num_trials: 1,
     fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
+    dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -114,11 +114,21 @@ pursuit_paradigm_settings = {
         {x: "80%", y: "80%", tx: "80%", ty: "20%"},
         {x: "80%", y: "80%", tx: "20%", ty: "80%"}
     ],
-    num_trials: 10,
-    dot_show_time: 2000,
+    num_trials: 2,
+    dot_show_time: 5000,
     fixation_rest_time: 500
 };
 
+/************************************
+ * MASSVIS_PARADIGM PARAMETERS
+ ************************************/
+massvis_paradigm_settings = {
+    image_array: ["../assets/images/visMost54.png", "../assets/images/visMost147.png", "../assets/images/visMost282.png", "../assets/images/visMost376.png", "../assets/images/visMost735.png"],
+    num_trials: 1,
+    target_show_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
+    image_show_time: 500   // amount of time dot will appear on screen with each trial, in ms
+
+};
 
 /************************************
 * COMMON FUNCTIONS
@@ -408,8 +418,15 @@ function draw_dot_countdown(context, dot, color) {
     //animation
     request_anim_frame(function () {
         if (delta >= calibration_settings.duration * 1000) {
-            create_new_dot_calibration();
-            return;
+            if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
+                create_calibration_break_form();
+                return;
+            }
+            else{
+                create_new_dot_calibration();
+                return;
+            }
+      
         }
         draw_dot_countdown(context, dot, color);
     });
@@ -825,11 +842,6 @@ function start_calibration() {
  */
 function create_new_dot_calibration(){
     collect_data = true;
-     num_objects_shown++;   
-    if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
-        create_calibration_break_form();
-        return;
-    }
     hide_face_tracker();
     delete_elem("instruction");       
     if (num_objects_shown >= calibration_settings.num_dots) {
@@ -846,7 +858,8 @@ function create_new_dot_calibration(){
     curr_object = objects_array.pop();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
-    draw_dot(context, curr_object, dark_color);   
+    draw_dot(context, curr_object, dark_color);  
+    num_objects_shown++;    
    
 }
 
@@ -998,7 +1011,7 @@ function create_validation_success_screen() {
         case "pursuit":
             task_description = "Follow the dots when they change color.";
             break;
-        case "massive":
+        case "massvis":
             task_description = "Look at the cross then look at the dots.";
             break;
         case "iframe":
@@ -1009,7 +1022,7 @@ function create_validation_success_screen() {
     instruction.innerHTML += "<header class=\"form__header\">" +
         "<h2 class=\"form__title\">" + task_description + "</h2>" +
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_task()\"> Continue </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"navigate_tasks()\"> Continue </button>";
     document.body.appendChild(instruction);
 }
 
@@ -1106,6 +1119,7 @@ function finish_simple_paradigm(){
     paradigm = "pursuit";
     webgazer.pause();
     collect_data = false;
+    console.log("finish simple paradigm");
     send_data_to_database(navigate_tasks);
 }
 /************************************
@@ -1180,9 +1194,10 @@ function finish_pursuit_paradigm(){
     store_data.task = "pursuit";
     store_data.description = "success";
     paradigm = "massvis";
-    send_data_to_database(create_survey);
+    send_data_to_database(loop_massvis_paradigm);
     webgazer.pause();
     collect_data = false;
+    console.log("finish pursuit paradigm");
 }
 
 /************************************
@@ -1190,47 +1205,46 @@ function finish_pursuit_paradigm(){
  ************************************/
 function loop_massvis_paradigm() {
     var canvas = document.getElementById("canvas-overlay");
-    current_task = "freeview_paradigm";
+    current_task = "massvis_paradigm";
     collect_data = true;
     webgazer.resume();
     clear_canvas();
     if (objects_array.length === 0) {
-        objects_array = shuffle(freeview_paradigm_settings.image_array);
+        objects_array = shuffle(massvis_paradigm_settings.image_array);
     }
     curr_object = objects_array.pop();
     num_objects_shown ++;
-    if (num_objects_shown > freeview_paradigm_settings.num_trials) {
-        end_freeview_paradigm();
+    if (num_objects_shown > massvis_paradigm_settings.num_trials) {
+        finish_massvis_paradigm();
     } else {
         draw_target();
-        setTimeout("draw_freeview_image();", freeview_paradigm_settings.fixation_rest_time);
-        setTimeout("loop_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
+        setTimeout("draw_massvis_image();", massvis_paradigm_settings.target_show_time);
+        setTimeout("loop_massvis_paradigm();", massvis_paradigm_settings.image_show_time);
     }
 
 }
 /**
- * Draw massvis 
- * @param {*} pos 
+ * Draw massvis
  */
-function draw_massvis_image(pos) {
-    var pos = Math.random() >= 0.5 ? "left" : "right";
+function draw_massvis_image() {
     clear_canvas();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    var width = canvas.width;
-    var height = canvas.height;
-    if (pos === "left") {
-        context.drawImage(curr_object, 0.25*width, 0.25*height);
-    } else {
-        context.drawImage(curr_object, 0.75*width, 0.25*height);
-    }
+    context.drawImage(curr_object,
+        canvas.width / 2 - curr_object.width / 2,
+        canvas.height / 2 - curr_object.height / 2
+    );
 }
 
-function end_massvis_paradigm() {
-    objects_array = [];
+function finish_massvis_paradigm() {
     num_objects_shown = 0;
+    store_data.task = "pursuit";
+    store_data.description = "success";
+    paradigm = "massvis";
     send_data_to_database(create_survey);
-    //TODO
+    webgazer.pause();
+    collect_data = false;
+    console.log("finish pursuit paradigm");
 }
 
 /************************************
