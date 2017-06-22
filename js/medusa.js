@@ -50,9 +50,9 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 3,  // duration of a a singe position sampled
+    duration: 6,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 1,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -65,22 +65,10 @@ var validation_settings = {
     num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2000,  // radius of acceptable gaze data around validation dot
-    hit_count: 2,
+    distance: 200,  // radius of acceptable gaze data around validation dot
+    hit_count: 20,
     listener: false
 };
-
-/************************************
-* SETTING UP AWS
-************************************/
-AWS.config.region = 'us-east-2'; // Region
-AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-IdentityPoolId: IdentityPoolId ,
-RoleArn: RoleArn
-});
-var dynamodb = new AWS.DynamoDB();
-var docClient = new AWS.DynamoDB.DocumentClient();
-
 
 /************************************
 * SIMPLE_PARADIGM PARAMETERS
@@ -90,12 +78,12 @@ simple_paradigm_settings = {
     num_trials: 5,
     target_show_time: 1500, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 3000    // amount of time dot will appear on screen with each trial, in ms
-
 };
 
 /************************************
 * PURSUIT_PARADIGM PARAMETERS
 ************************************/
+//TODO: change the x and y to 0. instead of %
 pursuit_paradigm_settings = {
     position_array:[
         {x: "20%", y: "20%", tx: "80%", ty: "20%"},
@@ -120,14 +108,16 @@ pursuit_paradigm_settings = {
 };
 
 /************************************
-* FREEVIEW_PARADIGM PARAMETERS
+* SETTING UP AWS
 ************************************/
-freeview_paradigm_settings = {
-    num_trials: 5,
-    image_show_time: 2000,
-    target_show_time: 1500,
-    image_array: [] //url array for images
-};
+AWS.config.region = 'us-east-2'; // Region
+AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+IdentityPoolId: IdentityPoolId ,
+RoleArn: RoleArn
+});
+var dynamodb = new AWS.DynamoDB();
+var docClient = new AWS.DynamoDB.DocumentClient();
+
 
 /************************************
 * COMMON FUNCTIONS

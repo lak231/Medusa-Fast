@@ -50,7 +50,7 @@ var cam_height = 240;
 * CALIBRATION PARAMETERS
 ************************************/
 var calibration_settings = {
-    duration: 1,  // duration of a a singe position sampled
+    duration: 6,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -62,11 +62,11 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 1,  // the number of dots used for validation
+    num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2000,  // radius of acceptable gaze data around validation dot
-    hit_count: 1,
+    distance: 200,  // radius of acceptable gaze data around validation dot
+    hit_count: 20,
     listener: false
 };
 
@@ -87,9 +87,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 1,
-    target_show_time: 1, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 1    // amount of time dot will appear on screen with each trial, in ms
+    num_trials: 10,
+    fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
+    dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -114,9 +114,9 @@ pursuit_paradigm_settings = {
         {x: "80%", y: "80%", tx: "80%", ty: "20%"},
         {x: "80%", y: "80%", tx: "20%", ty: "80%"}
     ],
-    num_trials: 1,
-    dot_show_time: 1,
-    target_show_time: 1
+    num_trials: 10,
+    dot_show_time: 2000,
+    fixation_rest_time: 500
 };
 
 
@@ -135,7 +135,7 @@ function download_calibration_data(el) {
 }
 
 /**
- * Save webgazer data to csv. Used specifically for iframe cases
+ * Save webgazer data to csv. 
  */
 function save_to_csv(){
     var data = [];
@@ -584,7 +584,6 @@ function initiate_webgazer(){
             else if (current_task === "validation"){              
                 validation_event_handler(data);
             }    
-            console.log(data);
             if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
@@ -1017,8 +1016,9 @@ function create_validation_success_screen() {
 /**
  * start running task based on paradigm
  */
-function start_task() {
+function navigate_tasks() {
     delete_elem("instruction");
+    console.log(paradigm);
     switch (paradigm) {
         case "simple":
             loop_simple_paradigm();
@@ -1060,7 +1060,7 @@ function finish_iframe_paradigm(){
     store_data.description = "success";
     webgazer.pause();
     collect_data = false;
-    send_data_to_database(start_task);
+    send_data_to_database(navigate_tasks);
 }
 
 /************************************
@@ -1084,8 +1084,16 @@ function loop_simple_paradigm() {
         finish_simple_paradigm();
     }
     else{
+        webgazer.pause();
+        collect_data = false;
         draw_target();
-        setTimeout(function(){clear_canvas(); draw_dot(context, curr_object, dark_color);},simple_paradigm_settings.target_show_time);
+        setTimeout(function(){
+                    clear_canvas(); 
+                    webgazer.resume();
+                    collect_data = true;
+                    draw_dot(context, curr_object, dark_color);
+                }, 
+                simple_paradigm_settings.fixation_rest_time);
         setTimeout("loop_simple_paradigm();",simple_paradigm_settings.dot_show_time);
     }
 }
@@ -1098,7 +1106,7 @@ function finish_simple_paradigm(){
     paradigm = "pursuit";
     webgazer.pause();
     collect_data = false;
-    send_data_to_database(start_task);
+    send_data_to_database(navigate_tasks);
 }
 /************************************
  * SMOOTH PURSUIT PARADIGM
@@ -1136,7 +1144,7 @@ function loop_pursuit_paradigm() {
     setTimeout( function () {
         time_stamp = null;
         draw_moving_dot();
-    }, pursuit_paradigm_settings.target_show_time);
+    }, pursuit_paradigm_settings.fixation_rest_time);
 
 }
 
@@ -1195,7 +1203,7 @@ function loop_massvis_paradigm() {
         end_freeview_paradigm();
     } else {
         draw_target();
-        setTimeout("draw_freeview_image();", freeview_paradigm_settings.target_show_time);
+        setTimeout("draw_freeview_image();", freeview_paradigm_settings.fixation_rest_time);
         setTimeout("loop_freeview_paradigm();", freeview_paradigm_settings.image_show_time);
     }
 
