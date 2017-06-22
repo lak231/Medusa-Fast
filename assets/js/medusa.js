@@ -115,7 +115,7 @@ pursuit_paradigm_settings = {
         {x: "80%", y: "80%", tx: "20%", ty: "80%"}
     ],
     num_trials: 1,
-    dot_show_time: 5000,
+    dot_show_time: 1000,
     fixation_rest_time: 500
 };
 
@@ -124,7 +124,7 @@ pursuit_paradigm_settings = {
  ************************************/
 massvis_paradigm_settings = {
     image_array: ["../assets/images/visMost54.png", "../assets/images/visMost147.png", "../assets/images/visMost282.png", "../assets/images/visMost376.png", "../assets/images/visMost735.png"],
-    num_trials: 1,
+    num_trials: 2,
     target_show_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
     image_show_time: 500   // amount of time dot will appear on screen with each trial, in ms
 
@@ -1031,7 +1031,6 @@ function create_validation_success_screen() {
  */
 function navigate_tasks() {
     delete_elem("instruction");
-    console.log(paradigm);
     switch (paradigm) {
         case "simple":
             loop_simple_paradigm();
@@ -1178,6 +1177,7 @@ function draw_moving_dot(){
     };
     if (distance(curr_object.cx,curr_object.cy,curr_object.tx,curr_object.ty) < 20){
         loop_pursuit_paradigm();
+        return;
     }
     else{
         var canvas = document.getElementById("canvas-overlay");
@@ -1194,7 +1194,7 @@ function finish_pursuit_paradigm(){
     store_data.task = "pursuit";
     store_data.description = "success";
     paradigm = "massvis";
-    send_data_to_database(loop_massvis_paradigm);
+    send_data_to_database(navigate_tasks);
     webgazer.pause();
     collect_data = false;
     console.log("finish pursuit paradigm");
