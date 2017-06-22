@@ -1230,7 +1230,6 @@ function draw_massvis_image() {
     clear_canvas();
     webgazer.resume();
     collect_data = true;
-    console.log("walla");
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     context.drawImage(curr_object,
