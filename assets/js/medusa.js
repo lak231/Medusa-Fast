@@ -123,7 +123,7 @@ pursuit_paradigm_settings = {
  * MASSVIS_PARADIGM PARAMETERS
  ************************************/
 massvis_paradigm_settings = {
-    image_array: ["../assets/images/visMost54.png", "../assets/images/visMost147.png", "../assets/images/visMost282.png", "../assets/images/visMost376.png", "../assets/images/visMost735.png"],
+    image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
     num_trials: 2,
     fixation_rest_time: 500, // amount of time 'target' will appear on screen with each trial, in ms
     image_show_time: 5000   // amount of time dot will appear on screen with each trial, in ms
@@ -1104,7 +1104,7 @@ function loop_simple_paradigm() {
                     webgazer.resume();
                     collect_data = true;
                     draw_dot(context, curr_object, dark_color);
-                    setTimeout("loop_simple_paradigm();",simple_paradigm_settings.dot_show_time);
+                    setTimeout(loop_simple_paradigm,simple_paradigm_settings.dot_show_time);
                 }, 
                 simple_paradigm_settings.fixation_rest_time);
     }
@@ -1162,6 +1162,7 @@ function loop_pursuit_paradigm() {
 }
 
 function draw_moving_dot(){
+    if (current_task !== 'pursuit_paradigm') return;
     var now = new Date().getTime(), dt = now - (time_stamp || now);
     time_stamp = now;
     var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
@@ -1213,17 +1214,14 @@ function loop_massvis_paradigm() {
     collect_data = true;
     webgazer.resume();
     clear_canvas();
-    if (objects_array.length === 0) {
-        objects_array = shuffle(massvis_paradigm_settings.image_array);
-    }
-    console.log(objects_array);
+    objects_array = shuffle(massvis_paradigm_settings.image_array);
     curr_object = new Image();
-    curr_object.src = objects_array.pop(); 
+    curr_object.src = objects_array.pop();    
     draw_target();
     num_objects_shown ++;
     webgazer.pause();
     collect_data = false;
-    setTimeout("draw_massvis_image();", massvis_paradigm_settings.fixation_rest_time);   
+    setTimeout(draw_massvis_image, massvis_paradigm_settings.fixation_rest_time);   
 }
 /**
  * Draw massvis
@@ -1232,19 +1230,19 @@ function draw_massvis_image() {
     clear_canvas();
     webgazer.resume();
     collect_data = true;
+    console.log("walla");
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    console.log(curr_object);
     context.drawImage(curr_object,
         canvas.width / 2 - curr_object.width / 2,
         canvas.height / 2 - curr_object.height / 2
     );
-    setTimeout("loop_massvis_paradigm();", massvis_paradigm_settings.image_show_time);
+    setTimeout(loop_massvis_paradigm, massvis_paradigm_settings.image_show_time);
 }
 
 function finish_massvis_paradigm() {
     num_objects_shown = 0;
-    store_data.task = "pursuit";
+    store_data.task = "massvis";
     store_data.description = "success";
     paradigm = "massvis";
     send_data_to_database(create_survey);
