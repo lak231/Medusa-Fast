@@ -236,12 +236,24 @@ function distance(x1,y1,x2,y2){
     return parseInt(Math.sqrt(a*a + b*b));
 }
 
+
+function toggle_stylesheets () {
+    for (i = 0; i < document.styleSheets.length; i++) {
+        document.styleSheets[i].disabled = !(document.styleSheets[i].disabled);
+    }
+}
+
+function enable_medusa_stylesheet() {
+    document.styleSheets[document.styleSheets.length - 1].disabled = false;
+}
+
 /**
  * create the overlay over the website
  * Creates overlay over website
  */
 function create_overlay(){
-    document.styleSheets[0].disabled = true;
+    toggle_stylesheets();
+    enable_medusa_stylesheet();
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
     // canvas.addEventListener("mousedown", canvas_on_click, false);
@@ -566,16 +578,23 @@ function send_gaze_data_to_database(callback){
  * Sends user data to the database
  */
 function send_user_data_to_database(callback){
+    var empty_count = 0;
     $("select").each(function (i) {
        if (this.value === "") {
-           console.log("empty");
+           empty_count += 1;
            this.style.boxShadow = "0 0 5px 1px var(--submit-color-darker)";
            this.onfocus = function () {
                this.style.boxShadow = "none";
            };
-           return;
        }
     });
+    if (empty_count === 1) {
+        document.getElementById("survey_info").innerHTML = "There is only one more thing you need to fill out";
+        return;
+    } else {
+        document.getElementById("survey_info").innerHTML = " There are " + empty_count.toString() + " more things you need to fill out.";
+        return;
+    }
     user.age = document.getElementById('age').value;
     user.gender = document.getElementById('gender').value;
     user.current_country = document.getElementById('current_country').value;
@@ -600,6 +619,9 @@ function send_user_data_to_database(callback){
             
         }
     });
+    delete_elem("canvas-overlay");
+    delete_elem("survey");
+    toggle_stylesheets();
 }
 
 
@@ -1353,7 +1375,7 @@ function create_survey() {
     survey.innerHTML += "<header class=\"form__header\">" +
                             "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
                         "</header>" +
-                        "<form>" +
+                        "<form id='selection_fields'>" +
                             "<select id='age' required>" +
                                 "<option value=\"\" disabled selected> How old are you? </option>" + age_options +
                             "</select>" +
@@ -1389,6 +1411,8 @@ function create_survey() {
                                 "<option value=\"\" disabled selected> What is your handedness? </option>" +
                                 "<option value='right-handed'>Right-handed</option><option value='left-handed'>Left-handed</option><option value='ambidextrous'>Ambidextrous</option>" +
                             "</select>" +
+                            "</br>" +
+                            "<p id='survey_info' class='information'></p>" +
                             "</br>" +
                             "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
                             "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
