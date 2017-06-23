@@ -8,7 +8,7 @@ RoleArn: "arn:aws:iam::790084491156:role/Cognito_MedusaUnauth_Role"
 var dynamodb = new AWS.DynamoDB();
 var docClient = new AWS.DynamoDB.DocumentClient();
 var params = {
-    TableName: "Gazers",
+    TableName: "GAZE_DATA",
 };
 var i = 1;
 var all_data = {};
@@ -20,7 +20,7 @@ function onScan(err, data) {
         console.log("Scan succeeded.");
         data.Items.forEach(function(adata) {
            all_data[i] = adata;
-           i ++;
+           i++;
         });
         if (typeof data.LastEvaluatedKey != "undefined") {
             console.log("Scanning for more...");
