@@ -64,7 +64,7 @@ var cam_height = 240;
 var calibration_settings = {
     duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 5,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
@@ -74,10 +74,10 @@ var calibration_settings = {
 ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 1,  // the number of dots used for validation
+    num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2000,  // radius of acceptable gaze data around validation dot
+    distance: 200,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -99,9 +99,9 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 1,
+    num_trials: 7,
     fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
+    dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
@@ -126,8 +126,8 @@ pursuit_paradigm_settings = {
         {x: 0.8, y: 0.8, tx: 0.8, ty: 0.2},
         {x: 0.8, y: 0.8, tx: 0.2, ty: 0.8}
     ],
-    num_trials: 1,
-    dot_show_time: 1000,
+    num_trials: 12,
+    dot_show_time: 5000,
     fixation_rest_time: 1000
 };
 
@@ -136,9 +136,9 @@ pursuit_paradigm_settings = {
  ************************************/
 massvis_paradigm_settings = {
     image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
-    num_trials: 1,
+    num_trials: 5,
     fixation_rest_time: 1000, // amount of time fixation cross will appear on screen with each trial, in ms
-    image_show_time: 100   // amount of time the image will appear on screen with each trial, in ms
+    image_show_time: 10000   // amount of time the image will appear on screen with each trial, in ms
 
 };
 
