@@ -882,6 +882,7 @@ function create_calibration_instruction() {
                                 "<span>Upload previous calibration data</span>" +
                             "</label>";
     document.body.appendChild(instruction);
+    show_video_feed();
 }
 
 function create_calibration_break_form(){
