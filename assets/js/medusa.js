@@ -566,34 +566,16 @@ function send_gaze_data_to_database(callback){
  * Sends user data to the database
  */
 function send_user_data_to_database(callback){
-    if (document.getElementById('age').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('gender').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('main_country').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('current_country').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('handedness').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('education_level').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('vision').value === "") {
-        alert("not filled");
-        return;
-    }
+    $("select").each(function (i) {
+       if (this.value === "") {
+           console.log("empty");
+           this.style.boxShadow = "0 0 5px 1px var(--submit-color-darker)";
+           this.onfocus = function () {
+               this.style.boxShadow = "none";
+           };
+           return;
+       }
+    });
     user.age = document.getElementById('age').value;
     user.gender = document.getElementById('gender').value;
     user.current_country = document.getElementById('current_country').value;
@@ -664,7 +646,7 @@ function create_consent_form() {
                                     "</p>" +
                                 "</fieldset>" +
 
-                                "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer() \">Next</button>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"create_survey()\">Next</button>" +
                             "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
