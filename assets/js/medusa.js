@@ -566,6 +566,34 @@ function send_gaze_data_to_database(callback){
  * Sends user data to the database
  */
 function send_user_data_to_database(callback){
+    if (document.getElementById('age').value === "") {
+        alert("not filled");
+        return;
+    }
+    if (document.getElementById('gender').value === "") {
+        alert("not filled");
+        return;
+    }
+    if (document.getElementById('main_country').value === "") {
+        alert("not filled");
+        return;
+    }
+    if (document.getElementById('current_country').value === "") {
+        alert("not filled");
+        return;
+    }
+    if (document.getElementById('handedness').value === "") {
+        alert("not filled");
+        return;
+    }
+    if (document.getElementById('education_level').value === "") {
+        alert("not filled");
+        return;
+    }
+    if (document.getElementById('vision').value === "") {
+        alert("not filled");
+        return;
+    }
     user.age = document.getElementById('age').value;
     user.gender = document.getElementById('gender').value;
     user.current_country = document.getElementById('current_country').value;
@@ -586,10 +614,8 @@ function send_user_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            if (typeof callback !== "undefined") {
-                session_time = (new Date).getTime().toString();
-                 reset_store_data(callback);
-            }
+            window.location.href = "../../index.html";
+            
         }
     });
 }
