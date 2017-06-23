@@ -589,10 +589,10 @@ function send_user_data_to_database(callback){
        }
     });
     if (empty_count === 1) {
-        document.getElementById("survey_info").innerHTML = "There is only one more thing you need to fill out";
+        document.getElementById("survey_info").innerHTML = "<strong> There is only one more thing you need to fill out </strong>";
         return;
-    } else {
-        document.getElementById("survey_info").innerHTML = " There are " + empty_count.toString() + " more things you need to fill out.";
+    } else if (empty_count > 1) {
+        document.getElementById("survey_info").innerHTML = "<strong> There are " + empty_count.toString() + " more things you need to fill out. </strong>";
         return;
     }
     user.age = document.getElementById('age').value;
@@ -610,18 +610,17 @@ function send_user_data_to_database(callback){
             "info":user
         }
     };
+    toggle_stylesheets();
     docClient.put(params, function(err, data) {
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            window.location.href = "../../index.html";
+            window.location.href = "../index.html";
             
         }
     });
-    delete_elem("canvas-overlay");
-    delete_elem("survey");
-    toggle_stylesheets();
+
 }
 
 
@@ -668,7 +667,7 @@ function create_consent_form() {
                                     "</p>" +
                                 "</fieldset>" +
 
-                                "<button class=\"form__button\" type=\"button\" onclick=\"create_survey()\">Next</button>" +
+                                "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer()\">Next</button>" +
                             "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
