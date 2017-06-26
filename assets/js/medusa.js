@@ -19,7 +19,7 @@ var store_data = {
     task: "",   // the current performing task
     canvasWidth: "",    // the width of the canvas
     canvasHeight: "",   // the height of the canvas
-    caliration_position_array: [],  // the array of all calibration positions
+    calibration_position_array: [],  // the array of all calibration positions
     validation_position_array: [],  // the array of all validation positions
     simple_position_array: [],  // the array of all simple positions
     pursuit_position_array: [], // the array of all pursuit positions
@@ -442,7 +442,7 @@ function reset_store_data(callback){
     task: "",   // the current performing task
     canvasWidth: "",    // the width of the canvas
     canvasHeight: "",   // the height of the canvas
-    caliration_position_array: [],  // the array of all calibration positions
+    calibration_position_array: [],  // the array of all calibration positions
     validation_position_array: [],  // the array of all validation positions
     simple_position_array: [],  // the array of all simple positions
     pursuit_position_array: [], // the array of all pursuit positions
@@ -536,7 +536,7 @@ function send_gaze_data_to_database(callback){
     store_data.url  = window.location.href;
     store_data.canvasWidth = canvas.width;
     store_data.canvasHeight = canvas.height;
-    store_data.caliration_position_array = calibration_settings.position_array;
+    store_data.calibration_position_array = calibration_settings.position_array;
     store_data.validation_position_array = validation_settings.position_array;
     store_data.simple_position_array = simple_paradigm_settings.position_array;
     store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
@@ -2924,5 +2924,4 @@ function hide_face_tracker() {
     var video = document.getElementById('webgazerVideoFeed');
     video.style.display = "None";
     cancelAnimationFrame(face_tracker);
->>>>>>> cc0993b5e7795df2ccc1b293ea79994a0be128ef
 }
