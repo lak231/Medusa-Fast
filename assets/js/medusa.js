@@ -3,7 +3,7 @@
 * CONSTANTS
 ************************************/
 const TABLE_NAME = "GAZE_DATA"; // name of data table of gaze data
-const USER_TABLE_NAME = "USERS" // name of data table of users
+const USER_TABLE_NAME = "USERS"; // name of data table of users
 const DEFAULT_DOT_RADIUS = 25;
 const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
 const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.

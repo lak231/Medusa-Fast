@@ -7,7 +7,8 @@
     // words - list of words to be always considered correct
     "words": [
         "massvis_paradigm_settings",
-        "draw_dot_countup"
+        "draw_dot_countup",
+        "Kedavra"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
