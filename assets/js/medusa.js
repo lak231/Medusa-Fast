@@ -1,16 +1,16 @@
 
 /************************************
-* CONSTANTS
-************************************/
+ * CONSTANTS
+ ************************************/
 const TABLE_NAME = "GAZE_DATA"; // name of data table of gaze data
-const USER_TABLE_NAME = "USERS"; // name of data table of users
+const USER_TABLE_NAME = "USERS" // name of data table of users
 const DEFAULT_DOT_RADIUS = 25;
 const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
 const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
 
 /************************************
-* VARIABLES
-************************************/
+ * VARIABLES
+ ************************************/
 var gazer_id = "";  // id of user
 var session_time = "";  // time of current webgazer session
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
@@ -19,7 +19,7 @@ var store_data = {
     task: "",   // the current performing task
     canvasWidth: "",    // the width of the canvas
     canvasHeight: "",   // the height of the canvas
-    calibration_position_array: [],  // the array of all calibration positions
+    caliration_position_array: [],  // the array of all calibration positions
     validation_position_array: [],  // the array of all validation positions
     simple_position_array: [],  // the array of all simple positions
     pursuit_position_array: [], // the array of all pursuit positions
@@ -59,55 +59,55 @@ var cam_width = 320;
 var cam_height = 240;
 
 /************************************
-* CALIBRATION PARAMETERS
-************************************/
+ * CALIBRATION PARAMETERS
+ ************************************/
 var calibration_settings = {
     duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 5,  // the number of dots used for calibration
+    num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
 };
 
 /************************************
-* VALIDATION PARAMETERS
-************************************/
+ * VALIDATION PARAMETERS
+ ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 1,  // the number of dots used for validation
+    num_dots: 10,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2000,  // radius of acceptable gaze data around validation dot
+    distance: 200,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
 
 /************************************
-* SETTING UP AWS
-************************************/
+ * SETTING UP AWS
+ ************************************/
 AWS.config.region = 'us-east-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-IdentityPoolId: IdentityPoolId ,
-RoleArn: RoleArn
+    IdentityPoolId: IdentityPoolId ,
+    RoleArn: RoleArn
 });
 var dynamodb = new AWS.DynamoDB();
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 
 /************************************
-* SIMPLE_PARADIGM PARAMETERS
-************************************/
+ * SIMPLE_PARADIGM PARAMETERS
+ ************************************/
 simple_paradigm_settings = {
     position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 1,
+    num_trials: 7,
     fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
-    dot_show_time: 1000    // amount of time dot will appear on screen with each trial, in ms
+    dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
 };
 
 /************************************
-* PURSUIT_PARADIGM PARAMETERS
-************************************/
+ * PURSUIT_PARADIGM PARAMETERS
+ ************************************/
 pursuit_paradigm_settings = {
     position_array:[
         {x: 0.2, y: 0.2, tx: 0.8, ty: 0.2},
@@ -126,8 +126,8 @@ pursuit_paradigm_settings = {
         {x: 0.8, y: 0.8, tx: 0.8, ty: 0.2},
         {x: 0.8, y: 0.8, tx: 0.2, ty: 0.8}
     ],
-    num_trials: 1,
-    dot_show_time: 1000,
+    num_trials: 12,
+    dot_show_time: 5000,
     fixation_rest_time: 1000
 };
 
@@ -136,15 +136,15 @@ pursuit_paradigm_settings = {
  ************************************/
 massvis_paradigm_settings = {
     image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
-    num_trials: 1,
+    num_trials: 5,
     fixation_rest_time: 1000, // amount of time fixation cross will appear on screen with each trial, in ms
-    image_show_time: 100   // amount of time the image will appear on screen with each trial, in ms
+    image_show_time: 10000   // amount of time the image will appear on screen with each trial, in ms
 
 };
 
 /************************************
-* COMMON FUNCTIONS
-************************************/
+ * COMMON FUNCTIONS
+ ************************************/
 /**
  * @data: the data to store
  * @return: an html link to the download file
@@ -158,7 +158,7 @@ function download_calibration_data(el) {
 }
 
 /**
- * Save webgazer data to csv. 
+ * Save webgazer data to csv.
  */
 function save_to_csv(){
     var data = [];
@@ -180,14 +180,14 @@ function upload_calibration_data(event){
     var input = event.target;
     var reader = new FileReader();
     reader.onload = function(){
-      var data = reader.result;
-      try{
-        webgazer_training_data = JSON.parse(data);
-      }
-      catch( err){
-          webgazer_training_data = undefined;
-      }
-      
+        var data = reader.result;
+        try{
+            webgazer_training_data = JSON.parse(data);
+        }
+        catch( err){
+            webgazer_training_data = undefined;
+        }
+
     };
     reader.readAsText(input.files[0]);
     var label	 = event.currentTarget.nextElementSibling,
@@ -225,10 +225,10 @@ function shuffle(array) {
 
 /**
  * Get the distance between two points with position (x1,y1) and (x2,y2)
- * @param {*} x1 
- * @param {*} y1 
- * @param {*} x2 
- * @param {*} y2 
+ * @param {*} x1
+ * @param {*} y1
+ * @param {*} x2
+ * @param {*} y2
  */
 function distance(x1,y1,x2,y2){
     var a = x1 - x2;
@@ -236,12 +236,24 @@ function distance(x1,y1,x2,y2){
     return parseInt(Math.sqrt(a*a + b*b));
 }
 
+
+function toggle_stylesheets () {
+    for (i = 0; i < document.styleSheets.length; i++) {
+        document.styleSheets[i].disabled = !(document.styleSheets[i].disabled);
+    }
+}
+
+function enable_medusa_stylesheet() {
+    document.styleSheets[document.styleSheets.length - 1].disabled = false;
+}
+
 /**
  * create the overlay over the website
  * Creates overlay over website
  */
 function create_overlay(){
-    document.styleSheets[0].disabled = true;
+    toggle_stylesheets();
+    enable_medusa_stylesheet();
     var canvas = document.createElement('canvas');
     canvas.id     = "canvas-overlay";
     // canvas.addEventListener("mousedown", canvas_on_click, false);
@@ -282,7 +294,7 @@ function get_elements_seen(x,y){
     }
     else{
         elem_array[element] = 1
-       
+
     }
 }
 
@@ -426,32 +438,32 @@ function draw_dot_countdown(context, dot, color) {
                 create_new_dot_calibration();
                 return;
             }
-      
+
         }
         draw_dot_countdown(context, dot, color);
     });
 }
 
 /**
- * reset the data sent to server. Should be called after each step to reduce the amount of data needed 
- * to send to server each time. 
+ * reset the data sent to server. Should be called after each step to reduce the amount of data needed
+ * to send to server each time.
  */
 function reset_store_data(callback){
-     store_data = {
-    url: "",   // url of website
-    task: "",   // the current performing task
-    canvasWidth: "",    // the width of the canvas
-    canvasHeight: "",   // the height of the canvas
-    calibration_position_array: [],  // the array of all calibration positions
-    validation_position_array: [],  // the array of all validation positions
-    simple_position_array: [],  // the array of all simple positions
-    pursuit_position_array: [], // the array of all pursuit positions
-    description: "",    // a description of the task. Depends on the type of task
-    elapsedTime: [], // time since webgazer.begin() is called
-    object_x: [], // x position of whatever object the current task is using
-    object_y: [],    // y position of whatever object the current task is using
-    gaze_x: [], // x position of gaze
-    gaze_y: [] // y position of gaze 
+    store_data = {
+        url: "",   // url of website
+        task: "",   // the current performing task
+        canvasWidth: "",    // the width of the canvas
+        canvasHeight: "",   // the height of the canvas
+        caliration_position_array: [],  // the array of all calibration positions
+        validation_position_array: [],  // the array of all validation positions
+        simple_position_array: [],  // the array of all simple positions
+        pursuit_position_array: [], // the array of all pursuit positions
+        description: "",    // a description of the task. Depends on the type of task
+        elapsedTime: [], // time since webgazer.begin() is called
+        object_x: [], // x position of whatever object the current task is using
+        object_y: [],    // y position of whatever object the current task is using
+        gaze_x: [], // x position of gaze
+        gaze_y: [] // y position of gaze
     };
     if (callback !== undefined) callback();
 }
@@ -496,11 +508,11 @@ function reset_store_data(callback){
  * @author http://www.html5canvastutorials.com/advanced/html5-canvas-animation-stage/
  */
 window.request_anim_frame = (function(callback) {
-        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
         function(callback) {
-          window.setTimeout(callback, 1000 / 60);
+            window.setTimeout(callback, 1000 / 60);
         };
-      })();
+})();
 
 /**
  * draw a target in the middle of the screen
@@ -536,7 +548,7 @@ function send_gaze_data_to_database(callback){
     store_data.url  = window.location.href;
     store_data.canvasWidth = canvas.width;
     store_data.canvasHeight = canvas.height;
-    store_data.calibration_position_array = calibration_settings.position_array;
+    store_data.caliration_position_array = calibration_settings.position_array;
     store_data.validation_position_array = validation_settings.position_array;
     store_data.simple_position_array = simple_paradigm_settings.position_array;
     store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
@@ -556,7 +568,7 @@ function send_gaze_data_to_database(callback){
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
             if (typeof callback !== "undefined") {
                 session_time = (new Date).getTime().toString();
-                 reset_store_data(callback);
+                reset_store_data(callback);
             }
         }
     });
@@ -566,32 +578,21 @@ function send_gaze_data_to_database(callback){
  * Sends user data to the database
  */
 function send_user_data_to_database(callback){
-    if (document.getElementById('age').value === "") {
-        alert("not filled");
+    var empty_count = 0;
+    $("select").each(function (i) {
+        if (this.value === "") {
+            empty_count += 1;
+            this.style.boxShadow = "0 0 5px 1px var(--submit-color-darker)";
+            this.onfocus = function () {
+                this.style.boxShadow = "none";
+            };
+        }
+    });
+    if (empty_count === 1) {
+        document.getElementById("survey_info").innerHTML = "<strong> There is only one more thing you need to fill out </strong>";
         return;
-    }
-    if (document.getElementById('gender').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('main_country').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('current_country').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('handedness').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('education_level').value === "") {
-        alert("not filled");
-        return;
-    }
-    if (document.getElementById('vision').value === "") {
-        alert("not filled");
+    } else if (empty_count > 1) {
+        document.getElementById("survey_info").innerHTML = "<strong> There are " + empty_count.toString() + " more things you need to fill out. </strong>";
         return;
     }
     user.age = document.getElementById('age').value;
@@ -609,22 +610,24 @@ function send_user_data_to_database(callback){
             "info":user
         }
     };
+    toggle_stylesheets();
     docClient.put(params, function(err, data) {
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            window.location.href = "../../index.html";
-            
+            window.location.href = "../index.html";
+
         }
     });
+
 }
 
 
 
 /************************************
-* MAIN FUNCTIONS
-************************************/
+ * MAIN FUNCTIONS
+ ************************************/
 /**
  * The only function needed to call when deploy. Simple call this function when you want to start up the program
  */
@@ -643,29 +646,29 @@ function create_consent_form() {
     form.id = "consent_form";
     form.className += "overlay-div";
     form.innerHTML +=
-                            "<header class=\"form__header\">" +
-                                "<h2 class=\"form__title\">Are you cool with us using your webcam to collect data about your eye movement?</h2>" +
-                            "</header>" +
+        "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\">Are you cool with us using your webcam to collect data about your eye movement?</h2>" +
+        "</header>" +
 
-                            "<form>" +
-                                "<fieldset class=\"form__options\">" +
-                                    "<p class=\"form__answer\">" +
-                                        "<input name=\"consent\" type=\"radio\" id=\"consent-yes\" value=\"yes\">" +
-                                        "<label class='form__label' for=\"consent-yes\"> Yeah sure. </br>" +
-                                                                    "I'm cool with that."+
-                                        "</label>" +
-                                    "</p>" +
+        "<form>" +
+        "<fieldset class=\"form__options\">" +
+        "<p class=\"form__answer\">" +
+        "<input name=\"consent\" type=\"radio\" id=\"consent-yes\" value=\"yes\">" +
+        "<label class='form__label' for=\"consent-yes\"> Yeah sure. </br>" +
+        "I'm cool with that."+
+        "</label>" +
+        "</p>" +
 
-                                    "<p class=\"form__answer\">" +
-                                        "<input name=\"consent\" type=\"radio\" id=\"consent-no\" value=\"no\">" +
-                                        "<label class='form__label' for=\"consent-no\">No thanks. </br>" +
-                                                                "That sounds creepy..." +
-                                        "</label>" +
-                                    "</p>" +
-                                "</fieldset>" +
+        "<p class=\"form__answer\">" +
+        "<input name=\"consent\" type=\"radio\" id=\"consent-no\" value=\"no\">" +
+        "<label class='form__label' for=\"consent-no\">No thanks. </br>" +
+        "That sounds creepy..." +
+        "</label>" +
+        "</p>" +
+        "</fieldset>" +
 
-                                "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer() \">Next</button>" +
-                            "</form>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer()\">Next</button>" +
+        "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
 }
@@ -677,7 +680,7 @@ function load_webgazer() {
     $.getScript("../assets/js/webgazer.js")
         .done(function( script, textStatus ) {
             initiate_webgazer();
-        })  
+        })
         .fail(function( jqxhr, settings, exception ) {
             $( "div.log" ).text( "Triggered ajaxError handler." );
         });
@@ -689,20 +692,20 @@ function load_webgazer() {
 function initiate_webgazer(){
     webgazer_time_stamp = 0;
     webgazer.clearData()
-        .setRegression('ridge') 
-  	    .setTracker('clmtrackr')
+        .setRegression('ridge')
+        .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
 
-            if (data === null) return;          
+            if (data === null) return;
             if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
-            if (curr_object === undefined || curr_object === null) return;           
-            if (collect_data === false) return;          
+            if (curr_object === undefined || curr_object === null) return;
+            if (collect_data === false) return;
             if (current_task === "calibration"){
-                webgazer.addWatchListener(curr_object.x, curr_object.y);               
-            }       
-            else if (current_task === "validation"){              
+                webgazer.addWatchListener(curr_object.x, curr_object.y);
+            }
+            else if (current_task === "validation"){
                 validation_event_handler(data);
-            }    
+            }
             if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
@@ -711,8 +714,8 @@ function initiate_webgazer(){
             store_data.object_x.push(curr_object.x);
             store_data.object_y.push(curr_object.y);
         })
-    	.begin()
-        .showPredictionPoints(false); 
+        .begin()
+        .showPredictionPoints(false);
     check_webgazer_status();
 }
 
@@ -724,7 +727,7 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        create_experiment_instruction(); 
+        create_experiment_instruction();
         create_gaze_database();
         create_user_database();
     } else {
@@ -762,11 +765,11 @@ function create_gaze_database() {
             { AttributeName: "gazer_id", KeyType: "HASH"},
             { AttributeName: "time_collected", KeyType: "RANGE" }  //Sort key
         ],
-        AttributeDefinitions: [       
-            { AttributeName: "gazer_id", AttributeType: "S" },              
+        AttributeDefinitions: [
+            { AttributeName: "gazer_id", AttributeType: "S" },
             { AttributeName: "time_collected", AttributeType: "S" }
         ],
-        ProvisionedThroughput: {       
+        ProvisionedThroughput: {
             ReadCapacityUnits: 20,
             WriteCapacityUnits: 20
         }
@@ -812,7 +815,7 @@ function create_user_database() {
  * Shows calibration instruction
  */
 function create_experiment_instruction() {
-     if ($("#consent-yes").is(':checked')) {
+    if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
         var instruction_guide1 = "Please remove all of your glasses and hats. Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment."
         var instruction_guide2 = "There are 5 tasks in total, including a calibration task, a validation task, and three experiments tasks. The whole experiment takes about 10-15 minutes "
@@ -820,11 +823,11 @@ function create_experiment_instruction() {
         delete_elem("consent_form");
         instruction.id = "instruction";
         instruction.className += "overlay-div";
-        instruction.style.zIndex = 12;  
+        instruction.style.zIndex = 12;
         instruction.innerHTML += "<header class=\"form__header\">" +
-                                    "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
-                                "</header>" +
-                                "<button class=\"form__button\" type=\"button\" onclick=\"create_calibration_instruction()\">Start</button>"; 
+            "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
+            "</header>" +
+            "<button class=\"form__button\" type=\"button\" onclick=\"create_calibration_instruction()\">Start</button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
@@ -833,8 +836,8 @@ function create_experiment_instruction() {
 
 
 /************************************
-* IFRAME
-************************************/
+ * IFRAME
+ ************************************/
 /**
  * iframe containment. Create an iframe to contain another website
  */
@@ -848,8 +851,8 @@ function create_iframe_testable(){
 }
 
 /************************************
-* CALIBRATION
-************************************/
+ * CALIBRATION
+ ************************************/
 /**
  * Shows consent form before doing calibration
  */
@@ -861,24 +864,25 @@ function create_iframe_testable(){
 function create_calibration_instruction() {
     webgazer_training_data = undefined;
     clear_canvas();
-    delete_elem("instruction");    
+    delete_elem("instruction");
     var instruction = document.createElement("div");
     var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every 5 seconds. There will be 39 dots in total, divided into 3 parts with breaks inbetween. "
     var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely."
     delete_elem("consent_form");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;  
+    instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-                                "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    
-                            "</header>" +
-                            "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
-                            "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
-                            "<label for='calibration_file'>" +
-                                "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='17' viewBox='0 0 20 17'><path d='M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z'/></svg>" +
-                                "<span>Upload previous calibration data</span>" +
-                            "</label>";
+        "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +
+        "</header>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
+        "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
+        "<label for='calibration_file'>" +
+        "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='17' viewBox='0 0 20 17'><path d='M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z'/></svg>" +
+        "<span>Upload previous calibration data</span>" +
+        "</label>";
     document.body.appendChild(instruction);
+    show_video_feed();
 }
 
 function create_calibration_break_form(){
@@ -888,11 +892,11 @@ function create_calibration_break_form(){
     var instruction = document.createElement("div");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;  
+    instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-                                "<h2 class=\"form__title\"> Break time! </br> There are more challenges to come.</h2>" +
-                            "</header>" +
-                            "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>";
+        "<h2 class=\"form__title\"> Break time! </br> There are more challenges to come.</h2>" +
+        "</header>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>";
     document.body.appendChild(instruction);
 }
 /**
@@ -909,7 +913,7 @@ function start_calibration() {
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
-    delete_elem("instruction");    
+    delete_elem("instruction");
     current_task = 'calibration';
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
@@ -918,7 +922,7 @@ function start_calibration() {
         finish_calibration();
     }
     else{
-         create_new_dot_calibration();
+        create_new_dot_calibration();
     }
 }
 
@@ -928,7 +932,7 @@ function start_calibration() {
 function create_new_dot_calibration(){
     collect_data = true;
     hide_face_tracker();
-    delete_elem("instruction");       
+    delete_elem("instruction");
     if (num_objects_shown >= calibration_settings.num_dots) {
         finish_calibration();
         return;
@@ -943,9 +947,9 @@ function create_new_dot_calibration(){
     curr_object = objects_array.pop();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
-    draw_dot(context, curr_object, dark_color);  
-    num_objects_shown++;    
-   
+    draw_dot(context, curr_object, dark_color);
+    num_objects_shown++;
+
 }
 
 /**
@@ -958,12 +962,12 @@ function finish_calibration(){
     store_data.description = "success";
     webgazer.pause();
     collect_data = false;
-    reset_store_data(create_validation_instruction);   
+    reset_store_data(create_validation_instruction);
 }
 
 /************************************
-* VALIDATION
-************************************/
+ * VALIDATION
+ ************************************/
 function create_validation_instruction() {
     clear_canvas();
     var instruction_guide1 = "Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready.";
@@ -973,7 +977,7 @@ function create_validation_instruction() {
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
         "<h2 class=\"form__title\"> Validation </h2>" + '<p class=\"information\">' + instruction_guide1 + '<\p>'+
-    "</header>" +
+        "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra </button>";
     document.body.appendChild(instruction);
 }
@@ -1019,8 +1023,8 @@ function create_new_dot_validation(){
 }
 
 /**
- * Handler for 'watch' procedure. 
- * @param {*} data 
+ * Handler for 'watch' procedure.
+ * @param {*} data
  */
 function validation_event_handler(data) {
     if (validation_settings.listener === false) {return}
@@ -1052,7 +1056,7 @@ function finish_validation(succeed){
     gazeDot.style.display = "none";
     success = (typeof succeed !== "undefined") ? succeed : true;
     objects_array = [];
-    num_objects_shown = 0;   
+    num_objects_shown = 0;
     webgazer.pause();
     collect_data = false;
     if (succeed === false) {
@@ -1162,7 +1166,7 @@ function loop_simple_paradigm() {
     webgazer.resume();
     clear_canvas();
     current_task = 'simple_paradigm';
-     if (objects_array.length === 0) {
+    if (objects_array.length === 0) {
         objects_array = create_dot_array(simple_paradigm_settings.position_array);
     }
     curr_object = objects_array.pop();
@@ -1175,13 +1179,13 @@ function loop_simple_paradigm() {
         collect_data = false;
         draw_fixation_cross();
         setTimeout(function(){
-                    clear_canvas(); 
-                    webgazer.resume();
-                    collect_data = true;
-                    draw_dot(context, curr_object, dark_color);
-                    setTimeout(loop_simple_paradigm,simple_paradigm_settings.dot_show_time);
-                }, 
-                simple_paradigm_settings.fixation_rest_time);
+                clear_canvas();
+                webgazer.resume();
+                collect_data = true;
+                draw_dot(context, curr_object, dark_color);
+                setTimeout(loop_simple_paradigm,simple_paradigm_settings.dot_show_time);
+            },
+            simple_paradigm_settings.fixation_rest_time);
     }
 }
 
@@ -1204,7 +1208,7 @@ function create_pursuit_instruction() {
 }
 
 function loop_pursuit_paradigm() {
-     if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
+    if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
         finish_pursuit_paradigm();
     }
     // if we don't have dot-positions any more, refill the array
@@ -1218,10 +1222,10 @@ function loop_pursuit_paradigm() {
         objects_array = pursuit_paradigm_settings.position_array.slice(0)
         objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
-        objects_array[i].x = canvas.width * objects_array[i].x;
-        objects_array[i].tx = canvas.width * objects_array[i].tx;
-        objects_array[i].y = canvas.height * objects_array[i].y;
-        objects_array[i].ty = canvas.height * objects_array[i].ty;
+            objects_array[i].x = canvas.width * objects_array[i].x;
+            objects_array[i].tx = canvas.width * objects_array[i].tx;
+            objects_array[i].y = canvas.height * objects_array[i].y;
+            objects_array[i].ty = canvas.height * objects_array[i].ty;
         }
     }
     curr_object = objects_array.pop();
@@ -1262,10 +1266,10 @@ function draw_moving_dot(){
     }
     else{
         var canvas = document.getElementById("canvas-overlay");
-        var context = canvas.getContext("2d");      
+        var context = canvas.getContext("2d");
         clear_canvas();
         draw_dot(context, dot, dark_color);
-        request_anim_frame(draw_moving_dot);    
+        request_anim_frame(draw_moving_dot);
     }
 }
 
@@ -1306,7 +1310,7 @@ function loop_massvis_paradigm() {
     num_objects_shown ++;
     webgazer.pause();
     collect_data = false;
-    setTimeout(draw_massvis_image, massvis_paradigm_settings.fixation_rest_time);   
+    setTimeout(draw_massvis_image, massvis_paradigm_settings.fixation_rest_time);
 }
 /**
  * Draw massvis
@@ -1328,7 +1332,7 @@ function draw_massvis_image() {
         store_data.task = "massvis";
         paradigm = "massvis";
         send_gaze_data_to_database(loop_massvis_paradigm);
-        }, massvis_paradigm_settings.image_show_time);
+    }, massvis_paradigm_settings.image_show_time);
 }
 
 function finish_massvis_paradigm() {
@@ -1346,11 +1350,11 @@ function finish_massvis_paradigm() {
  * HEATMAP PARADIGM
  ************************************/
 function start_heatmap_paradigm(){
-    //TODO: 
+    //TODO:
 }
 
 function end_heatmap_paradigm(){
-    //TODO: 
+    //TODO:
 }
 
 
@@ -1369,48 +1373,50 @@ function create_survey() {
     survey.className += "overlay-div";
     survey.style.zIndex = 12;
     survey.innerHTML += "<header class=\"form__header\">" +
-                            "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
-                        "</header>" +
-                        "<form>" +
-                            "<select id='age' required>" +
-                                "<option value=\"\" disabled selected> How old are you? </option>" + age_options +
-                            "</select>" +
-                            "</br>" +
-                            "<select id = 'gender' required>" +
-                                "<option value=\"\" disabled selected> What is your gender? </option>" +
-                                "<option value='male'> Male </option>" +
-                                "<option value='female'> Female </option>" +
-                                "<option value='other'> Other </option>" +
-                            "</select>" +
-                            "</br>" +
-                            "<select id = 'main_country' required>" +
-                                "<option value=\"\" disabled selected> Which country have you spent most of your life in? </option>" +
-                                "<option value='Afghanistan'>Afghanistan</option><option value='Aland Islands'>Aland Islands</option><option value='Albania'>Albania</option><option value='Algeria'>Algeria</option><option value='American Samoa'>American Samoa</option><option value='Andorra'>Andorra</option><option value='Angola'>Angola</option><option value='Anguilla'>Anguilla</option><option value='Antarctica'>Antarctica</option><option value='Antigua And Barbuda'>Antigua And Barbuda</option><option value='Argentina'>Argentina</option><option value='Armenia'>Armenia</option><option value='Aruba'>Aruba</option><option value='Australia'>Australia</option><option value='Austria'>Austria</option><option value='Azerbaijan'>Azerbaijan</option><option value='Bahamas'>Bahamas</option><option value='Bahrain'>Bahrain</option><option value='Bangladesh'>Bangladesh</option><option value='Barbados'>Barbados</option><option value='Belarus'>Belarus</option><option value='Belgium'>Belgium</option><option value='Belize'>Belize</option><option value='Benin'>Benin</option><option value='Bermuda'>Bermuda</option><option value='Bhutan'>Bhutan</option><option value='Bolivia'>Bolivia</option><option value='Bosnia And Herzegovina'>Bosnia And Herzegovina</option><option value='Botswana'>Botswana</option><option value='Bouvet Island'>Bouvet Island</option><option value='Brazil'>Brazil</option><option value='British Indian Ocean Territory'>British Indian Ocean Territory</option><option value='Brunei Darussalam'>Brunei Darussalam</option><option value='Bulgaria'>Bulgaria</option><option value='Burkina Faso'>Burkina Faso</option><option value='Burundi'>Burundi</option><option value='Cambodia'>Cambodia</option><option value='Cameroon'>Cameroon</option><option value='Canada'>Canada</option><option value='Cape Verde'>Cape Verde</option><option value='Cayman Islands'>Cayman Islands</option><option value='Central African Republic'>Central African Republic</option><option value='Chad'>Chad</option><option value='Chile'>Chile</option><option value='China'>China</option><option value='Christmas Island'>Christmas Island</option><option value='Cocos (Keeling) Islands'>Cocos (Keeling) Islands</option><option value='Colombia'>Colombia</option><option value='Comoros'>Comoros</option><option value='Congo'>Congo</option><option value='The Democratic Republic Of The Congo'>The Democratic Republic Of The Congo</option><option value='Cook Islands'>Cook Islands</option><option value='Costa Rica'>Costa Rica</option><option value='Cote Divoire'>Cote Divoire</option><option value='Croatia'>Croatia</option><option value='Cuba'>Cuba</option><option value='Cyprus'>Cyprus</option><option value='Czech Republic'>Czech Republic</option><option value='Denmark'>Denmark</option><option value='Djibouti'>Djibouti</option><option value='Dominica'>Dominica</option><option value='Dominican Republic'>Dominican Republic</option><option value='Ecuador'>Ecuador</option><option value='Egypt'>Egypt</option><option value='El Salvador'>El Salvador</option><option value='Equatorial Guinea'>Equatorial Guinea</option><option value='Eritrea'>Eritrea</option><option value='Estonia'>Estonia</option><option value='Ethiopia'>Ethiopia</option><option value='Falkland Islands (Malvinas)'>Falkland Islands (Malvinas)</option><option value='Faroe Islands'>Faroe Islands</option><option value='Fiji'>Fiji</option><option value='Finland'>Finland</option><option value='France'>France</option><option value='French Guiana'>French Guiana</option><option value='French Polynesia'>French Polynesia</option><option value='French Southern Territories'>French Southern Territories</option><option value='Gabon'>Gabon</option><option value='Gambia'>Gambia</option><option value='Georgia'>Georgia</option><option value='Germany'>Germany</option><option value='Ghana'>Ghana</option><option value='Gibraltar'>Gibraltar</option><option value='Greece'>Greece</option><option value='Greenland'>Greenland</option><option value='Grenada'>Grenada</option><option value='Guadeloupe'>Guadeloupe</option><option value='Guam'>Guam</option><option value='Guatemala'>Guatemala</option><option value='Guernsey'>Guernsey</option><option value='Guinea'>Guinea</option><option value='Guinea-bissau'>Guinea-bissau</option><option value='Guyana'>Guyana</option><option value='Haiti'>Haiti</option><option value='Heard Island And Mcdonald Islands'>Heard Island And Mcdonald Islands</option><option value='Holy See (Vatican City State)'>Holy See (Vatican City State)</option><option value='Honduras'>Honduras</option><option value='Hong Kong'>Hong Kong</option><option value='Hungary'>Hungary</option><option value='Iceland'>Iceland</option><option value='India'>India</option><option value='Indonesia'>Indonesia</option><option value='Iran'>Iran</option><option value='Iraq'>Iraq</option><option value='Ireland'>Ireland</option><option value='Isle Of Man'>Isle Of Man</option><option value='Israel'>Israel</option><option value='Italy'>Italy</option><option value='Jamaica'>Jamaica</option><option value='Japan'>Japan</option><option value='Jersey'>Jersey</option><option value='Jordan'>Jordan</option><option value='Kazakhstan'>Kazakhstan</option><option value='Kenya'>Kenya</option><option value='Kiribati'>Kiribati</option><option value='Democratic Peoples Republic of Korea'>Democratic Peoples Republic of Korea</option><option value='Republic of Korea'>Republic of Korea</option><option value='Kuwait'>Kuwait</option><option value='Kyrgyzstan'>Kyrgyzstan</option><option value='Lao Peoples Democratic Republic'>Lao Peoples Democratic Republic</option><option value='Latvia'>Latvia</option><option value='Lebanon'>Lebanon</option><option value='Lesotho'>Lesotho</option><option value='Liberia'>Liberia</option><option value='Libyan Arab Jamahiriya'>Libyan Arab Jamahiriya</option><option value='Liechtenstein'>Liechtenstein</option><option value='Lithuania'>Lithuania</option><option value='Luxembourg'>Luxembourg</option><option value='Macao'>Macao</option><option value='Macedonia'>Macedonia</option><option value='Madagascar'>Madagascar</option><option value='Malawi'>Malawi</option><option value='Malaysia'>Malaysia</option><option value='Maldives'>Maldives</option><option value='Mali'>Mali</option><option value='Malta'>Malta</option><option value='Marshall Islands'>Marshall Islands</option><option value='Martinique'>Martinique</option><option value='Mauritania'>Mauritania</option><option value='Mauritius'>Mauritius</option><option value='Mayotte'>Mayotte</option><option value='Mexico'>Mexico</option><option value='Micronesia'>Micronesia</option><option value='Republic of Moldova'>Republic of Moldova</option><option value='Monaco'>Monaco</option><option value='Mongolia'>Mongolia</option><option value='Montenegro'>Montenegro</option><option value='Montserrat'>Montserrat</option><option value='Morocco'>Morocco</option><option value='Mozambique'>Mozambique</option><option value='Myanmar'>Myanmar</option><option value='Namibia'>Namibia</option><option value='Nauru'>Nauru</option><option value='Nepal'>Nepal</option><option value='Netherlands'>Netherlands</option><option value='New Caledonia'>New Caledonia</option><option value='New Zealand'>New Zealand</option><option value='Nicaragua'>Nicaragua</option><option value='Niger'>Niger</option><option value='Nigeria'>Nigeria</option><option value='Niue'>Niue</option><option value='Norfolk Island'>Norfolk Island</option><option value='Northern Mariana Islands'>Northern Mariana Islands</option><option value='Norway'>Norway</option><option value='Oman'>Oman</option><option value='Pakistan'>Pakistan</option><option value='Palau'>Palau</option><option value='Palestinian Territory'>Palestinian Territory</option><option value='Panama'>Panama</option><option value='Papua New Guinea'>Papua New Guinea</option><option value='Paraguay'>Paraguay</option><option value='Peru'>Peru</option><option value='Philippines'>Philippines</option><option value='Pitcairn'>Pitcairn</option><option value='Poland'>Poland</option><option value='Portugal'>Portugal</option><option value='Puerto Rico'>Puerto Rico</option><option value='Qatar'>Qatar</option><option value='Reunion'>Reunion</option><option value='Romania'>Romania</option><option value='Russian Federation'>Russian Federation</option><option value='Rwanda'>Rwanda</option><option value='Saint Helena'>Saint Helena</option><option value='Saint Kitts And Nevis'>Saint Kitts And Nevis</option><option value='Saint Lucia'>Saint Lucia</option><option value='Saint Pierre And Miquelon'>Saint Pierre And Miquelon</option><option value='Saint Vincent And The Grenadines'>Saint Vincent And The Grenadines</option><option value='Samoa'>Samoa</option><option value='San Marino'>San Marino</option><option value='Sao Tome And Principe'>Sao Tome And Principe</option><option value='Saudi Arabia'>Saudi Arabia</option><option value='Senegal'>Senegal</option><option value='Serbia'>Serbia</option><option value='Seychelles'>Seychelles</option><option value='Sierra Leone'>Sierra Leone</option><option value='Singapore'>Singapore</option><option value='Slovakia'>Slovakia</option><option value='Slovenia'>Slovenia</option><option value='Solomon Islands'>Solomon Islands</option><option value='Somalia'>Somalia</option><option value='South Africa'>South Africa</option><option value='South Georgia And The South Sandwich Islands'>South Georgia And The South Sandwich Islands</option><option value='Spain'>Spain</option><option value='Sri Lanka'>Sri Lanka</option><option value='Sudan'>Sudan</option><option value='Suriname'>Suriname</option><option value='Svalbard And Jan Mayen'>Svalbard And Jan Mayen</option><option value='Swaziland'>Swaziland</option><option value='Sweden'>Sweden</option><option value='Switzerland'>Switzerland</option><option value='Syrian Arab Republic'>Syrian Arab Republic</option><option value='Taiwan'>Taiwan</option><option value='Tajikistan'>Tajikistan</option><option value='Tanzania'>Tanzania</option><option value='Thailand'>Thailand</option><option value='Timor-leste'>Timor-leste</option><option value='Togo'>Togo</option><option value='Tokelau'>Tokelau</option><option value='Tonga'>Tonga</option><option value='Trinidad And Tobago'>Trinidad And Tobago</option><option value='Tunisia'>Tunisia</option><option value='Turkey'>Turkey</option><option value='Turkmenistan'>Turkmenistan</option><option value='Turks And Caicos Islands'>Turks And Caicos Islands</option><option value='Tuvalu'>Tuvalu</option><option value='Uganda'>Uganda</option><option value='Ukraine'>Ukraine</option><option value='United Arab Emirates'>United Arab Emirates</option><option value='United Kingdom'>United Kingdom</option><option value='United States'>United States</option><option value='United States Minor Outlying Islands'>United States Minor Outlying Islands</option><option value='Uruguay'>Uruguay</option><option value='Uzbekistan'>Uzbekistan</option><option value='Vanuatu'>Vanuatu</option><option value='Venezuela'>Venezuela</option><option value='Viet Nam'>Viet Nam</option><option value='British Virgin Islands'>British Virgin Islands</option><option value='U.S. Virgin Islands'>U.S. Virgin Islands</option><option value='Wallis And Futuna'>Wallis And Futuna</option><option value='Western Sahara'>Western Sahara</option><option value='Yemen'>Yemen</option><option value='Zambia'>Zambia</option><option value='Zimbabwe'>Zimbabwe</option>" +
-                            "</select>" +
-                            "</br>" +
-                            "<select id= 'current_country' required>" +
-                                "<option value='' disabled selected> Which country are you currently living in? </option>" +
-                                "<option value='Afghanistan'>Afghanistan</option><option value='Aland Islands'>Aland Islands</option><option value='Albania'>Albania</option><option value='Algeria'>Algeria</option><option value='American Samoa'>American Samoa</option><option value='Andorra'>Andorra</option><option value='Angola'>Angola</option><option value='Anguilla'>Anguilla</option><option value='Antarctica'>Antarctica</option><option value='Antigua And Barbuda'>Antigua And Barbuda</option><option value='Argentina'>Argentina</option><option value='Armenia'>Armenia</option><option value='Aruba'>Aruba</option><option value='Australia'>Australia</option><option value='Austria'>Austria</option><option value='Azerbaijan'>Azerbaijan</option><option value='Bahamas'>Bahamas</option><option value='Bahrain'>Bahrain</option><option value='Bangladesh'>Bangladesh</option><option value='Barbados'>Barbados</option><option value='Belarus'>Belarus</option><option value='Belgium'>Belgium</option><option value='Belize'>Belize</option><option value='Benin'>Benin</option><option value='Bermuda'>Bermuda</option><option value='Bhutan'>Bhutan</option><option value='Bolivia'>Bolivia</option><option value='Bosnia And Herzegovina'>Bosnia And Herzegovina</option><option value='Botswana'>Botswana</option><option value='Bouvet Island'>Bouvet Island</option><option value='Brazil'>Brazil</option><option value='British Indian Ocean Territory'>British Indian Ocean Territory</option><option value='Brunei Darussalam'>Brunei Darussalam</option><option value='Bulgaria'>Bulgaria</option><option value='Burkina Faso'>Burkina Faso</option><option value='Burundi'>Burundi</option><option value='Cambodia'>Cambodia</option><option value='Cameroon'>Cameroon</option><option value='Canada'>Canada</option><option value='Cape Verde'>Cape Verde</option><option value='Cayman Islands'>Cayman Islands</option><option value='Central African Republic'>Central African Republic</option><option value='Chad'>Chad</option><option value='Chile'>Chile</option><option value='China'>China</option><option value='Christmas Island'>Christmas Island</option><option value='Cocos (Keeling) Islands'>Cocos (Keeling) Islands</option><option value='Colombia'>Colombia</option><option value='Comoros'>Comoros</option><option value='Congo'>Congo</option><option value='The Democratic Republic Of The Congo'>The Democratic Republic Of The Congo</option><option value='Cook Islands'>Cook Islands</option><option value='Costa Rica'>Costa Rica</option><option value='Cote Divoire'>Cote Divoire</option><option value='Croatia'>Croatia</option><option value='Cuba'>Cuba</option><option value='Cyprus'>Cyprus</option><option value='Czech Republic'>Czech Republic</option><option value='Denmark'>Denmark</option><option value='Djibouti'>Djibouti</option><option value='Dominica'>Dominica</option><option value='Dominican Republic'>Dominican Republic</option><option value='Ecuador'>Ecuador</option><option value='Egypt'>Egypt</option><option value='El Salvador'>El Salvador</option><option value='Equatorial Guinea'>Equatorial Guinea</option><option value='Eritrea'>Eritrea</option><option value='Estonia'>Estonia</option><option value='Ethiopia'>Ethiopia</option><option value='Falkland Islands (Malvinas)'>Falkland Islands (Malvinas)</option><option value='Faroe Islands'>Faroe Islands</option><option value='Fiji'>Fiji</option><option value='Finland'>Finland</option><option value='France'>France</option><option value='French Guiana'>French Guiana</option><option value='French Polynesia'>French Polynesia</option><option value='French Southern Territories'>French Southern Territories</option><option value='Gabon'>Gabon</option><option value='Gambia'>Gambia</option><option value='Georgia'>Georgia</option><option value='Germany'>Germany</option><option value='Ghana'>Ghana</option><option value='Gibraltar'>Gibraltar</option><option value='Greece'>Greece</option><option value='Greenland'>Greenland</option><option value='Grenada'>Grenada</option><option value='Guadeloupe'>Guadeloupe</option><option value='Guam'>Guam</option><option value='Guatemala'>Guatemala</option><option value='Guernsey'>Guernsey</option><option value='Guinea'>Guinea</option><option value='Guinea-bissau'>Guinea-bissau</option><option value='Guyana'>Guyana</option><option value='Haiti'>Haiti</option><option value='Heard Island And Mcdonald Islands'>Heard Island And Mcdonald Islands</option><option value='Holy See (Vatican City State)'>Holy See (Vatican City State)</option><option value='Honduras'>Honduras</option><option value='Hong Kong'>Hong Kong</option><option value='Hungary'>Hungary</option><option value='Iceland'>Iceland</option><option value='India'>India</option><option value='Indonesia'>Indonesia</option><option value='Iran'>Iran</option><option value='Iraq'>Iraq</option><option value='Ireland'>Ireland</option><option value='Isle Of Man'>Isle Of Man</option><option value='Israel'>Israel</option><option value='Italy'>Italy</option><option value='Jamaica'>Jamaica</option><option value='Japan'>Japan</option><option value='Jersey'>Jersey</option><option value='Jordan'>Jordan</option><option value='Kazakhstan'>Kazakhstan</option><option value='Kenya'>Kenya</option><option value='Kiribati'>Kiribati</option><option value='Democratic Peoples Republic of Korea'>Democratic Peoples Republic of Korea</option><option value='Republic of Korea'>Republic of Korea</option><option value='Kuwait'>Kuwait</option><option value='Kyrgyzstan'>Kyrgyzstan</option><option value='Lao Peoples Democratic Republic'>Lao Peoples Democratic Republic</option><option value='Latvia'>Latvia</option><option value='Lebanon'>Lebanon</option><option value='Lesotho'>Lesotho</option><option value='Liberia'>Liberia</option><option value='Libyan Arab Jamahiriya'>Libyan Arab Jamahiriya</option><option value='Liechtenstein'>Liechtenstein</option><option value='Lithuania'>Lithuania</option><option value='Luxembourg'>Luxembourg</option><option value='Macao'>Macao</option><option value='Macedonia'>Macedonia</option><option value='Madagascar'>Madagascar</option><option value='Malawi'>Malawi</option><option value='Malaysia'>Malaysia</option><option value='Maldives'>Maldives</option><option value='Mali'>Mali</option><option value='Malta'>Malta</option><option value='Marshall Islands'>Marshall Islands</option><option value='Martinique'>Martinique</option><option value='Mauritania'>Mauritania</option><option value='Mauritius'>Mauritius</option><option value='Mayotte'>Mayotte</option><option value='Mexico'>Mexico</option><option value='Micronesia'>Micronesia</option><option value='Republic of Moldova'>Republic of Moldova</option><option value='Monaco'>Monaco</option><option value='Mongolia'>Mongolia</option><option value='Montenegro'>Montenegro</option><option value='Montserrat'>Montserrat</option><option value='Morocco'>Morocco</option><option value='Mozambique'>Mozambique</option><option value='Myanmar'>Myanmar</option><option value='Namibia'>Namibia</option><option value='Nauru'>Nauru</option><option value='Nepal'>Nepal</option><option value='Netherlands'>Netherlands</option><option value='New Caledonia'>New Caledonia</option><option value='New Zealand'>New Zealand</option><option value='Nicaragua'>Nicaragua</option><option value='Niger'>Niger</option><option value='Nigeria'>Nigeria</option><option value='Niue'>Niue</option><option value='Norfolk Island'>Norfolk Island</option><option value='Northern Mariana Islands'>Northern Mariana Islands</option><option value='Norway'>Norway</option><option value='Oman'>Oman</option><option value='Pakistan'>Pakistan</option><option value='Palau'>Palau</option><option value='Palestinian Territory'>Palestinian Territory</option><option value='Panama'>Panama</option><option value='Papua New Guinea'>Papua New Guinea</option><option value='Paraguay'>Paraguay</option><option value='Peru'>Peru</option><option value='Philippines'>Philippines</option><option value='Pitcairn'>Pitcairn</option><option value='Poland'>Poland</option><option value='Portugal'>Portugal</option><option value='Puerto Rico'>Puerto Rico</option><option value='Qatar'>Qatar</option><option value='Reunion'>Reunion</option><option value='Romania'>Romania</option><option value='Russian Federation'>Russian Federation</option><option value='Rwanda'>Rwanda</option><option value='Saint Helena'>Saint Helena</option><option value='Saint Kitts And Nevis'>Saint Kitts And Nevis</option><option value='Saint Lucia'>Saint Lucia</option><option value='Saint Pierre And Miquelon'>Saint Pierre And Miquelon</option><option value='Saint Vincent And The Grenadines'>Saint Vincent And The Grenadines</option><option value='Samoa'>Samoa</option><option value='San Marino'>San Marino</option><option value='Sao Tome And Principe'>Sao Tome And Principe</option><option value='Saudi Arabia'>Saudi Arabia</option><option value='Senegal'>Senegal</option><option value='Serbia'>Serbia</option><option value='Seychelles'>Seychelles</option><option value='Sierra Leone'>Sierra Leone</option><option value='Singapore'>Singapore</option><option value='Slovakia'>Slovakia</option><option value='Slovenia'>Slovenia</option><option value='Solomon Islands'>Solomon Islands</option><option value='Somalia'>Somalia</option><option value='South Africa'>South Africa</option><option value='South Georgia And The South Sandwich Islands'>South Georgia And The South Sandwich Islands</option><option value='Spain'>Spain</option><option value='Sri Lanka'>Sri Lanka</option><option value='Sudan'>Sudan</option><option value='Suriname'>Suriname</option><option value='Svalbard And Jan Mayen'>Svalbard And Jan Mayen</option><option value='Swaziland'>Swaziland</option><option value='Sweden'>Sweden</option><option value='Switzerland'>Switzerland</option><option value='Syrian Arab Republic'>Syrian Arab Republic</option><option value='Taiwan'>Taiwan</option><option value='Tajikistan'>Tajikistan</option><option value='Tanzania'>Tanzania</option><option value='Thailand'>Thailand</option><option value='Timor-leste'>Timor-leste</option><option value='Togo'>Togo</option><option value='Tokelau'>Tokelau</option><option value='Tonga'>Tonga</option><option value='Trinidad And Tobago'>Trinidad And Tobago</option><option value='Tunisia'>Tunisia</option><option value='Turkey'>Turkey</option><option value='Turkmenistan'>Turkmenistan</option><option value='Turks And Caicos Islands'>Turks And Caicos Islands</option><option value='Tuvalu'>Tuvalu</option><option value='Uganda'>Uganda</option><option value='Ukraine'>Ukraine</option><option value='United Arab Emirates'>United Arab Emirates</option><option value='United Kingdom'>United Kingdom</option><option value='United States'>United States</option><option value='United States Minor Outlying Islands'>United States Minor Outlying Islands</option><option value='Uruguay'>Uruguay</option><option value='Uzbekistan'>Uzbekistan</option><option value='Vanuatu'>Vanuatu</option><option value='Venezuela'>Venezuela</option><option value='Viet Nam'>Viet Nam</option><option value='British Virgin Islands'>British Virgin Islands</option><option value='U.S. Virgin Islands'>U.S. Virgin Islands</option><option value='Wallis And Futuna'>Wallis And Futuna</option><option value='Western Sahara'>Western Sahara</option><option value='Yemen'>Yemen</option><option value='Zambia'>Zambia</option><option value='Zimbabwe'>Zimbabwe</option>" +
-                                "</select>" +
-                            "</br>" +
-                            "<select id = 'education_level' required>" +
-                                "<option value=\"\" disabled selected> What is the highest level of education you have received or are pursuing? </option>" +
-                                "<option value='pre-high school'>Pre-high school</option><option value='high school'>High school</option><option value='college'>College</option><option value='graduate school'>Graduate school</option><option value='professional school'>Professional school</option><option value='PhD'>PhD</option><option value='postdoctoral'>Postdoctoral</option>" +
-                            "</select>" +
-                            "</br>" +
-                            "<select id = 'vision' required>" +
-                                "<option value=\"\" disabled selected> How is your vision? </option>" +
-                                "<option value='perfect'>Perfect</option><option value='corrected'>Glasses/Contacts (corrected) </option><option value='other'>Other</option>" +
-                                "</select>" +
-                            "</br>" +
-                            "<select id = 'handedness' required>" +
-                                "<option value=\"\" disabled selected> What is your handedness? </option>" +
-                                "<option value='right-handed'>Right-handed</option><option value='left-handed'>Left-handed</option><option value='ambidextrous'>Ambidextrous</option>" +
-                            "</select>" +
-                            "</br>" +
-                            "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
-                            "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
-                        "</form>";
+        "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
+        "</header>" +
+        "<form id='selection_fields'>" +
+        "<select id='age' required>" +
+        "<option value=\"\" disabled selected> How old are you? </option>" + age_options +
+        "</select>" +
+        "</br>" +
+        "<select id = 'gender' required>" +
+        "<option value=\"\" disabled selected> What is your gender? </option>" +
+        "<option value='male'> Male </option>" +
+        "<option value='female'> Female </option>" +
+        "<option value='other'> Other </option>" +
+        "</select>" +
+        "</br>" +
+        "<select id = 'main_country' required>" +
+        "<option value=\"\" disabled selected> Which country have you spent most of your life in? </option>" +
+        "<option value='Afghanistan'>Afghanistan</option><option value='Aland Islands'>Aland Islands</option><option value='Albania'>Albania</option><option value='Algeria'>Algeria</option><option value='American Samoa'>American Samoa</option><option value='Andorra'>Andorra</option><option value='Angola'>Angola</option><option value='Anguilla'>Anguilla</option><option value='Antarctica'>Antarctica</option><option value='Antigua And Barbuda'>Antigua And Barbuda</option><option value='Argentina'>Argentina</option><option value='Armenia'>Armenia</option><option value='Aruba'>Aruba</option><option value='Australia'>Australia</option><option value='Austria'>Austria</option><option value='Azerbaijan'>Azerbaijan</option><option value='Bahamas'>Bahamas</option><option value='Bahrain'>Bahrain</option><option value='Bangladesh'>Bangladesh</option><option value='Barbados'>Barbados</option><option value='Belarus'>Belarus</option><option value='Belgium'>Belgium</option><option value='Belize'>Belize</option><option value='Benin'>Benin</option><option value='Bermuda'>Bermuda</option><option value='Bhutan'>Bhutan</option><option value='Bolivia'>Bolivia</option><option value='Bosnia And Herzegovina'>Bosnia And Herzegovina</option><option value='Botswana'>Botswana</option><option value='Bouvet Island'>Bouvet Island</option><option value='Brazil'>Brazil</option><option value='British Indian Ocean Territory'>British Indian Ocean Territory</option><option value='Brunei Darussalam'>Brunei Darussalam</option><option value='Bulgaria'>Bulgaria</option><option value='Burkina Faso'>Burkina Faso</option><option value='Burundi'>Burundi</option><option value='Cambodia'>Cambodia</option><option value='Cameroon'>Cameroon</option><option value='Canada'>Canada</option><option value='Cape Verde'>Cape Verde</option><option value='Cayman Islands'>Cayman Islands</option><option value='Central African Republic'>Central African Republic</option><option value='Chad'>Chad</option><option value='Chile'>Chile</option><option value='China'>China</option><option value='Christmas Island'>Christmas Island</option><option value='Cocos (Keeling) Islands'>Cocos (Keeling) Islands</option><option value='Colombia'>Colombia</option><option value='Comoros'>Comoros</option><option value='Congo'>Congo</option><option value='The Democratic Republic Of The Congo'>The Democratic Republic Of The Congo</option><option value='Cook Islands'>Cook Islands</option><option value='Costa Rica'>Costa Rica</option><option value='Cote Divoire'>Cote Divoire</option><option value='Croatia'>Croatia</option><option value='Cuba'>Cuba</option><option value='Cyprus'>Cyprus</option><option value='Czech Republic'>Czech Republic</option><option value='Denmark'>Denmark</option><option value='Djibouti'>Djibouti</option><option value='Dominica'>Dominica</option><option value='Dominican Republic'>Dominican Republic</option><option value='Ecuador'>Ecuador</option><option value='Egypt'>Egypt</option><option value='El Salvador'>El Salvador</option><option value='Equatorial Guinea'>Equatorial Guinea</option><option value='Eritrea'>Eritrea</option><option value='Estonia'>Estonia</option><option value='Ethiopia'>Ethiopia</option><option value='Falkland Islands (Malvinas)'>Falkland Islands (Malvinas)</option><option value='Faroe Islands'>Faroe Islands</option><option value='Fiji'>Fiji</option><option value='Finland'>Finland</option><option value='France'>France</option><option value='French Guiana'>French Guiana</option><option value='French Polynesia'>French Polynesia</option><option value='French Southern Territories'>French Southern Territories</option><option value='Gabon'>Gabon</option><option value='Gambia'>Gambia</option><option value='Georgia'>Georgia</option><option value='Germany'>Germany</option><option value='Ghana'>Ghana</option><option value='Gibraltar'>Gibraltar</option><option value='Greece'>Greece</option><option value='Greenland'>Greenland</option><option value='Grenada'>Grenada</option><option value='Guadeloupe'>Guadeloupe</option><option value='Guam'>Guam</option><option value='Guatemala'>Guatemala</option><option value='Guernsey'>Guernsey</option><option value='Guinea'>Guinea</option><option value='Guinea-bissau'>Guinea-bissau</option><option value='Guyana'>Guyana</option><option value='Haiti'>Haiti</option><option value='Heard Island And Mcdonald Islands'>Heard Island And Mcdonald Islands</option><option value='Holy See (Vatican City State)'>Holy See (Vatican City State)</option><option value='Honduras'>Honduras</option><option value='Hong Kong'>Hong Kong</option><option value='Hungary'>Hungary</option><option value='Iceland'>Iceland</option><option value='India'>India</option><option value='Indonesia'>Indonesia</option><option value='Iran'>Iran</option><option value='Iraq'>Iraq</option><option value='Ireland'>Ireland</option><option value='Isle Of Man'>Isle Of Man</option><option value='Israel'>Israel</option><option value='Italy'>Italy</option><option value='Jamaica'>Jamaica</option><option value='Japan'>Japan</option><option value='Jersey'>Jersey</option><option value='Jordan'>Jordan</option><option value='Kazakhstan'>Kazakhstan</option><option value='Kenya'>Kenya</option><option value='Kiribati'>Kiribati</option><option value='Democratic Peoples Republic of Korea'>Democratic Peoples Republic of Korea</option><option value='Republic of Korea'>Republic of Korea</option><option value='Kuwait'>Kuwait</option><option value='Kyrgyzstan'>Kyrgyzstan</option><option value='Lao Peoples Democratic Republic'>Lao Peoples Democratic Republic</option><option value='Latvia'>Latvia</option><option value='Lebanon'>Lebanon</option><option value='Lesotho'>Lesotho</option><option value='Liberia'>Liberia</option><option value='Libyan Arab Jamahiriya'>Libyan Arab Jamahiriya</option><option value='Liechtenstein'>Liechtenstein</option><option value='Lithuania'>Lithuania</option><option value='Luxembourg'>Luxembourg</option><option value='Macao'>Macao</option><option value='Macedonia'>Macedonia</option><option value='Madagascar'>Madagascar</option><option value='Malawi'>Malawi</option><option value='Malaysia'>Malaysia</option><option value='Maldives'>Maldives</option><option value='Mali'>Mali</option><option value='Malta'>Malta</option><option value='Marshall Islands'>Marshall Islands</option><option value='Martinique'>Martinique</option><option value='Mauritania'>Mauritania</option><option value='Mauritius'>Mauritius</option><option value='Mayotte'>Mayotte</option><option value='Mexico'>Mexico</option><option value='Micronesia'>Micronesia</option><option value='Republic of Moldova'>Republic of Moldova</option><option value='Monaco'>Monaco</option><option value='Mongolia'>Mongolia</option><option value='Montenegro'>Montenegro</option><option value='Montserrat'>Montserrat</option><option value='Morocco'>Morocco</option><option value='Mozambique'>Mozambique</option><option value='Myanmar'>Myanmar</option><option value='Namibia'>Namibia</option><option value='Nauru'>Nauru</option><option value='Nepal'>Nepal</option><option value='Netherlands'>Netherlands</option><option value='New Caledonia'>New Caledonia</option><option value='New Zealand'>New Zealand</option><option value='Nicaragua'>Nicaragua</option><option value='Niger'>Niger</option><option value='Nigeria'>Nigeria</option><option value='Niue'>Niue</option><option value='Norfolk Island'>Norfolk Island</option><option value='Northern Mariana Islands'>Northern Mariana Islands</option><option value='Norway'>Norway</option><option value='Oman'>Oman</option><option value='Pakistan'>Pakistan</option><option value='Palau'>Palau</option><option value='Palestinian Territory'>Palestinian Territory</option><option value='Panama'>Panama</option><option value='Papua New Guinea'>Papua New Guinea</option><option value='Paraguay'>Paraguay</option><option value='Peru'>Peru</option><option value='Philippines'>Philippines</option><option value='Pitcairn'>Pitcairn</option><option value='Poland'>Poland</option><option value='Portugal'>Portugal</option><option value='Puerto Rico'>Puerto Rico</option><option value='Qatar'>Qatar</option><option value='Reunion'>Reunion</option><option value='Romania'>Romania</option><option value='Russian Federation'>Russian Federation</option><option value='Rwanda'>Rwanda</option><option value='Saint Helena'>Saint Helena</option><option value='Saint Kitts And Nevis'>Saint Kitts And Nevis</option><option value='Saint Lucia'>Saint Lucia</option><option value='Saint Pierre And Miquelon'>Saint Pierre And Miquelon</option><option value='Saint Vincent And The Grenadines'>Saint Vincent And The Grenadines</option><option value='Samoa'>Samoa</option><option value='San Marino'>San Marino</option><option value='Sao Tome And Principe'>Sao Tome And Principe</option><option value='Saudi Arabia'>Saudi Arabia</option><option value='Senegal'>Senegal</option><option value='Serbia'>Serbia</option><option value='Seychelles'>Seychelles</option><option value='Sierra Leone'>Sierra Leone</option><option value='Singapore'>Singapore</option><option value='Slovakia'>Slovakia</option><option value='Slovenia'>Slovenia</option><option value='Solomon Islands'>Solomon Islands</option><option value='Somalia'>Somalia</option><option value='South Africa'>South Africa</option><option value='South Georgia And The South Sandwich Islands'>South Georgia And The South Sandwich Islands</option><option value='Spain'>Spain</option><option value='Sri Lanka'>Sri Lanka</option><option value='Sudan'>Sudan</option><option value='Suriname'>Suriname</option><option value='Svalbard And Jan Mayen'>Svalbard And Jan Mayen</option><option value='Swaziland'>Swaziland</option><option value='Sweden'>Sweden</option><option value='Switzerland'>Switzerland</option><option value='Syrian Arab Republic'>Syrian Arab Republic</option><option value='Taiwan'>Taiwan</option><option value='Tajikistan'>Tajikistan</option><option value='Tanzania'>Tanzania</option><option value='Thailand'>Thailand</option><option value='Timor-leste'>Timor-leste</option><option value='Togo'>Togo</option><option value='Tokelau'>Tokelau</option><option value='Tonga'>Tonga</option><option value='Trinidad And Tobago'>Trinidad And Tobago</option><option value='Tunisia'>Tunisia</option><option value='Turkey'>Turkey</option><option value='Turkmenistan'>Turkmenistan</option><option value='Turks And Caicos Islands'>Turks And Caicos Islands</option><option value='Tuvalu'>Tuvalu</option><option value='Uganda'>Uganda</option><option value='Ukraine'>Ukraine</option><option value='United Arab Emirates'>United Arab Emirates</option><option value='United Kingdom'>United Kingdom</option><option value='United States'>United States</option><option value='United States Minor Outlying Islands'>United States Minor Outlying Islands</option><option value='Uruguay'>Uruguay</option><option value='Uzbekistan'>Uzbekistan</option><option value='Vanuatu'>Vanuatu</option><option value='Venezuela'>Venezuela</option><option value='Viet Nam'>Viet Nam</option><option value='British Virgin Islands'>British Virgin Islands</option><option value='U.S. Virgin Islands'>U.S. Virgin Islands</option><option value='Wallis And Futuna'>Wallis And Futuna</option><option value='Western Sahara'>Western Sahara</option><option value='Yemen'>Yemen</option><option value='Zambia'>Zambia</option><option value='Zimbabwe'>Zimbabwe</option>" +
+        "</select>" +
+        "</br>" +
+        "<select id= 'current_country' required>" +
+        "<option value='' disabled selected> Which country are you currently living in? </option>" +
+        "<option value='Afghanistan'>Afghanistan</option><option value='Aland Islands'>Aland Islands</option><option value='Albania'>Albania</option><option value='Algeria'>Algeria</option><option value='American Samoa'>American Samoa</option><option value='Andorra'>Andorra</option><option value='Angola'>Angola</option><option value='Anguilla'>Anguilla</option><option value='Antarctica'>Antarctica</option><option value='Antigua And Barbuda'>Antigua And Barbuda</option><option value='Argentina'>Argentina</option><option value='Armenia'>Armenia</option><option value='Aruba'>Aruba</option><option value='Australia'>Australia</option><option value='Austria'>Austria</option><option value='Azerbaijan'>Azerbaijan</option><option value='Bahamas'>Bahamas</option><option value='Bahrain'>Bahrain</option><option value='Bangladesh'>Bangladesh</option><option value='Barbados'>Barbados</option><option value='Belarus'>Belarus</option><option value='Belgium'>Belgium</option><option value='Belize'>Belize</option><option value='Benin'>Benin</option><option value='Bermuda'>Bermuda</option><option value='Bhutan'>Bhutan</option><option value='Bolivia'>Bolivia</option><option value='Bosnia And Herzegovina'>Bosnia And Herzegovina</option><option value='Botswana'>Botswana</option><option value='Bouvet Island'>Bouvet Island</option><option value='Brazil'>Brazil</option><option value='British Indian Ocean Territory'>British Indian Ocean Territory</option><option value='Brunei Darussalam'>Brunei Darussalam</option><option value='Bulgaria'>Bulgaria</option><option value='Burkina Faso'>Burkina Faso</option><option value='Burundi'>Burundi</option><option value='Cambodia'>Cambodia</option><option value='Cameroon'>Cameroon</option><option value='Canada'>Canada</option><option value='Cape Verde'>Cape Verde</option><option value='Cayman Islands'>Cayman Islands</option><option value='Central African Republic'>Central African Republic</option><option value='Chad'>Chad</option><option value='Chile'>Chile</option><option value='China'>China</option><option value='Christmas Island'>Christmas Island</option><option value='Cocos (Keeling) Islands'>Cocos (Keeling) Islands</option><option value='Colombia'>Colombia</option><option value='Comoros'>Comoros</option><option value='Congo'>Congo</option><option value='The Democratic Republic Of The Congo'>The Democratic Republic Of The Congo</option><option value='Cook Islands'>Cook Islands</option><option value='Costa Rica'>Costa Rica</option><option value='Cote Divoire'>Cote Divoire</option><option value='Croatia'>Croatia</option><option value='Cuba'>Cuba</option><option value='Cyprus'>Cyprus</option><option value='Czech Republic'>Czech Republic</option><option value='Denmark'>Denmark</option><option value='Djibouti'>Djibouti</option><option value='Dominica'>Dominica</option><option value='Dominican Republic'>Dominican Republic</option><option value='Ecuador'>Ecuador</option><option value='Egypt'>Egypt</option><option value='El Salvador'>El Salvador</option><option value='Equatorial Guinea'>Equatorial Guinea</option><option value='Eritrea'>Eritrea</option><option value='Estonia'>Estonia</option><option value='Ethiopia'>Ethiopia</option><option value='Falkland Islands (Malvinas)'>Falkland Islands (Malvinas)</option><option value='Faroe Islands'>Faroe Islands</option><option value='Fiji'>Fiji</option><option value='Finland'>Finland</option><option value='France'>France</option><option value='French Guiana'>French Guiana</option><option value='French Polynesia'>French Polynesia</option><option value='French Southern Territories'>French Southern Territories</option><option value='Gabon'>Gabon</option><option value='Gambia'>Gambia</option><option value='Georgia'>Georgia</option><option value='Germany'>Germany</option><option value='Ghana'>Ghana</option><option value='Gibraltar'>Gibraltar</option><option value='Greece'>Greece</option><option value='Greenland'>Greenland</option><option value='Grenada'>Grenada</option><option value='Guadeloupe'>Guadeloupe</option><option value='Guam'>Guam</option><option value='Guatemala'>Guatemala</option><option value='Guernsey'>Guernsey</option><option value='Guinea'>Guinea</option><option value='Guinea-bissau'>Guinea-bissau</option><option value='Guyana'>Guyana</option><option value='Haiti'>Haiti</option><option value='Heard Island And Mcdonald Islands'>Heard Island And Mcdonald Islands</option><option value='Holy See (Vatican City State)'>Holy See (Vatican City State)</option><option value='Honduras'>Honduras</option><option value='Hong Kong'>Hong Kong</option><option value='Hungary'>Hungary</option><option value='Iceland'>Iceland</option><option value='India'>India</option><option value='Indonesia'>Indonesia</option><option value='Iran'>Iran</option><option value='Iraq'>Iraq</option><option value='Ireland'>Ireland</option><option value='Isle Of Man'>Isle Of Man</option><option value='Israel'>Israel</option><option value='Italy'>Italy</option><option value='Jamaica'>Jamaica</option><option value='Japan'>Japan</option><option value='Jersey'>Jersey</option><option value='Jordan'>Jordan</option><option value='Kazakhstan'>Kazakhstan</option><option value='Kenya'>Kenya</option><option value='Kiribati'>Kiribati</option><option value='Democratic Peoples Republic of Korea'>Democratic Peoples Republic of Korea</option><option value='Republic of Korea'>Republic of Korea</option><option value='Kuwait'>Kuwait</option><option value='Kyrgyzstan'>Kyrgyzstan</option><option value='Lao Peoples Democratic Republic'>Lao Peoples Democratic Republic</option><option value='Latvia'>Latvia</option><option value='Lebanon'>Lebanon</option><option value='Lesotho'>Lesotho</option><option value='Liberia'>Liberia</option><option value='Libyan Arab Jamahiriya'>Libyan Arab Jamahiriya</option><option value='Liechtenstein'>Liechtenstein</option><option value='Lithuania'>Lithuania</option><option value='Luxembourg'>Luxembourg</option><option value='Macao'>Macao</option><option value='Macedonia'>Macedonia</option><option value='Madagascar'>Madagascar</option><option value='Malawi'>Malawi</option><option value='Malaysia'>Malaysia</option><option value='Maldives'>Maldives</option><option value='Mali'>Mali</option><option value='Malta'>Malta</option><option value='Marshall Islands'>Marshall Islands</option><option value='Martinique'>Martinique</option><option value='Mauritania'>Mauritania</option><option value='Mauritius'>Mauritius</option><option value='Mayotte'>Mayotte</option><option value='Mexico'>Mexico</option><option value='Micronesia'>Micronesia</option><option value='Republic of Moldova'>Republic of Moldova</option><option value='Monaco'>Monaco</option><option value='Mongolia'>Mongolia</option><option value='Montenegro'>Montenegro</option><option value='Montserrat'>Montserrat</option><option value='Morocco'>Morocco</option><option value='Mozambique'>Mozambique</option><option value='Myanmar'>Myanmar</option><option value='Namibia'>Namibia</option><option value='Nauru'>Nauru</option><option value='Nepal'>Nepal</option><option value='Netherlands'>Netherlands</option><option value='New Caledonia'>New Caledonia</option><option value='New Zealand'>New Zealand</option><option value='Nicaragua'>Nicaragua</option><option value='Niger'>Niger</option><option value='Nigeria'>Nigeria</option><option value='Niue'>Niue</option><option value='Norfolk Island'>Norfolk Island</option><option value='Northern Mariana Islands'>Northern Mariana Islands</option><option value='Norway'>Norway</option><option value='Oman'>Oman</option><option value='Pakistan'>Pakistan</option><option value='Palau'>Palau</option><option value='Palestinian Territory'>Palestinian Territory</option><option value='Panama'>Panama</option><option value='Papua New Guinea'>Papua New Guinea</option><option value='Paraguay'>Paraguay</option><option value='Peru'>Peru</option><option value='Philippines'>Philippines</option><option value='Pitcairn'>Pitcairn</option><option value='Poland'>Poland</option><option value='Portugal'>Portugal</option><option value='Puerto Rico'>Puerto Rico</option><option value='Qatar'>Qatar</option><option value='Reunion'>Reunion</option><option value='Romania'>Romania</option><option value='Russian Federation'>Russian Federation</option><option value='Rwanda'>Rwanda</option><option value='Saint Helena'>Saint Helena</option><option value='Saint Kitts And Nevis'>Saint Kitts And Nevis</option><option value='Saint Lucia'>Saint Lucia</option><option value='Saint Pierre And Miquelon'>Saint Pierre And Miquelon</option><option value='Saint Vincent And The Grenadines'>Saint Vincent And The Grenadines</option><option value='Samoa'>Samoa</option><option value='San Marino'>San Marino</option><option value='Sao Tome And Principe'>Sao Tome And Principe</option><option value='Saudi Arabia'>Saudi Arabia</option><option value='Senegal'>Senegal</option><option value='Serbia'>Serbia</option><option value='Seychelles'>Seychelles</option><option value='Sierra Leone'>Sierra Leone</option><option value='Singapore'>Singapore</option><option value='Slovakia'>Slovakia</option><option value='Slovenia'>Slovenia</option><option value='Solomon Islands'>Solomon Islands</option><option value='Somalia'>Somalia</option><option value='South Africa'>South Africa</option><option value='South Georgia And The South Sandwich Islands'>South Georgia And The South Sandwich Islands</option><option value='Spain'>Spain</option><option value='Sri Lanka'>Sri Lanka</option><option value='Sudan'>Sudan</option><option value='Suriname'>Suriname</option><option value='Svalbard And Jan Mayen'>Svalbard And Jan Mayen</option><option value='Swaziland'>Swaziland</option><option value='Sweden'>Sweden</option><option value='Switzerland'>Switzerland</option><option value='Syrian Arab Republic'>Syrian Arab Republic</option><option value='Taiwan'>Taiwan</option><option value='Tajikistan'>Tajikistan</option><option value='Tanzania'>Tanzania</option><option value='Thailand'>Thailand</option><option value='Timor-leste'>Timor-leste</option><option value='Togo'>Togo</option><option value='Tokelau'>Tokelau</option><option value='Tonga'>Tonga</option><option value='Trinidad And Tobago'>Trinidad And Tobago</option><option value='Tunisia'>Tunisia</option><option value='Turkey'>Turkey</option><option value='Turkmenistan'>Turkmenistan</option><option value='Turks And Caicos Islands'>Turks And Caicos Islands</option><option value='Tuvalu'>Tuvalu</option><option value='Uganda'>Uganda</option><option value='Ukraine'>Ukraine</option><option value='United Arab Emirates'>United Arab Emirates</option><option value='United Kingdom'>United Kingdom</option><option value='United States'>United States</option><option value='United States Minor Outlying Islands'>United States Minor Outlying Islands</option><option value='Uruguay'>Uruguay</option><option value='Uzbekistan'>Uzbekistan</option><option value='Vanuatu'>Vanuatu</option><option value='Venezuela'>Venezuela</option><option value='Viet Nam'>Viet Nam</option><option value='British Virgin Islands'>British Virgin Islands</option><option value='U.S. Virgin Islands'>U.S. Virgin Islands</option><option value='Wallis And Futuna'>Wallis And Futuna</option><option value='Western Sahara'>Western Sahara</option><option value='Yemen'>Yemen</option><option value='Zambia'>Zambia</option><option value='Zimbabwe'>Zimbabwe</option>" +
+        "</select>" +
+        "</br>" +
+        "<select id = 'education_level' required>" +
+        "<option value=\"\" disabled selected> What is the highest level of education you have received or are pursuing? </option>" +
+        "<option value='pre-high school'>Pre-high school</option><option value='high school'>High school</option><option value='college'>College</option><option value='graduate school'>Graduate school</option><option value='professional school'>Professional school</option><option value='PhD'>PhD</option><option value='postdoctoral'>Postdoctoral</option>" +
+        "</select>" +
+        "</br>" +
+        "<select id = 'vision' required>" +
+        "<option value=\"\" disabled selected> How is your vision? </option>" +
+        "<option value='perfect'>Perfect</option><option value='corrected'>Glasses/Contacts (corrected) </option><option value='other'>Other</option>" +
+        "</select>" +
+        "</br>" +
+        "<select id = 'handedness' required>" +
+        "<option value=\"\" disabled selected> What is your handedness? </option>" +
+        "<option value='right-handed'>Right-handed</option><option value='left-handed'>Left-handed</option><option value='ambidextrous'>Ambidextrous</option>" +
+        "</select>" +
+        "</br>" +
+        "<p id='survey_info' class='information'></p>" +
+        "</br>" +
+        "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
+        "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
+        "</form>";
     document.body.appendChild(survey);
 }
 
