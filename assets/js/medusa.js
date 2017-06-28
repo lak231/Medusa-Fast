@@ -854,7 +854,6 @@ function create_iframe_testable(){
     iframe.id = "iframe";
     var innerDoc = (iframe.contentDocument) ? iframe.contentDocument : iframe.contentWindow.document;
     document.appendChild(iframe);
-    //TODO: format iframe here
 }
 
 /************************************
@@ -1429,6 +1428,7 @@ function create_survey() {
 
 function show_video_feed () {
     webgazer.resume();
+    hide_face_tracker();
     var video = document.getElementById('webgazerVideoFeed');
     video.style.display = 'block';
     video.style.position = 'fixed';
@@ -1455,7 +1455,9 @@ function show_video_feed () {
     face_tracker = requestAnimFrame(draw_face_tracker);
 }
 
-
+/**
+ * Draw the face tracker on the screen
+ */
 function draw_face_tracker() {
     face_tracker = requestAnimFrame(draw_face_tracker);
     var overlay = document.getElementById('face_tracker');
@@ -1466,9 +1468,12 @@ function draw_face_tracker() {
     }
 }
 
+/**
+ * Hide the face tracker from the user
+ */
 function hide_face_tracker() {
     delete_elem("face_tracker");
     var video = document.getElementById('webgazerVideoFeed');
     video.style.display = "None";
-    cancelAnimationFrame(face_tracker);
+    cancelAnimationFrame(face_tracker);   
 }
