@@ -665,8 +665,9 @@ function create_consent_form() {
         "That sounds creepy..." +
         "</label>" +
         "</p>" +
-        "</fieldset>" +
 
+        "</fieldset>" +
+        "<p class='information' id='webcam-info'></p>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer()\">Next</button>" +
         "</form>";
     form.style.zIndex = 11;
@@ -677,13 +678,19 @@ function create_consent_form() {
  * Loads Webgazer. Once loaded, starts the collect data procedure
  */
 function load_webgazer() {
-    $.getScript("../assets/js/webgazer.js")
-        .done(function( script, textStatus ) {
-            initiate_webgazer();
-        })
-        .fail(function( jqxhr, settings, exception ) {
-            $( "div.log" ).text( "Triggered ajaxError handler." );
-        });
+    navigator.getUserMedia({video: true}, function() {
+        $.getScript("../assets/js/webgazer.js")
+            .done(function( script, textStatus ) {
+                initiate_webgazer();
+            })
+            .fail(function( jqxhr, settings, exception ) {
+                $( "div.log" ).text( "Triggered ajaxError handler." );
+            });
+    }, function() {
+        document.getElementById("webcam-info").innerHTML = "";
+        document.getElementById("webcam-info").innerHTML += "No webcam found."
+    });
+
 }
 
 /**
