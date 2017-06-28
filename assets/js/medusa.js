@@ -589,10 +589,10 @@ function send_user_data_to_database(callback){
         }
     });
     if (empty_count === 1) {
-        document.getElementById("survey_info").innerHTML = "<strong> There is only one more thing you need to fill out </strong>";
+        document.getElementById("survey_info").innerHTML = "There is only one more thing you need to fill out";
         return;
     } else if (empty_count > 1) {
-        document.getElementById("survey_info").innerHTML = "<strong> There are " + empty_count.toString() + " more things you need to fill out. </strong>";
+        document.getElementById("survey_info").innerHTML = "There are " + empty_count.toString() + " more things you need to fill out.";
         return;
     }
     user.age = document.getElementById('age').value;
@@ -610,13 +610,14 @@ function send_user_data_to_database(callback){
             "info":user
         }
     };
+    save_user_choices();
     toggle_stylesheets();
     docClient.put(params, function(err, data) {
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            window.location.href = "../index.html";
+            window.location.href = "../../index.html";
 
         }
     });
@@ -668,7 +669,7 @@ function create_consent_form() {
 
         "</fieldset>" +
         "<p class='information' id='webcam-info'></p>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer()\">Next</button>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"create_survey()\">Next</button>" +
         "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
@@ -841,6 +842,35 @@ function create_experiment_instruction() {
 }
 
 
+
+function autofill_survey(obj) {
+    if (obj.value === "no") return;
+    var user_survey_choices = {};
+    if (typeof(Storage) !== "undefined") {
+        if (localStorage.getItem("user_survey_choices") !== null) {
+            user_survey_choices = JSON.parse(localStorage.getItem("user_survey_choices"));
+            $("select").each(function () {
+                if (user_survey_choices.hasOwnProperty(this.id)) {
+                    this.value = user_survey_choices[this.id];
+                }
+            });
+        }
+    }
+}
+
+function save_user_choices() {
+    if (typeof(Storage) !== "undefined") {
+        var user_survey_choices = {};
+        $("select").each(function () {
+            if (this.id !== "experience") {
+                user_survey_choices[this.id] = this.value;
+            }
+        });
+        user_survey_choices = JSON.stringify(user_survey_choices);
+
+        localStorage.setItem("user_survey_choices", user_survey_choices);
+    }
+}
 
 /************************************
  * IFRAME
@@ -1382,6 +1412,12 @@ function create_survey() {
         "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
         "</header>" +
         "<form id='selection_fields'>" +
+        "<select id='experience' onchange='autofill_survey(this)' required>" +
+            "<option value=\"\" disabled selected> Have you done this experiment before? </option>" +
+            "<option value='yes'> Yes </option>" +
+            "<option value='no'> No </option>" +
+        "</select>" +
+        "</br>" +
         "<select id='age' required>" +
         "<option value=\"\" disabled selected> How old are you? </option>" + age_options +
         "</select>" +
