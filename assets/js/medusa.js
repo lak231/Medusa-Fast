@@ -701,7 +701,7 @@ function create_consent_form() {
 
         "</fieldset>" +
         "<p class='information' id='webcam-info'></p>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"create_survey()\">Next</button>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer()\">Next</button>" +
         "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
