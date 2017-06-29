@@ -2,8 +2,8 @@ var AWS = require("aws-sdk");
 var fs = require('fs');
 AWS.config.region = 'us-east-2'; // Region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-IdentityPoolId: 'us-east-2:3b25824a-8344-494d-99ee-91a2815b71a3',
-RoleArn: "arn:aws:iam::790084491156:role/Cognito_MedusaUnauth_Role"
+IdentityPoolId: 'us-east-2:8ee03ba3-a31d-4414-882a-a7a83917a5be',
+RoleArn: "arn:aws:iam::345518382834:role/Cognito_medusaUnauth_Role"
 });
 var dynamodb = new AWS.DynamoDB();
 var docClient = new AWS.DynamoDB.DocumentClient();
