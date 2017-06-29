@@ -57,6 +57,8 @@ var possible_paradigm = ["simple","pursuit","heatmap", "massvis"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
+var heatmap_data_x = [];
+var heatmap_data_y = [];
 
 /************************************
  * CALIBRATION PARAMETERS
@@ -1367,7 +1369,52 @@ function draw_massvis_image() {
     setTimeout(function(){
         store_data.task = "massvis";
         paradigm = "massvis";
-        send_gaze_data_to_database(loop_massvis_paradigm);
+        heatmap_data_x = store_data.gaze_x;
+        heatmap_data_y = store_data.gaze_y;
+        send_gaze_data_to_database(draw_massvis_heatmap());
+    }, massvis_paradigm_settings.image_show_time);
+}
+
+function draw_massvis_heatmap() {
+    clear_canvas();
+    webgazer.pause();
+    collect_data = true;
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    var spacing = 10;
+    context.drawImage(curr_object,
+        canvas.width / 2 - (curr_object.width/curr_object.height * (canvas.height - spacing * 2))/2,
+        spacing,
+        curr_object.width/curr_object.height * (canvas.height - spacing * 2),
+        canvas.height - spacing * 2
+    );
+
+    var heatmapInstance = h337.create({
+        container: document.querySelector("#canvas-overlay")
+    });
+
+    var points = [];
+    var max = 0;
+
+    for (i = 0; i < heatmap_data_x.length; i++) {
+        var point = {
+            x: heatmap_data_x[i],
+            y: heatmap_data_y[i],
+            value: 0,
+            radius: 5
+        };
+        points.push(point);
+    }
+
+    var data = {
+        max: max,
+        data: points
+    };
+
+    heatmapInstance.setData(data);
+
+    setTimeout(function(){
+        loop_massvis_paradigm();
     }, massvis_paradigm_settings.image_show_time);
 }
 
