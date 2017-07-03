@@ -16,14 +16,7 @@ var session_time = "";  // time of current webgazer session
 
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
-    url: "",   // url of website
     task: "",   // the current performing task
-    canvasWidth: "",    // the width of the canvas
-    canvasHeight: "",   // the height of the canvas
-    caliration_position_array: [],  // the array of all calibration positions
-    validation_position_array: [],  // the array of all validation positions
-    simple_position_array: [],  // the array of all simple positions
-    pursuit_position_array: [], // the array of all pursuit positions
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -34,6 +27,10 @@ var store_data = {
 
 // store all of information of the users which we will send to the database
 var user = {
+    url: "",   // url of website
+    canvasWidth: "",    // the width of the canvas
+    canvasHeight: "",   // the height of the canvas
+    pursuit_position_array: [], // the array of all pursuit positions
     gender:"",    // the gender of the user
     age: "",    // age of the user
     main_country:"",  // country where the user spends the most time in
@@ -464,12 +461,6 @@ function reset_store_data(callback){
     store_data = {
         url: "",   // url of website
         task: "",   // the current performing task
-        canvasWidth: "",    // the width of the canvas
-        canvasHeight: "",   // the height of the canvas
-        caliration_position_array: [],  // the array of all calibration positions
-        validation_position_array: [],  // the array of all validation positions
-        simple_position_array: [],  // the array of all simple positions
-        pursuit_position_array: [], // the array of all pursuit positions
         description: "",    // a description of the task. Depends on the type of task
         elapsedTime: [], // time since webgazer.begin() is called
         object_x: [], // x position of whatever object the current task is using
@@ -523,13 +514,6 @@ function draw_fixation_cross() {
 function send_gaze_data_to_database(callback){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    store_data.url  = window.location.href;
-    store_data.canvasWidth = canvas.width;
-    store_data.canvasHeight = canvas.height;
-    store_data.caliration_position_array = calibration_settings.position_array;
-    store_data.validation_position_array = validation_settings.position_array;
-    store_data.simple_position_array = simple_paradigm_settings.position_array;
-    store_data.pursuit_position_array = pursuit_paradigm_settings.position_array;
     var params = {
         TableName :TABLE_NAME,
         Item: {
@@ -544,7 +528,6 @@ function send_gaze_data_to_database(callback){
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
             if (typeof callback !== "undefined") {
-                session_time = (new Date).getTime().toString();
                 reset_store_data(callback);
             }
         }
@@ -572,6 +555,11 @@ function send_user_data_to_database(callback){
         document.getElementById("survey_info").innerHTML = "There are " + empty_count.toString() + " more things you need to fill out.";
         return;
     }
+    var canvas = document.getElementById("canvas-overlay");
+    user.url = window.location.href;
+    user.canvasHeight = canvas.height;
+    user.canvasWidth = canvas.width;
+    user.pursuit_position_array = pursuit_paradigm_settings.position_array;
     user.age = document.getElementById('age').value;
     user.gender = document.getElementById('gender').value;
     user.current_country = document.getElementById('current_country').value;
@@ -788,19 +776,20 @@ function check_webgazer_status() {
  */
 function createID() {
     // check if there is a gazer_id already stored
-    if (typeof(Storage) !== "undefined") {
-        console.log(localStorage.getItem("gazer_id"));
-        if (localStorage.getItem("gazer_id") !== null){
-            gazer_id = localStorage.getItem("gazer_id");
-        }
-        else{
-            gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
-            localStorage.setItem("gazer_id", gazer_id);
-        }
-    }
-    else{
-        gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
-    }
+    gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
+    // if (typeof(Storage) !== "undefined") {
+    //     console.log(localStorage.getItem("gazer_id"));
+    //     if (localStorage.getItem("gazer_id") !== null){
+    //         gazer_id = localStorage.getItem("gazer_id");
+    //     }
+    //     else{
+    //         gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
+    //         localStorage.setItem("gazer_id", gazer_id);
+    //     }
+    // }
+    // else{
+    //     gazer_id = "id-"+((new Date).getTime().toString(16)+Math.floor(1E7*Math.random()).toString(16));
+    // }
 }
 
 /**
