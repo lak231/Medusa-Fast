@@ -3,7 +3,7 @@
  * CONSTANTS
  ************************************/
 const TABLE_NAME = "GAZE_DATA"; // name of data table of gaze data
-const USER_TABLE_NAME = "USERS" // name of data table of users
+const USER_TABLE_NAME = "USERS"; // name of data table of users
 const DEFAULT_DOT_RADIUS = 25;
 const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
 const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
@@ -40,8 +40,8 @@ var user = {
     current_country:"",   // the current country the user is living in
     education_level:"",   // the education level of the user
     main_hand:"",     // the main hand (left, right or ambidextrous) of the user
-    eye_sight:"", // the eye sight of the user. either near-sight, far-sight or normal
-}
+    eye_sight:"" // the eye sight of the user. either near-sight, far-sight or normal
+};
 
 var collect_data = true;
 var face_tracker;
@@ -59,6 +59,8 @@ var possible_paradigm = ["simple","pursuit","heatmap", "massvis"];
 var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
+var heatmap_data_x = [];
+var heatmap_data_y = [];
 
 /************************************
  * CALIBRATION PARAMETERS
@@ -117,7 +119,7 @@ pursuit_paradigm_settings = {
         {x: 0.8, y: 0.8, tx: 0.2, ty: 0.8}
     ],
     num_trials: 12,
-    dot_show_time: 5000,
+    dot_show_time: 3500,
     fixation_rest_time: 1000
 };
 
@@ -152,7 +154,7 @@ var docClient = new AWS.DynamoDB.DocumentClient();
  */
 function download_calibration_data(el) {
     var data = webgazer.getTrainingData();
-    var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
     el.setAttribute("href", data);
     var date = new Date().toDateString();
     el.setAttribute("download", "calibration_data " + date + ".json");
@@ -735,7 +737,6 @@ function initiate_webgazer(){
         .setRegression('ridge')
         .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
-
             if (data === null) return;
             if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
             if (curr_object === undefined || curr_object === null) return;
@@ -864,9 +865,9 @@ function create_user_database() {
 function create_experiment_instruction() {
     if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
-        var instruction_guide1 = "Please remove all of your glasses and hats. Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment."
-        var instruction_guide2 = "There are 5 tasks in total, including a calibration task, a validation task, and three experiments tasks. The whole experiment takes about 10-15 minutes "
-        var instruction_guide3 = "We know focusing on the screen for a long time is tiring to the eyes, so there will be break in between sections."
+        var instruction_guide1 = "Please remove all of your glasses and hats. Please modify the camera until the yellow lines roughly fit your face, and try to keep your head still during the entire experiment.";
+        var instruction_guide2 = "There are 5 tasks in total, including a calibration task, a validation task, and three experiments tasks. The whole experiment takes about 10-15 minutes ";
+        var instruction_guide3 = "We know focusing on the screen for a long time is tiring to the eyes, so there will be break in between sections.";
         delete_elem("consent_form");
         instruction.id = "instruction";
         instruction.className += "overlay-div";
@@ -994,8 +995,8 @@ function create_calibration_instruction() {
     clear_canvas();
     delete_elem("instruction");
     var instruction = document.createElement("div");
-    var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every 5 seconds. There will be 39 dots in total, divided into 3 parts with breaks inbetween. "
-    var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely."
+    var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every 5 seconds. There will be 39 dots in total, divided into 3 parts with breaks inbetween. ";
+    var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely.";
     delete_elem("consent_form");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
@@ -1435,7 +1436,45 @@ function draw_massvis_image() {
     setTimeout(function(){
         store_data.task = "massvis";
         paradigm = "massvis";
-        send_gaze_data_to_database(loop_massvis_paradigm);
+        heatmap_data_x = store_data.gaze_x.slice(0);
+        heatmap_data_y = store_data.gaze_y.slice(0);
+        send_gaze_data_to_database(draw_massvis_heatmap());
+    }, massvis_paradigm_settings.image_show_time);
+}
+
+function draw_massvis_heatmap() {
+    webgazer.pause();
+    collect_data = false;
+
+    var canvas = document.createElement('canvas');
+    canvas.id     = "heatmap-overlay";
+    // canvas.addEventListener("mousedown", canvas_on_click, false);
+    // style the newly created canvas
+    canvas.style.zIndex   = 11;
+    canvas.style.position = "fixed";
+    canvas.style.left = 0;
+    canvas.style.top = 0;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+
+    var heat = simpleheat(canvas);
+    points = [];
+    for (i = 0; i < heatmap_data_x.length; i++) {
+        var point = [
+            heatmap_data_x[i],
+            heatmap_data_y[i],
+            0.05];
+        points.push(point);
+    }
+
+    heat.data(points);
+    heat.draw();
+
+    setTimeout(function(){
+        loop_massvis_paradigm();
+        heat.clear();
+        delete_elem("heatmap-overlay");
     }, massvis_paradigm_settings.image_show_time);
 }
 
