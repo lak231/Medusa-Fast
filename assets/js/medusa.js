@@ -749,10 +749,17 @@ function initiate_webgazer(){
             if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
+            if (current_task === "pursuit"){
+                store_data.object_x.push(curr_object.cx);
+                store_data.object_y.push(curr_object.cy);
+            }
+            else{
+                store_data.object_x.push(curr_object.x);
+                store_data.object_y.push(curr_object.y);    
+            }
             store_data.gaze_x.push(data.x);
             store_data.gaze_y.push(data.y);
-            store_data.object_x.push(curr_object.x);
-            store_data.object_y.push(curr_object.y);
+            
         })
         .begin()
         .showPredictionPoints(false);
@@ -1314,7 +1321,9 @@ function loop_pursuit_paradigm() {
     clear_canvas();
     current_task = 'pursuit_paradigm';
     if (objects_array.length === 0) {
-        objects_array = pursuit_paradigm_settings.position_array.slice(0)
+        var temp = { arr : pursuit_paradigm_settings.position_array };
+        var obj = $.extend(true, {}, temp);
+        var objects_array = obj.arr
         objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
             objects_array[i].x = canvas.width * objects_array[i].x;
