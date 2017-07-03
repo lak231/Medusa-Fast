@@ -670,7 +670,7 @@ function send_user_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            window.location.href = "../index.html";
+            window.location.href = "../../index.html";
 
         }
     });
