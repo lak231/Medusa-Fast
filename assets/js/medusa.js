@@ -75,10 +75,10 @@ var calibration_settings = {
  ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 10,  // the number of dots used for validation
+    num_dots: 13,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 200,  // radius of acceptable gaze data around validation dot
+    distance: 150,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -87,7 +87,7 @@ var validation_settings = {
  * SIMPLE_PARADIGM PARAMETERS
  ************************************/
 simple_paradigm_settings = {
-    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
+    position_array:[[0.2, 0.2], [0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 7,
     fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
@@ -581,9 +581,9 @@ function draw_heatmap(function_name) {
         // }
 
     } else if (current_task === "calibration" || current_task === "validation") {
-        for (i = 0; i < simple_paradigm_settings.position_array.length; i++) {
-            midX = simple_paradigm_settings.position_array[i][0] * canvas.width;
-            midY = simple_paradigm_settings.position_array[i][1] * canvas.height;
+        for (i = 0; i < calibration_settings.position_array.length; i++) {
+            midX = calibration_settings.position_array[i][0] * canvas.width;
+            midY = calibration_settings.position_array[i][1] * canvas.height;
             draw_fixation_cross(midX, midY, canvas);
         }
         draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
@@ -1175,17 +1175,8 @@ function finish_calibration(){
  * VALIDATION
  ************************************/
 function create_validation_instruction() {
-    clear_canvas();
     var instruction_guide1 = "Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready.";
-    var instruction = document.createElement("div");
-    instruction.id = "instruction";
-    instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;
-    instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Validation </h2>" + '<p class=\"information\">' + instruction_guide1 + '<\p>'+
-        "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra </button>";
-    document.body.appendChild(instruction);
+    create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
 }
 
 /**
@@ -1295,7 +1286,7 @@ function create_validation_fail_screen() {
     }, screen_timeout);
 }
 
-function create_general_instruction(title, information, button_action) {
+function create_general_instruction(title, information, button_action, button_label) {
     clear_canvas();
     var instruction = document.createElement("div");
     instruction.id = "instruction";
@@ -1305,7 +1296,7 @@ function create_general_instruction(title, information, button_action) {
         "<h2 class=\"form__title\">" + title + "</h2>" +
         "<p class='information'>"  + information + '<\p>'+
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker();" + button_action + "\"> Continue </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker();" + button_action + "\">" + button_label + "</button>";
     document.body.appendChild(instruction);
     show_video_feed();
 }
@@ -1337,7 +1328,7 @@ function navigate_tasks() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_simple_instruction() {
-    create_general_instruction("Dot viewing", "Please look at the cross. When the dot appears, please look at it.", "loop_simple_paradigm()");
+    create_general_instruction("Dot viewing", "Please look at the cross. When the dot appears, please look at it.", "loop_simple_paradigm()", "Start");
 }
 
 function loop_simple_paradigm() {
@@ -1389,7 +1380,7 @@ function finish_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it (not into the screen but with your eyes).", "loop_pursuit_paradigm()");
+    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it (not into the screen but with your eyes).", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
@@ -1406,7 +1397,7 @@ function loop_pursuit_paradigm() {
     if (objects_array.length === 0) {
         var temp = { arr : pursuit_paradigm_settings.position_array };
         var obj = $.extend(true, {}, temp);
-        var objects_array = obj.arr
+        var objects_array = obj.arr;
         objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
             objects_array[i].x = canvas.width * objects_array[i].x;
@@ -1479,7 +1470,7 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function create_massvis_instruction() {
-    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()");
+    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
 }
 
 function loop_massvis_paradigm() {
