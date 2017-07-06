@@ -459,7 +459,6 @@ function draw_dot_countdown(context, dot, color) {
  */
 function reset_store_data(callback){
     store_data = {
-        url: "",   // url of website
         task: "",   // the current performing task
         description: "",    // a description of the task. Depends on the type of task
         elapsedTime: [], // time since webgazer.begin() is called
