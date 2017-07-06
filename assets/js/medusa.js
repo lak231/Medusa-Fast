@@ -75,10 +75,10 @@ var calibration_settings = {
  ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 10,  // the number of dots used for validation
+    num_dots: 13,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 200,  // radius of acceptable gaze data around validation dot
+    distance: 150,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -87,7 +87,7 @@ var validation_settings = {
  * SIMPLE_PARADIGM PARAMETERS
  ************************************/
 simple_paradigm_settings = {
-    position_array:[[0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
+    position_array:[[0.2, 0.2], [0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 7,
     fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
@@ -441,7 +441,10 @@ function draw_dot_countdown(context, dot, color) {
     request_anim_frame(function () {
         if (delta >= calibration_settings.duration * 1000) {
             if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
-                create_calibration_break_form();
+                heatmap_data_x = store_data.gaze_x.slice(0);
+                heatmap_data_y = store_data.gaze_y.slice(0);
+                clear_canvas();
+                draw_heatmap("create_calibration_break_form");
                 return;
             }
             else{
@@ -486,12 +489,9 @@ window.request_anim_frame = (function(callback) {
 /**
  * draw the fixation cross on the middle of the screen
  */
-function draw_fixation_cross() {
+function draw_fixation_cross(midX, midY, canvas_object) {
     clear_canvas();
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    var midX = canvas.width*0.5;
-    var midY = canvas.height*0.5;
+    var context = canvas_object.getContext("2d");
     context.strokeStyle = font_color;
     context.lineWidth = 5;
     //draw horizontal line
@@ -506,6 +506,96 @@ function draw_fixation_cross() {
     context.stroke();
 }
 
+function draw_heatmap(function_name) {
+    console.log(heatmap_data_x);
+    console.log(store_data.gaze_x);
+    webgazer.pause();
+    collect_data = false;
+
+    var canvas = document.createElement('canvas');
+    canvas.id     = "heatmap-overlay";
+    // canvas.addEventListener("mousedown", canvas_on_click, false);
+    // style the newly created canvas
+    canvas.style.zIndex   = 11;
+    canvas.style.position = "fixed";
+    canvas.style.left = 0;
+    canvas.style.top = 0;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+
+    var button = document.createElement("button");
+    button.className += "form__button";
+    button.id = "heatmap-button";
+    button.style.opacity = 0.1;
+    button.style.right = "1em";
+    button.style.bottom = "2em";
+    button.innerHTML = "Next";
+    button.style.position = "fixed";
+    button.style.zIndex = 99;
+    button.addEventListener('click', function () {
+        window[function_name]();
+        delete_elem("heatmap-button");
+        delete_elem("heatmap-overlay");
+    });
+    button.onmouseover = function() {
+        button.style.opacity = 1;
+    };
+    button.onmouseout = function() {
+        button.style.opacity = 0.1;
+    };
+    document.body.appendChild(button);
+
+    var context = canvas.getContext("2d");
+    var heat = simpleheat(canvas);
+    var points = [];
+    for (i = 0; i < heatmap_data_x.length; i++) {
+        var point = [
+            heatmap_data_x[i],
+            heatmap_data_y[i],
+            0.1];
+        points.push(point);
+    }
+
+    heat.data(points);
+    heat.draw();
+
+    if (current_task === "simple_paradigm") {
+        for (i = 0; i < simple_paradigm_settings.position_array.length; i++) {
+            var midX = simple_paradigm_settings.position_array[i][0] * canvas.width;
+            var midY = simple_paradigm_settings.position_array[i][1] * canvas.height;
+            draw_fixation_cross(midX, midY, canvas);
+        }
+    } else if (current_task === "pursuit_paradigm") {
+        draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.2, canvas);
+        draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.2, canvas);
+        draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.8,canvas);
+        draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.8, canvas);
+        // for (i = 0; i < pursuit_paradigm_settings.position_array.length; i++) {
+        //     draw_dashed_line(canvas.width * pursuit_paradigm_settings.position_array[i].x,
+        //                     canvas.height * pursuit_paradigm_settings.position_array[i].y,
+        //                     canvas.width * pursuit_paradigm_settings.position_array[i].ty,
+        //                     canvas.height * pursuit_paradigm_settings.position_array[i].y,
+        //                     context);
+        // }
+
+    } else if (current_task === "calibration" || current_task === "validation") {
+        for (i = 0; i < calibration_settings.position_array.length; i++) {
+            midX = calibration_settings.position_array[i][0] * canvas.width;
+            midY = calibration_settings.position_array[i][1] * canvas.height;
+            draw_fixation_cross(midX, midY, canvas);
+        }
+        draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
+    }
+}
+
+function draw_dashed_line(x, y, tx, ty, ctx) {
+    ctx.beginPath();
+    ctx.setLineDash([5, 15]);
+    ctx.moveTo(x, y);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+}
 
 /**
  * Sends gaze data to database and then clear out the store_data variable. Called after each step 
@@ -526,9 +616,7 @@ function send_gaze_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            if (typeof callback !== "undefined") {
-                reset_store_data(callback);
-            }
+            reset_store_data(callback);
         }
     });
 }
@@ -743,11 +831,11 @@ function initiate_webgazer(){
             }
             else{
                 store_data.object_x.push(curr_object.x);
-                store_data.object_y.push(curr_object.y);    
+                store_data.object_y.push(curr_object.y);
             }
             store_data.gaze_x.push(data.x);
             store_data.gaze_y.push(data.y);
-            
+
         })
         .begin()
         .showPredictionPoints(false);
@@ -1079,24 +1167,15 @@ function finish_calibration(){
     store_data.description = "success";
     webgazer.pause();
     collect_data = false;
-    reset_store_data(create_validation_instruction);
+    reset_store_data(draw_heatmap("create_validation_instruction"));
 }
 
 /************************************
  * VALIDATION
  ************************************/
 function create_validation_instruction() {
-    clear_canvas();
     var instruction_guide1 = "Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready.";
-    var instruction = document.createElement("div");
-    instruction.id = "instruction";
-    instruction.className += "overlay-div";
-    instruction.style.zIndex = 12;
-    instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Validation </h2>" + '<p class=\"information\">' + instruction_guide1 + '<\p>'+
-        "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"start_validation()\"> Avada Kedavra </button>";
-    document.body.appendChild(instruction);
+    create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
 }
 
 /**
@@ -1185,7 +1264,9 @@ function finish_validation(succeed){
         store_data.task = "validation";
         store_data.description = "success";
         paradigm = "simple";
-        navigate_tasks();
+        heatmap_data_x = store_data.gaze_x.slice(0);
+        heatmap_data_y = store_data.gaze_y.slice(0);
+        draw_heatmap("navigate_tasks");
     }
 }
 
@@ -1204,7 +1285,7 @@ function create_validation_fail_screen() {
     }, screen_timeout);
 }
 
-function create_general_instruction(title, information, button_action) {
+function create_general_instruction(title, information, button_action, button_label) {
     clear_canvas();
     var instruction = document.createElement("div");
     instruction.id = "instruction";
@@ -1214,7 +1295,7 @@ function create_general_instruction(title, information, button_action) {
         "<h2 class=\"form__title\">" + title + "</h2>" +
         "<p class='information'>"  + information + '<\p>'+
         "</header>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker();" + button_action + "\"> Continue </button>";
+        "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker();" + button_action + "\">" + button_label + "</button>";
     document.body.appendChild(instruction);
     show_video_feed();
 }
@@ -1246,7 +1327,7 @@ function navigate_tasks() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_simple_instruction() {
-    create_general_instruction("Dot viewing", "Please look at the cross. When the dot appears, please look at it.", "loop_simple_paradigm()");
+    create_general_instruction("Dot viewing", "Please look at the cross. When the dot appears, please look at it.", "loop_simple_paradigm()", "Start");
 }
 
 function loop_simple_paradigm() {
@@ -1268,7 +1349,7 @@ function loop_simple_paradigm() {
     else{
         webgazer.pause();
         collect_data = false;
-        draw_fixation_cross();
+        draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
         setTimeout(function(){
                 clear_canvas();
                 webgazer.resume();
@@ -1289,13 +1370,16 @@ function finish_simple_paradigm(){
     webgazer.pause();
     collect_data = false;
     console.log("finish simple paradigm");
-    send_gaze_data_to_database(navigate_tasks);
+    heatmap_data_x = store_data.gaze_x.slice(0);
+    heatmap_data_y = store_data.gaze_y.slice(0);
+    send_gaze_data_to_database();
+    draw_heatmap("navigate_tasks");
 }
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it (not into the screen but with your eyes).", "loop_pursuit_paradigm()");
+    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it (not into the screen but with your eyes).", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
@@ -1312,7 +1396,7 @@ function loop_pursuit_paradigm() {
     if (objects_array.length === 0) {
         var temp = { arr : pursuit_paradigm_settings.position_array };
         var obj = $.extend(true, {}, temp);
-        var objects_array = obj.arr
+        var objects_array = obj.arr;
         objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
             objects_array[i].x = canvas.width * objects_array[i].x;
@@ -1374,7 +1458,10 @@ function finish_pursuit_paradigm(){
     paradigm = "massvis";
     webgazer.pause();
     collect_data = false;
-    send_gaze_data_to_database(navigate_tasks);
+    heatmap_data_x = store_data.gaze_x.slice(0);
+    heatmap_data_y = store_data.gaze_y.slice(0);
+    draw_heatmap("navigate_tasks");
+    send_gaze_data_to_database();
     console.log("finish pursuit paradigm");
 }
 
@@ -1382,7 +1469,7 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function create_massvis_instruction() {
-    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()");
+    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
 }
 
 function loop_massvis_paradigm() {
@@ -1399,7 +1486,7 @@ function loop_massvis_paradigm() {
     curr_object = new Image();
     curr_object.src = objects_array.pop();
     store_data.description = curr_object.src;
-    draw_fixation_cross();
+    draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
     num_objects_shown ++;
     webgazer.pause();
     collect_data = false;
@@ -1426,43 +1513,8 @@ function draw_massvis_image() {
         paradigm = "massvis";
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
-        send_gaze_data_to_database(draw_massvis_heatmap());
-    }, massvis_paradigm_settings.image_show_time);
-}
-
-function draw_massvis_heatmap() {
-    webgazer.pause();
-    collect_data = false;
-
-    var canvas = document.createElement('canvas');
-    canvas.id     = "heatmap-overlay";
-    // canvas.addEventListener("mousedown", canvas_on_click, false);
-    // style the newly created canvas
-    canvas.style.zIndex   = 11;
-    canvas.style.position = "fixed";
-    canvas.style.left = 0;
-    canvas.style.top = 0;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.appendChild(canvas);
-
-    var heat = simpleheat(canvas);
-    points = [];
-    for (i = 0; i < heatmap_data_x.length; i++) {
-        var point = [
-            heatmap_data_x[i],
-            heatmap_data_y[i],
-            0.05];
-        points.push(point);
-    }
-
-    heat.data(points);
-    heat.draw();
-
-    setTimeout(function(){
-        loop_massvis_paradigm();
-        heat.clear();
-        delete_elem("heatmap-overlay");
+        send_gaze_data_to_database();
+        draw_heatmap("loop_massvis_paradigm");
     }, massvis_paradigm_settings.image_show_time);
 }
 
