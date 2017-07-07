@@ -88,7 +88,7 @@ var validation_settings = {
  ************************************/
 simple_paradigm_settings = {
     position_array:[[0.2, 0.2], [0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 7,
+    num_trials: 8,
     fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
@@ -567,7 +567,7 @@ function draw_heatmap(function_name) {
             var midY = simple_paradigm_settings.position_array[i][1] * canvas.height;
             draw_fixation_cross(midX, midY, canvas);
         }
-    } else if (current_task === "pursuit_paradigm") {
+    } else if (current_task === "pursuit_end") {
         draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.2, canvas);
         draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.2, canvas);
         draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.8,canvas);
@@ -1387,6 +1387,7 @@ function create_pursuit_instruction() {
 function loop_pursuit_paradigm() {
     if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
         finish_pursuit_paradigm();
+        return;
     }
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
@@ -1425,7 +1426,7 @@ function loop_pursuit_paradigm() {
 }
 
 function draw_moving_dot(){
-    if (current_task !== 'pursuit_paradigm') return;
+    if (current_task !== "pursuit_paradigm") return;
     var now = new Date().getTime(), dt = now - (time_stamp || now);
     time_stamp = now;
     var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
@@ -1457,7 +1458,7 @@ function finish_pursuit_paradigm(){
     num_objects_shown = 0;
     store_data.task = "pursuit";
     store_data.description = "success";
-    current_task = "";
+    current_task = "pursuit_end";
     paradigm = "massvis";
     webgazer.pause();
     collect_data = false;
