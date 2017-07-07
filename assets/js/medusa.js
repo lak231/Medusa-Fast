@@ -1376,6 +1376,7 @@ function finish_simple_paradigm(){
     send_gaze_data_to_database();
     draw_heatmap("navigate_tasks");
 }
+
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
@@ -1397,7 +1398,7 @@ function loop_pursuit_paradigm() {
     if (objects_array.length === 0) {
         var temp = { arr : pursuit_paradigm_settings.position_array };
         var obj = $.extend(true, {}, temp);
-        var objects_array = obj.arr;
+        objects_array = obj.arr;
         objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
             objects_array[i].x = canvas.width * objects_array[i].x;
@@ -1456,6 +1457,7 @@ function finish_pursuit_paradigm(){
     num_objects_shown = 0;
     store_data.task = "pursuit";
     store_data.description = "success";
+    current_task = "";
     paradigm = "massvis";
     webgazer.pause();
     collect_data = false;
