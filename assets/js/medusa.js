@@ -462,7 +462,6 @@ function draw_dot_countdown(context, dot, color) {
  */
 function reset_store_data(callback){
     store_data = {
-        url: "",   // url of website
         task: "",   // the current performing task
         description: "",    // a description of the task. Depends on the type of task
         elapsedTime: [], // time since webgazer.begin() is called
@@ -608,16 +607,16 @@ function send_gaze_data_to_database(callback){
         TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
-            "time_collected":session_time,
-            "info":store_data
+            "time_collected": session_time,
+            "info": store_data
         }
     };
+    console.log(params);
     docClient.put(params, function(err, data) {
         if (err) {
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            console.log("eyyyy");
             reset_store_data(callback);
         }
     });
@@ -1478,7 +1477,6 @@ function create_massvis_instruction() {
 }
 
 function loop_massvis_paradigm() {
-    console.log(num_objects_shown);
     if (num_objects_shown >= massvis_paradigm_settings.num_trials) {
         finish_massvis_paradigm();
         return;
@@ -1519,8 +1517,6 @@ function draw_massvis_image() {
         paradigm = "massvis";
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
-        console.log(heatmap_data_x);
-        console.log(heatmap_data_y);
         send_gaze_data_to_database();
         draw_heatmap("loop_massvis_paradigm");
     }, massvis_paradigm_settings.image_show_time);
