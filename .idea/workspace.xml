@@ -22,8 +22,18 @@
       <file leaf-file-name="medusa.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/assets/js/medusa.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="90" column="18" lean-forward="false" selection-start-line="90" selection-start-column="18" selection-end-line="90" selection-end-column="18" />
+            <state relative-caret-position="-1428">
+              <caret line="78" column="31" lean-forward="true" selection-start-line="78" selection-start-column="31" selection-end-line="78" selection-end-column="31" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/index.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1275">
+              <caret line="75" column="38" lean-forward="false" selection-start-line="74" selection-start-column="37" selection-end-line="75" selection-end-column="38" />
               <folding />
             </state>
           </provider>
@@ -42,29 +52,13 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>send_ga</find>
-      <find>done</find>
-      <find>draw_heat</find>
-      <find>draw_fi</find>
-      <find>draw_fix</find>
-      <find>current_task</find>
-      <find>finish</find>
-      <find>draw_fixa</find>
-      <find>heatmap_data_x</find>
-      <find>finish_simple</find>
-      <find>send_data</find>
-      <find>send_gaze</find>
-      <find>reset_store</find>
-      <find>create_calibration_break</find>
       <find>c</find>
       <find>calibration</find>
       <find>d</find>
       <find>heatmap</find>
-      <find>finish_validation</find>
       <find>simple_paradigm_settings</find>
       <find>pursuit</find>
       <find>create_general_instruction</find>
-      <find>draw_heatmap</find>
       <find>create_general</find>
       <find>validation</find>
       <find>validation_settings</find>
@@ -72,6 +66,22 @@
       <find>objects_array = []</find>
       <find>objects_array =</find>
       <find>distance</find>
+      <find>objects_array</find>
+      <find>upload_calibration</find>
+      <find>loop_pursui</find>
+      <find>loop_pursuit</find>
+      <find>draw_heatmap</find>
+      <find>loop_pur</find>
+      <find>upload</find>
+      <find>pursuit_paradigm_settings</find>
+      <find>massvis_paradigm_settings</find>
+      <find>send_gaze_data</find>
+      <find>reset_store</find>
+      <find>finish_calibration</find>
+      <find>finish_validation</find>
+      <find>finish_simple_</find>
+      <find>send_gaze_data_to_database</find>
+      <find>reset_store_data</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -160,6 +170,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="Medusa" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Medusa" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Medusa" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="html" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -322,35 +346,12 @@
       <workItem from="1499110834532" duration="90000" />
       <workItem from="1499111048288" duration="2485000" />
       <workItem from="1499259707414" duration="4429000" />
-      <workItem from="1499278695246" duration="8000" />
-    </task>
-    <task id="LOCAL-00022" summary="basic framework kinda done">
-      <created>1497539540970</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1497539540970</updated>
-    </task>
-    <task id="LOCAL-00023" summary="changed color scheme">
-      <created>1497545016387</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1497545016387</updated>
-    </task>
-    <task id="LOCAL-00024" summary="Merge branch 'master' of https://gitlab.bucknell.edu/bucknell-hci/webcam-eyetracking&#10;&#10;# Conflicts:&#10;#&#9;js/medusa.js">
-      <created>1497545211449</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1497545211449</updated>
-    </task>
-    <task id="LOCAL-00025" summary="Merge branch 'master' of https://gitlab.bucknell.edu/bucknell-hci/webcam-eyetracking&#10;&#10;# Conflicts:&#10;#&#9;js/medusa.js">
-      <created>1497546762524</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1497546762524</updated>
+      <workItem from="1499278695246" duration="615000" />
+      <workItem from="1499369756751" duration="17000" />
+      <workItem from="1499369959022" duration="2246000" />
+      <workItem from="1499434684784" duration="3698000" />
+      <workItem from="1499696307846" duration="3942000" />
+      <workItem from="1499712333136" duration="608000" />
     </task>
     <task id="LOCAL-00026" summary="Survey looks less horrible now">
       <created>1497550903655</created>
@@ -667,22 +668,50 @@
       <option name="project" value="LOCAL" />
       <updated>1499112925532</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="heatmap testing">
+      <created>1499278708626</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1499278708634</updated>
+    </task>
+    <task id="LOCAL-00072" summary="heatmap testing">
+      <created>1499434883402</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1499434883403</updated>
+    </task>
+    <task id="LOCAL-00073" summary="heatmap testing">
+      <created>1499438032773</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1499438032773</updated>
+    </task>
+    <task id="LOCAL-00074" summary="heatmap testing">
+      <created>1499712385439</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1499712385444</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="198895000" />
+    <option name="totallyTimeSpent" value="210013000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16181915" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16181915" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.032842584" sideWeight="0.525119" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.032842584" sideWeight="0.47488102" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3272933" sideWeight="0.50608146" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3272933" sideWeight="0.46641988" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24960339" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19365798" sideWeight="0.49813533" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2751982" sideWeight="0.49391857" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -717,6 +746,32 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="processedProjectFiles" value="true" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
@@ -750,7 +805,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="4" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -805,6 +860,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -874,6 +930,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="5" column="28" lean-forward="false" selection-start-line="5" selection-start-column="28" selection-end-line="5" selection-end-column="28" />
+          <folding>
+            <marker date="1498503103091" expanded="false" signature="0:144" ph="//..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -881,13 +940,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="250">
           <caret line="3290" column="3288" lean-forward="false" selection-start-line="3290" selection-start-column="3284" selection-end-line="3290" selection-end-column="3288" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1275">
-          <caret line="75" column="38" lean-forward="false" selection-start-line="74" selection-start-column="37" selection-end-line="75" selection-end-column="38" />
         </state>
       </provider>
     </entry>
@@ -912,10 +964,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1275">
+          <caret line="75" column="38" lean-forward="false" selection-start-line="74" selection-start-column="37" selection-end-line="75" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/assets/js/medusa.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="90" column="18" lean-forward="false" selection-start-line="90" selection-start-column="18" selection-end-line="90" selection-end-column="18" />
+        <state relative-caret-position="-1428">
+          <caret line="78" column="31" lean-forward="true" selection-start-line="78" selection-start-column="31" selection-end-line="78" selection-end-column="31" />
           <folding />
         </state>
       </provider>
