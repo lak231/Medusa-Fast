@@ -89,7 +89,7 @@ var validation_settings = {
 simple_paradigm_settings = {
     position_array:[[0.2, 0.2], [0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
     num_trials: 8,
-    fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
+    fixation_rest_time: 1500, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
 };
@@ -117,7 +117,7 @@ pursuit_paradigm_settings = {
     ],
     num_trials: 12,
     dot_show_time: 3500,
-    fixation_rest_time: 1000
+    fixation_rest_time: 1500
 };
 
 /************************************
@@ -617,6 +617,7 @@ function send_gaze_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
+            console.log("eyyyy");
             reset_store_data(callback);
         }
     });
@@ -1477,7 +1478,8 @@ function create_massvis_instruction() {
 }
 
 function loop_massvis_paradigm() {
-    if (num_objects_shown > massvis_paradigm_settings.num_trials) {
+    console.log(num_objects_shown);
+    if (num_objects_shown >= massvis_paradigm_settings.num_trials) {
         finish_massvis_paradigm();
         return;
     }
@@ -1517,6 +1519,8 @@ function draw_massvis_image() {
         paradigm = "massvis";
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
+        console.log(heatmap_data_x);
+        console.log(heatmap_data_y);
         send_gaze_data_to_database();
         draw_heatmap("loop_massvis_paradigm");
     }, massvis_paradigm_settings.image_show_time);
