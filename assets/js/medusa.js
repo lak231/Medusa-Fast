@@ -758,23 +758,27 @@ function create_consent_form() {
     form.className += "overlay-div";
     form.innerHTML +=
         "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">Are you cool with us using your webcam to collect data about your eye movement?</h2>" +
+        "<h2 class=\"form__title\">Consent form</h2>" +
+        "<p class='information' style='font-size: 1em'><b>Why we are doing this research:</b> We are trying to examine the feasibility of using consumer-grade webcams to conduct eye-tracking experiments to replace traditional eye-tracking method.</p>" +
+        "<p class='information' style='font-size: 1em'><b>What you will have to do:</b> You will be presented with a series of tasks that involves looking at some dots and data visualizations .</p>" +
+        "<p class='information' style='font-size: 1em'><b>Privacy and Data collection:</b> We will not ask you for your name. We will not record any videos or images from the webcam. The only data from your webcam that we are collecting is predicted coordinates of your gaze made by webgazer. All data will be stored in a secure server.</p>" +
+        "<p class='information' style='font-size: 1em'><b>Duration:</b> Approximately 15 minutes.</p>" +
+        "<p class='information' style='font-size: 1em'><b>Taking part is voluntary:</b> You are free to leave the experiment at any time. If you refuse to be in the experiment or stop participating, there will no penalty or loss of benefits to which you are otherwise entitled.</p>" +
+        "<p class='information' style='font-size: 1em'><b>If you have questions:</b> You may contact Professor Evan Peck at <a href='mailto:evan.peck@bucknell.edu'>evan.peck@bucknell.edu</a>. If you have questions about your rights as a research participant, please contact Matthew Slater, Bucknell University's IRB Chair at 570.577.2767 or at <a href='mailto:matthew.slater@bucknell.edu'>matthew.slater@bucknell.edu</a></p>" +
         "</header>" +
 
         "<form>" +
         "<fieldset class=\"form__options\">" +
         "<p class=\"form__answer\">" +
         "<input name=\"consent\" type=\"radio\" id=\"consent-yes\" value=\"yes\">" +
-        "<label class='form__label' for=\"consent-yes\"> Yeah sure. </br>" +
-        "I'm cool with that."+
+        "<label class='form__label' for=\"consent-yes\"> I have read the above information, and have received answers to any questions I asked. </br>" +
+        "I consent to take part in the study." +
         "</label>" +
         "</p>" +
 
         "<p class=\"form__answer\">" +
         "<input name=\"consent\" type=\"radio\" id=\"consent-no\" value=\"no\">" +
-        "<label class='form__label' for=\"consent-no\">No thanks. </br>" +
-        "That sounds creepy..." +
-        "</label>" +
+        "<label class='form__label' for=\"consent-no\"> I decide not to take part in the study. <br> <br> <br></label>" +
         "</p>" +
 
         "</fieldset>" +
