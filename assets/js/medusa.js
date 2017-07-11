@@ -1179,7 +1179,7 @@ function finish_calibration(){
  * VALIDATION
  ************************************/
 function create_validation_instruction() {
-    var instruction_guide1 = "Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready.";
+    var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. </br> Press the button when you're ready.";
     create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
 }
 
@@ -1282,7 +1282,7 @@ function create_validation_fail_screen() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Your magic is weak. </br> Returning to training. </h2>" +
+        "<h2 class=\"form__title\"> Validation failed. </br> Returning to calibration. </h2>" +
         "</header>";
     document.body.appendChild(instruction);
     setTimeout(function() {
@@ -1385,7 +1385,7 @@ function finish_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it (not into the screen but with your eyes).", "loop_pursuit_paradigm()", "Start");
+    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it when it changes color.", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
