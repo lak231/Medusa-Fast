@@ -554,7 +554,7 @@ function draw_heatmap(function_name) {
         button.style.right = "1em";
         button.style.bottom = "2em";
         button.innerHTML = "Next";
-        button.style.position = "fixed";
+        button.style.position = "absolute";
         button.style.zIndex = 99;
         button.addEventListener('click', function () {
             window[function_name]();
@@ -615,24 +615,10 @@ function draw_heatmap(function_name) {
             }
             canvas = document.getElementById("canvas-overlay");
             context = canvas.getContext("2d");
-            var aspect_ratio = curr_object.width/curr_object.height;
-            if (curr_object.width >= canvas.width || curr_object.height >= canvas.height) {
-                var heightmajor_height = canvas.height - massvis_paradigm_settings.spacing * 2;
-                var heightmajor_width = aspect_ratio * heightmajor_height;
-                var widthmajor_width =  canvas.width - massvis_paradigm_settings.spacing * 2;
-                var widthmajor_height = widthmajor_width / aspect_ratio;
-                if (heightmajor_height < canvas.height && heightmajor_width < canvas.width) {
-                    curr_object.width = heightmajor_width;
-                    curr_object.height = heightmajor_height;
-                } else if (widthmajor_width < canvas.width && widthmajor_height < canvas.height) {
-                    curr_object.width = widthmajor_width;
-                    curr_object.height = widthmajor_height;
-                }
-            }
             curr_object.onload =
                 context.drawImage(curr_object,
                     canvas.width / 2 - curr_object.width / 2,
-                    massvis_paradigm_settings.spacing / 2,
+                    canvas.height / 2 - curr_object.height / 2,
                     curr_object.width,
                     curr_object.height
                 );
