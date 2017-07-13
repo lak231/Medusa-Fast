@@ -53,7 +53,7 @@ var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
 var possible_paradigm = ["simple","pursuit","heatmap", "massvis"];
-var screen_timeout = 3000;
+var screen_timeout = 300;
 var cam_width = 320;
 var cam_height = 240;
 var heatmap_data_x = [];
@@ -78,7 +78,7 @@ var validation_settings = {
     num_dots: 13,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 150,  // radius of acceptable gaze data around validation dot
+    distance: 200,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -86,10 +86,10 @@ var validation_settings = {
 /************************************
  * SIMPLE_PARADIGM PARAMETERS
  ************************************/
-simple_paradigm_settings = {
+var simple_paradigm_settings = {
     position_array:[[0.2, 0.2], [0.5,0.2],[0.8,0.2],[0.2,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8]],
-    num_trials: 7,
-    fixation_rest_time: 1000, // amount of time 'target' will appear on screen with each trial, in ms
+    num_trials: 8,
+    fixation_rest_time: 1500, // amount of time 'target' will appear on screen with each trial, in ms
     dot_show_time: 5000    // amount of time dot will appear on screen with each trial, in ms
 
 };
@@ -97,7 +97,7 @@ simple_paradigm_settings = {
 /************************************
  * PURSUIT_PARADIGM PARAMETERS
  ************************************/
-pursuit_paradigm_settings = {
+var pursuit_paradigm_settings = {
     position_array:[
         {x: 0.2, y: 0.2, tx: 0.8, ty: 0.2},
         {x: 0.2, y: 0.2, tx: 0.2, ty: 0.8},
@@ -117,20 +117,30 @@ pursuit_paradigm_settings = {
     ],
     num_trials: 12,
     dot_show_time: 3500,
-    fixation_rest_time: 1000
+    fixation_rest_time: 1500
 };
 
 /************************************
  * MASSVIS_PARADIGM PARAMETERS
  ************************************/
-massvis_paradigm_settings = {
-    image_array: ["../assets/images/vis/visMost54.png", "../assets/images/vis/visMost147.png", "../assets/images/vis/visMost282.png", "../assets/images/vis/visMost376.png", "../assets/images/vis/visMost735.png"],
-    num_trials: 5,
-    fixation_rest_time: 1000, // amount of time fixation cross will appear on screen with each trial, in ms
+var massvis_paradigm_settings = {
+    image_array: ['../assets/images/vis/economist_daily_chart_103.png', '../assets/images/vis/economist_daily_chart_106.png', '../assets/images/vis/economist_daily_chart_110.png', '../assets/images/vis/economist_daily_chart_116.png', '../assets/images/vis/economist_daily_chart_124.png', '../assets/images/vis/economist_daily_chart_129.png', '../assets/images/vis/economist_daily_chart_153.png', '../assets/images/vis/economist_daily_chart_165.png', '../assets/images/vis/economist_daily_chart_167.png', '../assets/images/vis/economist_daily_chart_18.png', '../assets/images/vis/economist_daily_chart_187.png', '../assets/images/vis/economist_daily_chart_202.png', '../assets/images/vis/economist_daily_chart_215.png', '../assets/images/vis/economist_daily_chart_219.png', '../assets/images/vis/economist_daily_chart_240.png', '../assets/images/vis/economist_daily_chart_242.png', '../assets/images/vis/economist_daily_chart_258.png', '../assets/images/vis/economist_daily_chart_268.png', '../assets/images/vis/economist_daily_chart_310.png', '../assets/images/vis/economist_daily_chart_317.png', '../assets/images/vis/economist_daily_chart_324.png', '../assets/images/vis/economist_daily_chart_35.png', '../assets/images/vis/economist_daily_chart_380.png', '../assets/images/vis/economist_daily_chart_390.png', '../assets/images/vis/economist_daily_chart_392.png', '../assets/images/vis/economist_daily_chart_4.png', '../assets/images/vis/economist_daily_chart_406.png', '../assets/images/vis/economist_daily_chart_416.png', '../assets/images/vis/economist_daily_chart_430.png', '../assets/images/vis/economist_daily_chart_439.png', '../assets/images/vis/economist_daily_chart_449.png', '../assets/images/vis/economist_daily_chart_45.png', '../assets/images/vis/economist_daily_chart_453.png', '../assets/images/vis/economist_daily_chart_454.png', '../assets/images/vis/economist_daily_chart_46.png', '../assets/images/vis/economist_daily_chart_475.png', '../assets/images/vis/economist_daily_chart_48.png', '../assets/images/vis/economist_daily_chart_490.png', '../assets/images/vis/economist_daily_chart_491.png', '../assets/images/vis/economist_daily_chart_493.png', '../assets/images/vis/economist_daily_chart_5.png', '../assets/images/vis/economist_daily_chart_516.png', '../assets/images/vis/economist_daily_chart_520.png', '../assets/images/vis/economist_daily_chart_521.png', '../assets/images/vis/economist_daily_chart_529.png', '../assets/images/vis/economist_daily_chart_53.png', '../assets/images/vis/economist_daily_chart_54.png', '../assets/images/vis/economist_daily_chart_66.png', '../assets/images/vis/economist_daily_chart_69.png', '../assets/images/vis/economist_daily_chart_75.png', '../assets/images/vis/economist_daily_chart_85.png', '../assets/images/vis/economist_daily_chart_89.png', '../assets/images/vis/economist_daily_chart_99.png', '../assets/images/vis/np_21.png', '../assets/images/vis/np_48.png', '../assets/images/vis/np_7.png', '../assets/images/vis/treasuryA10.png', '../assets/images/vis/treasuryB04.png', '../assets/images/vis/treasuryB10.png', '../assets/images/vis/treasuryB15.png', '../assets/images/vis/treasuryD04_3.png', '../assets/images/vis/treasuryD05_1.png', '../assets/images/vis/treasuryD08.png', '../assets/images/vis/treasuryG01_2.png', '../assets/images/vis/treasuryG02_2.png', '../assets/images/vis/treasuryG05_1.png', '../assets/images/vis/treasuryG06_2.png', '../assets/images/vis/treasuryG07_2.png', '../assets/images/vis/treasuryI01_2.png', '../assets/images/vis/treasuryI02_1.png', '../assets/images/vis/treasuryK01.png', '../assets/images/vis/treasuryK03_2.png', '../assets/images/vis/treasuryK03_3.png', '../assets/images/vis/treasuryK05_1.png', '../assets/images/vis/treasuryK06.png', '../assets/images/vis/treasuryL03_2.png', '../assets/images/vis/treasuryL04_1.png', '../assets/images/vis/treasuryL10_1.png', '../assets/images/vis/treasuryL11_2.png', '../assets/images/vis/treasuryL13.png', '../assets/images/vis/treasuryL16.png', '../assets/images/vis/v482_n7386_5_f5.png', '../assets/images/vis/v482_n7386_7_f2.png', '../assets/images/vis/v483_n7387_20_f2.png', '../assets/images/vis/v483_n7387_5_f1.png', '../assets/images/vis/v483_n7387_7_f4.png', '../assets/images/vis/v483_n7388_11_f2.png', '../assets/images/vis/v483_n7388_14_f3.png', '../assets/images/vis/v483_n7389_24_f3.png', '../assets/images/vis/v483_n7390_14_f2.png', '../assets/images/vis/v483_n7390_21_f4.png', '../assets/images/vis/v483_n7390_8_f1.png', '../assets/images/vis/v483_n7391_1_f1.png', '../assets/images/vis/v483_n7391_3_f5.png', '../assets/images/vis/v483_n7391_8_f1.png', '../assets/images/vis/v484_n7392_14_f3.png', '../assets/images/vis/v484_n7393_20_f1.png', '../assets/images/vis/v484_n7393_6_f4.png', '../assets/images/vis/v484_n7394_10_f4.png', '../assets/images/vis/v484_n7394_5_f2.png', '../assets/images/vis/v484_n7394_5_f5.png', '../assets/images/vis/v484_n7394_8_f2.png', '../assets/images/vis/v484_n7394_8_f4.png', '../assets/images/vis/v484_n7395_11_f1.png', '../assets/images/vis/v485_n7397_14_f3.png', '../assets/images/vis/v485_n7397_15_f1.png', '../assets/images/vis/v485_n7397_6_f4.png', '../assets/images/vis/v485_n7399_13_f4.png', '../assets/images/vis/v485_n7399_9_f2.png', '../assets/images/vis/v485_n7400_14_f1.png', '../assets/images/vis/v485_n7400_14_f2.png', '../assets/images/vis/v485_n7400_15_f2.png', '../assets/images/vis/v486_n7401_8_f1.png', '../assets/images/vis/v486_n7401_8_f2.png', '../assets/images/vis/v486_n7403_19_f2.png', '../assets/images/vis/v486_n7403_1_f8.png', '../assets/images/vis/v486_n7404_1_f2.png', '../assets/images/vis/v486_n7404_20_f6.png', '../assets/images/vis/v486_n7404_6_f1.png', '../assets/images/vis/v486_n7404_9_f2.png', '../assets/images/vis/v487_n7405_21_f2.png', '../assets/images/vis/v487_n7405_22_f1.png', '../assets/images/vis/v487_n7405_6_f4.png', '../assets/images/vis/v487_n7405_7_f1.png', '../assets/images/vis/v487_n7406_13_f2.png', '../assets/images/vis/v487_n7406_13_f5.png', '../assets/images/vis/v487_n7407_15_f3.png', '../assets/images/vis/v487_n7407_22_f2.png', '../assets/images/vis/v487_n7407_22_f4.png', '../assets/images/vis/v487_n7408_15_f3.png', '../assets/images/vis/v488_n7410_13_f4.png', '../assets/images/vis/v488_n7410_15_f3.png', '../assets/images/vis/v488_n7411_6_f4.png', '../assets/images/vis/v488_n7411_9_f1.png', '../assets/images/vis/v488_n7412_1_f3.png', '../assets/images/vis/v488_n7412_1_f4.png', '../assets/images/vis/v488_n7412_4_f1.png', '../assets/images/vis/v488_n7412_7_f1.png', '../assets/images/vis/v488_n7412_8_f1.png', '../assets/images/vis/v488_n7412_9_f1.png', '../assets/images/vis/v488_n7413_3_f2.png', '../assets/images/vis/v489_n7414_20_f1.png', '../assets/images/vis/v489_n7414_25_f2.png', '../assets/images/vis/v489_n7415_12_f5.png', '../assets/images/vis/v489_n7415_7_f2.png', '../assets/images/vis/v489_n7416_15_f2.png', '../assets/images/vis/v489_n7416_19_f3.png', '../assets/images/vis/v489_n7416_3_f4.png', '../assets/images/vis/v489_n7416_4_f6.png', '../assets/images/vis/v490_n7418_12_f1.png', '../assets/images/vis/v490_n7418_14_f2.png', '../assets/images/vis/v490_n7418_1_f2.png', '../assets/images/vis/v490_n7418_6_f3.png', '../assets/images/vis/v490_n7419_11_f1.png', '../assets/images/vis/v490_n7419_20_f3.png', '../assets/images/vis/v490_n7419_2_f1.png', '../assets/images/vis/v490_n7419_2_f2.png', '../assets/images/vis/v490_n7419_7_f4.png', '../assets/images/vis/v490_n7420_13_f4.png', '../assets/images/vis/v490_n7420_23_f5.png', '../assets/images/vis/vis109.png', '../assets/images/vis/vis230.png', '../assets/images/vis/vis250.png', '../assets/images/vis/vis278.png', '../assets/images/vis/vis286.png', '../assets/images/vis/vis288.png', '../assets/images/vis/vis328.png', '../assets/images/vis/vis386.png', '../assets/images/vis/vis399.png', '../assets/images/vis/vis409.png', '../assets/images/vis/vis416.png', '../assets/images/vis/vis417.png', '../assets/images/vis/vis428.png', '../assets/images/vis/vis499.png', '../assets/images/vis/vis512.png', '../assets/images/vis/vis564.png', '../assets/images/vis/vis586.png', '../assets/images/vis/vis618.png', '../assets/images/vis/vis625.png', '../assets/images/vis/vis630.png', '../assets/images/vis/vis652.png', '../assets/images/vis/vis67.png', '../assets/images/vis/vis673.png', '../assets/images/vis/vis678.png', '../assets/images/vis/vis684.png', '../assets/images/vis/vis697.png', '../assets/images/vis/vis708.png', '../assets/images/vis/vis729.png', '../assets/images/vis/vis734.png', '../assets/images/vis/vis768.png', '../assets/images/vis/vis826.png', '../assets/images/vis/vis831.png', '../assets/images/vis/vis850.png', '../assets/images/vis/vis853.png', '../assets/images/vis/vis859.png', '../assets/images/vis/vis87.png', '../assets/images/vis/vis881.png', '../assets/images/vis/visMost108.png', '../assets/images/vis/visMost132.png', '../assets/images/vis/visMost143.png', '../assets/images/vis/visMost147.png', '../assets/images/vis/visMost187.png', '../assets/images/vis/visMost190.png', '../assets/images/vis/visMost215.png', '../assets/images/vis/visMost217.png', '../assets/images/vis/visMost227.png', '../assets/images/vis/visMost232.png', '../assets/images/vis/visMost240.png', '../assets/images/vis/visMost244.png', '../assets/images/vis/visMost248.png', '../assets/images/vis/visMost255.png', '../assets/images/vis/visMost261.png', '../assets/images/vis/visMost267.png', '../assets/images/vis/visMost271.png', '../assets/images/vis/visMost274.png', '../assets/images/vis/visMost282.png', '../assets/images/vis/visMost357.png', '../assets/images/vis/visMost362.png', '../assets/images/vis/visMost374.png', '../assets/images/vis/visMost376.png', '../assets/images/vis/visMost378.png', '../assets/images/vis/visMost387.png', '../assets/images/vis/visMost420.png', '../assets/images/vis/visMost451.png', '../assets/images/vis/visMost456.png', '../assets/images/vis/visMost468.png', '../assets/images/vis/visMost496.png', '../assets/images/vis/visMost505.png', '../assets/images/vis/visMost52.png', '../assets/images/vis/visMost523.png', '../assets/images/vis/visMost526.png', '../assets/images/vis/visMost537.png', '../assets/images/vis/visMost54.png', '../assets/images/vis/visMost545.png', '../assets/images/vis/visMost55.png', '../assets/images/vis/visMost575.png', '../assets/images/vis/visMost601.png', '../assets/images/vis/visMost623.png', '../assets/images/vis/visMost635.png', '../assets/images/vis/visMost645.png', '../assets/images/vis/visMost657.png', '../assets/images/vis/visMost673.png', '../assets/images/vis/visMost705.png', '../assets/images/vis/visMost735.png', '../assets/images/vis/visMost745.png', '../assets/images/vis/visMost755.png', '../assets/images/vis/visMost758.png', '../assets/images/vis/visMost77.png', '../assets/images/vis/visMost82.png', '../assets/images/vis/visMost83.png', '../assets/images/vis/visMost92.png', '../assets/images/vis/visMost93.png', '../assets/images/vis/whoB03_1.png', '../assets/images/vis/whoB05_1.png', '../assets/images/vis/whoB13_2.png', '../assets/images/vis/whoB15_1.png', '../assets/images/vis/whoB19_1.png', '../assets/images/vis/whoB20_1.png', '../assets/images/vis/whoB22_1.png', '../assets/images/vis/whoB24_1.png', '../assets/images/vis/whoB25_2.png', '../assets/images/vis/whoB32_1.png', '../assets/images/vis/whoI11_1.png', '../assets/images/vis/whoI11_2.png', '../assets/images/vis/whoI12_2.png', '../assets/images/vis/whoI14.png', '../assets/images/vis/whoI19.png', '../assets/images/vis/whoI22.png', '../assets/images/vis/whoJ15_1.png', '../assets/images/vis/whoJ15_2.png', '../assets/images/vis/whoJ23.png', '../assets/images/vis/whoJ32.png', '../assets/images/vis/whoJ33.png', '../assets/images/vis/whoJ36_1.png', '../assets/images/vis/whoJ36_2.png', '../assets/images/vis/whoJ40_1.png', '../assets/images/vis/whoJ40_2.png', '../assets/images/vis/whoJ43_2.png', '../assets/images/vis/whoJ44.png', '../assets/images/vis/whoJ48_2.png', '../assets/images/vis/whoK04_2.png', '../assets/images/vis/whoK06_2.png', '../assets/images/vis/whoK07_2.png', '../assets/images/vis/whoK08.png', '../assets/images/vis/whoK12_2.png', '../assets/images/vis/whoK17_1.png', '../assets/images/vis/whoK19_1.png', '../assets/images/vis/whoK23_2.png', '../assets/images/vis/whoK31.png', '../assets/images/vis/whoL03.png', '../assets/images/vis/whoL06.png', '../assets/images/vis/whoL09.png', '../assets/images/vis/whoL10.png', '../assets/images/vis/whoL11.png', '../assets/images/vis/whoL12.png', '../assets/images/vis/whoL14.png', '../assets/images/vis/whoM05.png', '../assets/images/vis/whoN05.png', '../assets/images/vis/whoN08.png', '../assets/images/vis/whoN10.png', '../assets/images/vis/whoN16_1.png', '../assets/images/vis/whoN18.png', '../assets/images/vis/whoN21_1.png', '../assets/images/vis/whoN22.png', '../assets/images/vis/whoN23_2.png', '../assets/images/vis/whoN32_2.png', '../assets/images/vis/whoN33.png', '../assets/images/vis/whoO06_2.png', '../assets/images/vis/whoO12.png', '../assets/images/vis/whoP13.png', '../assets/images/vis/whoP16.png', '../assets/images/vis/whoQ06_2.png', '../assets/images/vis/whoQ09_2.png', '../assets/images/vis/whoQ11_1.png', '../assets/images/vis/whoQ14_2.png', '../assets/images/vis/whoQ15_1.png', '../assets/images/vis/whoQ18_3.png', '../assets/images/vis/whoQ26.png', '../assets/images/vis/whoQ32_2.png', '../assets/images/vis/whoQ41_1.png', '../assets/images/vis/whoQ42_1.png', '../assets/images/vis/whoQ44_4.png', '../assets/images/vis/whoQ48_4.png', '../assets/images/vis/whoQ48_5.png', '../assets/images/vis/whoQ50_2.png', '../assets/images/vis/whoQ51_2.png', '../assets/images/vis/whoQ52_4.png', '../assets/images/vis/wsj10.png', '../assets/images/vis/wsj104.png', '../assets/images/vis/wsj108.png', '../assets/images/vis/wsj11.png', '../assets/images/vis/wsj116.png', '../assets/images/vis/wsj129.png', '../assets/images/vis/wsj135.png', '../assets/images/vis/wsj144.png', '../assets/images/vis/wsj147.png', '../assets/images/vis/wsj162.png', '../assets/images/vis/wsj167.png', '../assets/images/vis/wsj170.png', '../assets/images/vis/wsj172.png', '../assets/images/vis/wsj176.png', '../assets/images/vis/wsj184.png', '../assets/images/vis/wsj20.png', '../assets/images/vis/wsj21.png', '../assets/images/vis/wsj214.png', '../assets/images/vis/wsj220.png', '../assets/images/vis/wsj226.png', '../assets/images/vis/wsj233.png', '../assets/images/vis/wsj240.png', '../assets/images/vis/wsj259.png', '../assets/images/vis/wsj262.png', '../assets/images/vis/wsj264.png', '../assets/images/vis/wsj270.png', '../assets/images/vis/wsj271.png', '../assets/images/vis/wsj277.png', '../assets/images/vis/wsj28.png', '../assets/images/vis/wsj286.png', '../assets/images/vis/wsj292.png', '../assets/images/vis/wsj294.png', '../assets/images/vis/wsj297.png', '../assets/images/vis/wsj299.png', '../assets/images/vis/wsj308.png', '../assets/images/vis/wsj316.png', '../assets/images/vis/wsj340.png', '../assets/images/vis/wsj359.png', '../assets/images/vis/wsj360.png', '../assets/images/vis/wsj392.png', '../assets/images/vis/wsj395.png', '../assets/images/vis/wsj405.png', '../assets/images/vis/wsj441.png', '../assets/images/vis/wsj459.png', '../assets/images/vis/wsj462.png', '../assets/images/vis/wsj474.png', '../assets/images/vis/wsj481.png', '../assets/images/vis/wsj505.png', '../assets/images/vis/wsj508.png', '../assets/images/vis/wsj511.png', '../assets/images/vis/wsj52.png', '../assets/images/vis/wsj521.png', '../assets/images/vis/wsj529.png', '../assets/images/vis/wsj533.png', '../assets/images/vis/wsj536.png', '../assets/images/vis/wsj54.png', '../assets/images/vis/wsj540.png', '../assets/images/vis/wsj55.png', '../assets/images/vis/wsj553.png', '../assets/images/vis/wsj557.png', '../assets/images/vis/wsj561.png', '../assets/images/vis/wsj593.png', '../assets/images/vis/wsj612.png', '../assets/images/vis/wsj79.png', '../assets/images/vis/wsj9.png', '../assets/images/vis/wsj99.png'],
+    spacing: 10,
+    num_trials: 20,
+    fixation_rest_time: 1500, // amount of time fixation cross will appear on screen with each trial, in ms
     image_show_time: 10000   // amount of time the image will appear on screen with each trial, in ms
 
 };
 
+/************************************
+ * BONUS ROUND PARAMETERS
+ ************************************/
+var bonus_round_settings = {
+    image_show_time: 10000,  // duration of a a singe position sampled
+    num_trials: 1,
+    image_array: ['../assets/images/bonus/panda 1.jpg'],
+    fixation_rest_time: 1500
+};
 
 /************************************
  * SETTING UP AWS
@@ -506,87 +516,128 @@ function draw_fixation_cross(midX, midY, canvas_object) {
     context.stroke();
 }
 
+
 function draw_heatmap(function_name) {
     console.log(heatmap_data_x);
     console.log(store_data.gaze_x);
     webgazer.pause();
     collect_data = false;
+    clear_canvas();
 
-    var canvas = document.createElement('canvas');
-    canvas.id     = "heatmap-overlay";
-    // canvas.addEventListener("mousedown", canvas_on_click, false);
-    // style the newly created canvas
-    canvas.style.zIndex   = 11;
-    canvas.style.position = "fixed";
-    canvas.style.left = 0;
-    canvas.style.top = 0;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.appendChild(canvas);
+    var instruction = document.createElement("div");
+    instruction.id = "instruction";
+    instruction.className += "overlay-div";
+    instruction.style.zIndex = 99;
+    instruction.innerHTML += "<header class=\"form__header\">" +
+        "<h2 class=\"form__title\"> Here is a heatmap of where we think you were looking. </h2>" +
+        "</header>";
+    document.body.appendChild(instruction);
 
-    var button = document.createElement("button");
-    button.className += "form__button";
-    button.id = "heatmap-button";
-    button.style.opacity = 0.1;
-    button.style.right = "1em";
-    button.style.bottom = "2em";
-    button.innerHTML = "Next";
-    button.style.position = "fixed";
-    button.style.zIndex = 99;
-    button.addEventListener('click', function () {
-        window[function_name]();
-        delete_elem("heatmap-button");
-        delete_elem("heatmap-overlay");
-    });
-    button.onmouseover = function() {
-        button.style.opacity = 1;
-    };
-    button.onmouseout = function() {
-        button.style.opacity = 0.1;
-    };
-    document.body.appendChild(button);
+    setTimeout(function() {
+        delete_elem("instruction");
+        var canvas = document.createElement('canvas');
+        canvas.id     = "heatmap-overlay";
+        // canvas.addEventListener("mousedown", canvas_on_click, false);
+        // style the newly created canvas
+        canvas.style.zIndex   = 11;
+        canvas.style.position = "fixed";
+        canvas.style.left = 0;
+        canvas.style.top = 0;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        document.body.appendChild(canvas);
 
-    var context = canvas.getContext("2d");
-    var heat = simpleheat(canvas);
-    var points = [];
-    for (i = 0; i < heatmap_data_x.length; i++) {
-        var point = [
-            heatmap_data_x[i],
-            heatmap_data_y[i],
-            0.1];
-        points.push(point);
-    }
+        var button = document.createElement("button");
+        button.className += "form__button";
+        button.id = "heatmap-button";
+        button.style.opacity = 0.5;
+        button.style.right = "1em";
+        button.style.bottom = "2em";
+        button.innerHTML = "Next";
+        button.style.position = "fixed";
+        button.style.zIndex = 99;
+        button.addEventListener('click', function () {
+            window[function_name]();
+            delete_elem("heatmap-button");
+            delete_elem("heatmap-overlay");
+        });
+        button.onmouseover = function() {
+            button.style.opacity = 1;
+        };
+        button.onmouseout = function() {
+            button.style.opacity = 0.5;
+        };
+        document.body.appendChild(button);
 
-    heat.data(points);
-    heat.draw();
-
-    if (current_task === "simple_paradigm") {
-        for (i = 0; i < simple_paradigm_settings.position_array.length; i++) {
-            var midX = simple_paradigm_settings.position_array[i][0] * canvas.width;
-            var midY = simple_paradigm_settings.position_array[i][1] * canvas.height;
-            draw_fixation_cross(midX, midY, canvas);
+        var context = canvas.getContext("2d");
+        var heat = simpleheat(canvas);
+        var points = [];
+        for (i = 0; i < heatmap_data_x.length; i++) {
+            var point = [
+                heatmap_data_x[i],
+                heatmap_data_y[i],
+                0.1];
+            points.push(point);
         }
-    } else if (current_task === "pursuit_paradigm") {
-        draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.2, canvas);
-        draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.2, canvas);
-        draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.8,canvas);
-        draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.8, canvas);
-        // for (i = 0; i < pursuit_paradigm_settings.position_array.length; i++) {
-        //     draw_dashed_line(canvas.width * pursuit_paradigm_settings.position_array[i].x,
-        //                     canvas.height * pursuit_paradigm_settings.position_array[i].y,
-        //                     canvas.width * pursuit_paradigm_settings.position_array[i].ty,
-        //                     canvas.height * pursuit_paradigm_settings.position_array[i].y,
-        //                     context);
-        // }
 
-    } else if (current_task === "calibration" || current_task === "validation") {
-        for (i = 0; i < calibration_settings.position_array.length; i++) {
-            midX = calibration_settings.position_array[i][0] * canvas.width;
-            midY = calibration_settings.position_array[i][1] * canvas.height;
-            draw_fixation_cross(midX, midY, canvas);
+        heat.data(points);
+        heat.draw();
+
+        if (current_task === "simple_paradigm") {
+            for (i = 0; i < simple_paradigm_settings.position_array.length; i++) {
+                var midX = simple_paradigm_settings.position_array[i][0] * canvas.width;
+                var midY = simple_paradigm_settings.position_array[i][1] * canvas.height;
+                draw_fixation_cross(midX, midY, canvas);
+            }
+        } else if (current_task === "pursuit_end") {
+            draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.2, canvas);
+            draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.2, canvas);
+            draw_fixation_cross(canvas.width * 0.2, canvas.height * 0.8,canvas);
+            draw_fixation_cross(canvas.width * 0.8, canvas.height * 0.8, canvas);
+            // for (i = 0; i < pursuit_paradigm_settings.position_array.length; i++) {
+            //     draw_dashed_line(canvas.width * pursuit_paradigm_settings.position_array[i].x,
+            //                     canvas.height * pursuit_paradigm_settings.position_array[i].y,
+            //                     canvas.width * pursuit_paradigm_settings.position_array[i].ty,
+            //                     canvas.height * pursuit_paradigm_settings.position_array[i].y,
+            //                     context);
+            // }
+
+        } else if (current_task === "calibration" || current_task === "validation") {
+            for (i = 0; i < calibration_settings.position_array.length; i++) {
+                midX = calibration_settings.position_array[i][0] * canvas.width;
+                midY = calibration_settings.position_array[i][1] * canvas.height;
+                draw_fixation_cross(midX, midY, canvas);
+            }
+            draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
+        } else if (current_task === "bonus" || current_task === "massvis_paradigm") {
+            if (current_task === "bonus") {
+                curr_object.src = curr_object.src.slice(0, curr_object.src.length - 4) + " answer.jpg";
+            }
+            canvas = document.getElementById("canvas-overlay");
+            context = canvas.getContext("2d");
+            var aspect_ratio = curr_object.width/curr_object.height;
+            if (curr_object.width >= canvas.width || curr_object.height >= canvas.height) {
+                var heightmajor_height = canvas.height - massvis_paradigm_settings.spacing * 2;
+                var heightmajor_width = aspect_ratio * heightmajor_height;
+                var widthmajor_width =  canvas.width - massvis_paradigm_settings.spacing * 2;
+                var widthmajor_height = widthmajor_width / aspect_ratio;
+                if (heightmajor_height < canvas.height && heightmajor_width < canvas.width) {
+                    curr_object.width = heightmajor_width;
+                    curr_object.height = heightmajor_height;
+                } else if (widthmajor_width < canvas.width && widthmajor_height < canvas.height) {
+                    curr_object.width = widthmajor_width;
+                    curr_object.height = widthmajor_height;
+                }
+            }
+            curr_object.onload =
+                context.drawImage(curr_object,
+                    canvas.width / 2 - curr_object.width / 2,
+                    massvis_paradigm_settings.spacing / 2,
+                    curr_object.width,
+                    curr_object.height
+                );
         }
-        draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
-    }
+    }, screen_timeout);
 }
 
 function draw_dashed_line(x, y, tx, ty, ctx) {
@@ -607,8 +658,8 @@ function send_gaze_data_to_database(callback){
         TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
-            "time_collected":session_time,
-            "info":store_data
+            "time_collected": session_time,
+            "info": store_data
         }
     };
     docClient.put(params, function(err, data) {
@@ -669,7 +720,7 @@ function send_user_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            window.location.href = "../../index.html";
+            window.location.href = "../index.html";
 
         }
     });
@@ -757,23 +808,27 @@ function create_consent_form() {
     form.className += "overlay-div";
     form.innerHTML +=
         "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\">Are you cool with us using your webcam to collect data about your eye movement?</h2>" +
+        "<h2 class=\"form__title\">Consent form</h2>" +
+        "<p class='information' style='font-size: 1em'><b>Why we are doing this research:</b> We are trying to examine the feasibility of using consumer-grade webcams to conduct eye-tracking experiments to replace traditional eye-tracking method.</p>" +
+        "<p class='information' style='font-size: 1em'><b>What you will have to do:</b> You will be presented with a series of tasks that involves looking at some dots and data visualizations .</p>" +
+        "<p class='information' style='font-size: 1em'><b>Privacy and Data collection:</b> We will not ask you for your name. We will not record any videos or images from the webcam. The only data from your webcam that we are collecting is predicted coordinates of your gaze made by webgazer. All data will be stored in a secure server.</p>" +
+        "<p class='information' style='font-size: 1em'><b>Duration:</b> Approximately 15 minutes.</p>" +
+        "<p class='information' style='font-size: 1em'><b>Taking part is voluntary:</b> You are free to leave the experiment at any time. If you refuse to be in the experiment or stop participating, there will no penalty or loss of benefits to which you are otherwise entitled.</p>" +
+        "<p class='information' style='font-size: 1em'><b>If you have questions:</b> You may contact Professor Evan Peck at <a href='mailto:evan.peck@bucknell.edu'>evan.peck@bucknell.edu</a>. If you have questions about your rights as a research participant, please contact Matthew Slater, Bucknell University's IRB Chair at 570.577.2767 or at <a href='mailto:matthew.slater@bucknell.edu'>matthew.slater@bucknell.edu</a></p>" +
         "</header>" +
 
         "<form>" +
         "<fieldset class=\"form__options\">" +
         "<p class=\"form__answer\">" +
         "<input name=\"consent\" type=\"radio\" id=\"consent-yes\" value=\"yes\">" +
-        "<label class='form__label' for=\"consent-yes\"> Yeah sure. </br>" +
-        "I'm cool with that."+
+        "<label class='form__label' for=\"consent-yes\"> I have read the above information, and have received answers to any questions I asked. </br>" +
+        "I consent to take part in the study." +
         "</label>" +
         "</p>" +
 
         "<p class=\"form__answer\">" +
         "<input name=\"consent\" type=\"radio\" id=\"consent-no\" value=\"no\">" +
-        "<label class='form__label' for=\"consent-no\">No thanks. </br>" +
-        "That sounds creepy..." +
-        "</label>" +
+        "<label class='form__label' for=\"consent-no\"> I decide not to take part in the study. <br> <br> <br></label>" +
         "</p>" +
 
         "</fieldset>" +
@@ -1167,6 +1222,8 @@ function finish_calibration(){
     store_data.description = "success";
     webgazer.pause();
     collect_data = false;
+    heatmap_data_x = store_data.gaze_x.slice(0);
+    heatmap_data_y = store_data.gaze_y.slice(0);
     reset_store_data(draw_heatmap("create_validation_instruction"));
 }
 
@@ -1174,7 +1231,7 @@ function finish_calibration(){
  * VALIDATION
  ************************************/
 function create_validation_instruction() {
-    var instruction_guide1 = "Next you will be able to use black magic to increase the numbers on the screen just by looking at them. </br> Press the button when you're ready.";
+    var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. </br> Press the button when you're ready.";
     create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
 }
 
@@ -1277,7 +1334,7 @@ function create_validation_fail_screen() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Your magic is weak. </br> Returning to training. </h2>" +
+        "<h2 class=\"form__title\"> Validation failed. </br> Returning to calibration. </h2>" +
         "</header>";
     document.body.appendChild(instruction);
     setTimeout(function() {
@@ -1316,6 +1373,10 @@ function navigate_tasks() {
             break;
         case "iframe":
             create_iframe_testable();
+            break;
+        case "bonus":
+            create_bonus_round_instruction();
+            break;
         default:
             loop_iframe_paradigm();
     }
@@ -1375,16 +1436,18 @@ function finish_simple_paradigm(){
     send_gaze_data_to_database();
     draw_heatmap("navigate_tasks");
 }
+
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it (not into the screen but with your eyes).", "loop_pursuit_paradigm()", "Start");
+    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it when it changes color.", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
     if (num_objects_shown >= pursuit_paradigm_settings.num_trials) {
         finish_pursuit_paradigm();
+        return;
     }
     // if we don't have dot-positions any more, refill the array
     var canvas = document.getElementById("canvas-overlay");
@@ -1396,7 +1459,7 @@ function loop_pursuit_paradigm() {
     if (objects_array.length === 0) {
         var temp = { arr : pursuit_paradigm_settings.position_array };
         var obj = $.extend(true, {}, temp);
-        var objects_array = obj.arr;
+        objects_array = obj.arr;
         objects_array = shuffle(objects_array);
         for (var i=0; i < objects_array.length; i++) {
             objects_array[i].x = canvas.width * objects_array[i].x;
@@ -1423,7 +1486,7 @@ function loop_pursuit_paradigm() {
 }
 
 function draw_moving_dot(){
-    if (current_task !== 'pursuit_paradigm') return;
+    if (current_task !== "pursuit_paradigm") return;
     var now = new Date().getTime(), dt = now - (time_stamp || now);
     time_stamp = now;
     var angle = Math.atan2(curr_object.ty - curr_object.y, curr_object.tx - curr_object.x);
@@ -1455,6 +1518,7 @@ function finish_pursuit_paradigm(){
     num_objects_shown = 0;
     store_data.task = "pursuit";
     store_data.description = "success";
+    current_task = "pursuit_end";
     paradigm = "massvis";
     webgazer.pause();
     collect_data = false;
@@ -1473,7 +1537,7 @@ function create_massvis_instruction() {
 }
 
 function loop_massvis_paradigm() {
-    if (num_objects_shown > massvis_paradigm_settings.num_trials) {
+    if (num_objects_shown >= massvis_paradigm_settings.num_trials) {
         finish_massvis_paradigm();
         return;
     }
@@ -1501,13 +1565,28 @@ function draw_massvis_image() {
     collect_data = true;
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    var spacing = 10;
-    context.drawImage(curr_object,
-        canvas.width / 2 - (curr_object.width/curr_object.height * (canvas.height - spacing * 2))/2,
-        spacing,
-        curr_object.width/curr_object.height * (canvas.height - spacing * 2),
-        canvas.height - spacing * 2
-    );
+    var aspect_ratio = curr_object.width/curr_object.height;
+    if (curr_object.width >= canvas.width || curr_object.height >= canvas.height) {
+        var heightmajor_height = canvas.height - massvis_paradigm_settings.spacing * 2;
+        var heightmajor_width = aspect_ratio * heightmajor_height;
+        var widthmajor_width =  canvas.width - massvis_paradigm_settings.spacing * 2;
+        var widthmajor_height = widthmajor_width / aspect_ratio;
+        if (heightmajor_height < canvas.height && heightmajor_width < canvas.width) {
+            curr_object.width = heightmajor_width;
+            curr_object.height = heightmajor_height;
+        } else if (widthmajor_width < canvas.width && widthmajor_height < canvas.height) {
+            curr_object.width = widthmajor_width;
+            curr_object.height = widthmajor_height;
+        }
+    }
+    curr_object.onload =
+        context.drawImage(curr_object,
+            canvas.width / 2 - curr_object.width / 2,
+            canvas.height / 2 - curr_object.height / 2,
+            curr_object.width,
+            curr_object.height
+        );
+
     setTimeout(function(){
         store_data.task = "massvis";
         paradigm = "massvis";
@@ -1522,12 +1601,78 @@ function finish_massvis_paradigm() {
     clear_canvas();
     num_objects_shown = 0;
     store_data.task = "massvis";
-    paradigm = "massvis";
+    paradigm = "bonus";
     webgazer.pause();
     collect_data = false;
-    create_survey();
+    navigate_tasks();
     console.log("finish massvis paradigm");
 }
 
+/************************************
+ * BONUS ROUND
+ * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
+ ************************************/
+function create_bonus_round_instruction() {
+    create_general_instruction("Bonus Round", "Find the panda in picture and compare your result to other people's.<br>This task is optional.", "loop_bonus_round()", "Start");
+    var instruction = document.getElementById("instruction");
+    instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
+}
 
+function loop_bonus_round() {
+    if (num_objects_shown >= bonus_round_settings.num_trials) {
+        finish_bonus_round();
+        return;
+    }
+    var canvas = document.getElementById("canvas-overlay");
+    current_task = "bonus";
+    collect_data = true;
+    webgazer.resume();
+    clear_canvas();
+    objects_array = shuffle(bonus_round_settings.image_array);
+    curr_object = new Image();
+    curr_object.src = objects_array.pop();
+    store_data.description = curr_object.src;
+    draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
+    num_objects_shown ++;
+    webgazer.pause();
+    collect_data = false;
+    setTimeout(draw_bonus_round_image, bonus_round_settings.fixation_rest_time);
+}
+
+/**
+ * Draw bonus round images
+ */
+function draw_bonus_round_image() {
+    clear_canvas();
+    webgazer.resume();
+    collect_data = true;
+    var canvas = document.getElementById("canvas-overlay");
+    var context = canvas.getContext("2d");
+    var spacing = 10;
+    context.drawImage(curr_object,
+        canvas.width / 2 - (curr_object.width/curr_object.height * (canvas.height - spacing * 2))/2,
+        spacing,
+        curr_object.width/curr_object.height * (canvas.height - spacing * 2),
+        canvas.height - spacing * 2
+    );
+    setTimeout(function(){
+        store_data.task = "bonus";
+        paradigm = "bonus";
+        heatmap_data_x = store_data.gaze_x.slice(0);
+        heatmap_data_y = store_data.gaze_y.slice(0);
+        send_gaze_data_to_database();
+        draw_heatmap("loop_bonus_round");
+    }, bonus_round_settings.image_show_time);
+}
+
+function finish_bonus_round() {
+    clear_canvas();
+    num_objects_shown = 0;
+    store_data.task = "bonus";
+    paradigm = "bonus";
+    webgazer.pause();
+    collect_data = false;
+    create_survey();
+    console.log("finish bonus paradigm");
+}
 
