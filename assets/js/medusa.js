@@ -393,9 +393,16 @@ function draw_track(context, dot, color) {
 
 function create_img_array () {
     var width = 0;
+    var width_array = [];
     var height = 0;
+    var height_array = [];
+    var big_img_width_array = [];
     var total_frames = 0;
+    var total_frames_array = [];
     var curr_sprite_array = [];
+    var original_img;
+    var img;
+    var img_content;
     switch(calibration_settings.current_round) {
         case 1:
             curr_sprite_array = calibration_sprite_1;
@@ -412,23 +419,16 @@ function create_img_array () {
     }
 
     for (i = 0; i < curr_sprite_array.length; i ++) {
-        (function() {
-            var original_img = new Image();
-            original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
-            original_img.onload = function () {
-                width = original_img.width;
-                height = original_img.height;
-
-                var img_content = new Image();
-                img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
-                img_content.onload = function () {
-                    total_frames = this.width / width;
-                };
-
-                var img = {
+        original_img = new Image();
+        original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
+        original_img.onload = function () {
+            img_content = new Image();
+            img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
+            img_content.onload = function () {
+                img = {
                     'content': img_content,
                     'current_frame': 0,
-                    'total_frames': total_frames,
+                    'total_frames': img_content.width/original_img.width,
                     'width': original_img.width,
                     'height': original_img.height,
                     'x': 0,
@@ -437,11 +437,10 @@ function create_img_array () {
                     'render_count': 0
                 };
                 img_array.push(img);
+                console.log(img_array);
             };
-        })(i);
+        };
     }
-    console.log(img_array);
-    return img_array;
 }
 /**
  * Draw a dot with a counting up number inside. Used for validation process
@@ -1204,6 +1203,13 @@ function create_survey() {
  * Shows calibration instruction
  */
 function create_calibration_instruction() {
+    calibration_sprite_1 = shuffle(calibration_settings.sprite_array_1);
+    calibration_sprite_2 = shuffle(calibration_settings.sprite_array_2);
+    calibration_sprite_3 = shuffle(calibration_settings.sprite_array_3);
+    if (img_array.length === 0) {
+        create_img_array();
+        console.log("walla")
+    }
     webgazer_training_data = undefined;
     clear_canvas();
     delete_elem("instruction");
@@ -1259,9 +1265,6 @@ function start_calibration() {
     current_task = 'calibration';
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
-    calibration_sprite_1 = shuffle(calibration_settings.sprite_array_1);
-    calibration_sprite_2 = shuffle(calibration_settings.sprite_array_2);
-    calibration_sprite_3 = shuffle(calibration_settings.sprite_array_3);
     if (webgazer_training_data !== undefined){
         webgazer.loadTrainingData(webgazer_training_data);
         finish_calibration();
@@ -1289,9 +1292,7 @@ function create_new_dot_calibration(){
     if (objects_array.length === 0) {
         objects_array = create_dot_array(calibration_settings.position_array);
     }
-    if (img_array.length === 0) {
-        img_array = create_img_array();
-    }
+    console.log(img_array);
     curr_img = img_array.pop();
     curr_object = objects_array.pop();
     curr_img.x = curr_object.x;
