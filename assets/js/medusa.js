@@ -365,7 +365,6 @@ function draw_dot(context, dot, color) {
     if (current_task === "calibration") {
         time_stamp = new Date().getTime();
         //draw_dot_countdown(context, dot, color);
-        console.log(curr_img.total_frames);
         draw_gif(context, curr_img);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
@@ -414,33 +413,35 @@ function create_img_array () {
     }
 
     for (i = 0; i < curr_sprite_array.length; i ++) {
-        var original_img = new Image();
-        original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
-        original_img.onload = function() {
-            width = original_img.width;
-            height = original_img.height;
-        };
+        (function() {
+            var original_img = new Image();
+            original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
+            original_img.onload = function () {
+                width = original_img.width;
+                height = original_img.height;
+            };
 
 
-        var img_content = new Image();
-        img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
-        img_content.onload = function () {
-            total_frames = img_content.width/width;
-        };
+            var img_content = new Image();
+            img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
+            img_content.onload = function () {
+                total_frames = img_content.width / width;
+            };
 
-        var img = {
-            'content': img_content,
-            'current_frame': 0,
-            'total_frames': img_content.width/original_img.width,
-            'width': original_img.width,
-            'height': original_img.height,
-            'x': 0,
-            'y': 0,
-            'render_rate': 3,
-            'render_count': 0
-        };
+            var img = {
+                'content': img_content,
+                'current_frame': 0,
+                'total_frames': img_content.width / original_img.width,
+                'width': original_img.width,
+                'height': original_img.height,
+                'x': 0,
+                'y': 0,
+                'render_rate': 3,
+                'render_count': 0
+            };
 
-        img_array.push(img);
+            img_array.push(img);
+        })(i);
     }
     return img_array;
 }
