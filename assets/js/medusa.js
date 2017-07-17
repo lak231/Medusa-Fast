@@ -5,8 +5,8 @@
 const TABLE_NAME = "GAZE_DATA"; // name of data table of gaze data
 const USER_TABLE_NAME = "USERS"; // name of data table of users
 const DEFAULT_DOT_RADIUS = 25;
-const SAMPLING_RATE = 1000;   // number of call to function once webgazer got data per second
-const DATA_COLLECTION_RATE = 1000;    // number of data collected per second.
+const SAMPLING_RATE = 30;   // number of call to function once webgazer got data per second
+const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
 
 /************************************
  * VARIABLES
@@ -69,7 +69,7 @@ var curr_img;
  * CALIBRATION PARAMETERS
  ************************************/
 var calibration_settings = {
-    duration: 5,  // duration of a a singe position sampled
+    duration: 4,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -437,7 +437,6 @@ function create_img_array () {
                     'render_count': 0
                 };
                 img_array.push(img);
-                console.log(img_array);
             };
         };
     }
@@ -483,49 +482,49 @@ function draw_dot_countup(context, dot, color) {
  */
 function draw_dot_countdown(context, dot, color) {
     var time = new Date().getTime();
-    var delta = time - time_stamp;
-    var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
-    clear_canvas();
-    //base circle
-    draw_track(context, dot, color);
-    //animated circle
-    context.lineWidth = 7;
-    context.beginPath();
-    context.strokeStyle = color;
-    context.arc(
-        dot.x,
-        dot.y,
-        dot.r,
-        Math.PI/-2,
-        Math.PI * 3/2-arc_len,
-        false
-    );
-    context.stroke();
+    // var delta = time - time_stamp;
+    // var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
+    // clear_canvas();
+    // //base circle
+    // draw_track(context, dot, color);
+    // //animated circle
+    // context.lineWidth = 7;
+    // context.beginPath();
+    // context.strokeStyle = color;
+    // context.arc(
+    //     dot.x,
+    //     dot.y,
+    //     dot.r,
+    //     Math.PI/-2,
+    //     Math.PI * 3/2-arc_len,
+    //     false
+    // );
+    // context.stroke();
 
-    //draw countdown number
-    context.font = "20px Source Sans Pro";
-    context.fillStyle = color;
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillText(calibration_settings.duration - Math.floor(delta / 1000), dot.x, dot.y);
-    //animation
-    request_anim_frame(function () {
-        if (delta >= calibration_settings.duration * 1000) {
-            if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
-                heatmap_data_x = store_data.gaze_x.slice(0);
-                heatmap_data_y = store_data.gaze_y.slice(0);
-                clear_canvas();
-                draw_heatmap("create_calibration_break_form");
-                return;
-            }
-            else{
-                create_new_dot_calibration();
-                return;
-            }
+    // //draw countdown number
+    // context.font = "20px Source Sans Pro";
+    // context.fillStyle = color;
+    // context.textAlign = "center";
+    // context.textBaseline = "middle";
+    // context.fillText(calibration_settings.duration - Math.floor(delta / 1000), dot.x, dot.y);
+    // //animation
+    // request_anim_frame(function () {
+    //     if (delta >= calibration_settings.duration * 1000) {
+    //         if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
+    //             heatmap_data_x = store_data.gaze_x.slice(0);
+    //             heatmap_data_y = store_data.gaze_y.slice(0);
+    //             clear_canvas();
+    //             draw_heatmap("create_calibration_break_form");
+    //             return;
+    //         }
+    //         else{
+    //             create_new_dot_calibration();
+    //             return;
+    //         }
 
-        }
-        draw_dot_countdown(context, dot, color);
-    });
+    //     }
+    //     draw_dot_countdown(context, dot, color);
+    // });
 }
 
 function draw_gif(context, img) {
@@ -542,7 +541,7 @@ function draw_gif(context, img) {
 
     //animation
     request_anim_frame(function () {
-        if (delta >= calibration_settings.duration * 1000) {
+        if (delta >= calibration_settings.duration * 1000) {   
             if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
                 heatmap_data_x = store_data.gaze_x.slice(0);
                 heatmap_data_y = store_data.gaze_y.slice(0);
@@ -555,7 +554,6 @@ function draw_gif(context, img) {
                 create_new_dot_calibration();
                 return;
             }
-
         }
         draw_gif(context, img);
     });
@@ -576,7 +574,6 @@ function reset_store_data(callback){
     };
     if (callback !== undefined) callback();
 }
-
 
 
 /**
@@ -949,16 +946,19 @@ function initiate_webgazer(){
         .setTracker('clmtrackr')
         .setGazeListener(function(data, elapsedTime) {
             if (data === null) return;
-            if (elapsedTime - webgazer_time_stamp < 1000 / SAMPLING_RATE) return;
-            if (curr_object === undefined || curr_object === null) return;
-            if (collect_data === false) return;
+            if (elapsedTime - webgazer_time_stamp > 1000 / SAMPLING_RATE){
             if (current_task === "calibration"){
                 webgazer.addWatchListener(curr_object.x, curr_object.y);
+                }
             }
+            if (curr_object === undefined || curr_object === null) return;
+            if (collect_data === false) return;
+            
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
-            if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
+            console.log(elapsedTime - webgazer_time_stamp);
+            // if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
             if (current_task === "pursuit"){
@@ -971,7 +971,6 @@ function initiate_webgazer(){
             }
             store_data.gaze_x.push(data.x);
             store_data.gaze_y.push(data.y);
-
         })
         .begin()
         .showPredictionPoints(false);
@@ -1208,7 +1207,6 @@ function create_calibration_instruction() {
     calibration_sprite_3 = shuffle(calibration_settings.sprite_array_3);
     if (img_array.length === 0) {
         create_img_array();
-        console.log("walla")
     }
     webgazer_training_data = undefined;
     clear_canvas();
@@ -1292,7 +1290,6 @@ function create_new_dot_calibration(){
     if (objects_array.length === 0) {
         objects_array = create_dot_array(calibration_settings.position_array);
     }
-    console.log(img_array);
     curr_img = img_array.pop();
     curr_object = objects_array.pop();
     curr_img.x = curr_object.x;
