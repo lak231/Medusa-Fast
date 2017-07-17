@@ -360,7 +360,7 @@ function draw_dot(context, dot, color) {
         img_content.src = "../assets/images/gif/sprite-dugtrio.png";
         var img = {
             'content': img_content,
-            'current': 0,
+            'current_frame': 0,
             'total_frames': 120,
             'width': 65,
             'height': 50,
@@ -369,7 +369,6 @@ function draw_dot(context, dot, color) {
             'render_rate': 3,
             'render_count': 0
         };
-
         draw_gif(context, img);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
@@ -485,20 +484,15 @@ function draw_dot_countdown(context, dot, color) {
 function draw_gif(context, img) {
     var time = new Date().getTime();
     var delta = time - time_stamp;
-    if (img.render_count === img.render_rate) {
-        clear_canvas();
-        img.onload = context.drawImage(img.content, img.current_frame * img.width, 0,
-            img.width, img.height,
-            img.x - img.width / 2, img.y - img.height / 2, img.width, img.height);
-        if (img.current_frame < img.total_frames) {
-            img.current_frame = (img.current_frame + 1) % img.total_frames;
-        } else {
-            img.current_frame = 0;
-        }
-        img.render_count = 0;
-    } else {
-        img.render_count += 1;
+    clear_canvas();
+    if (img.render_count === img.render_rate - 1) {
+        img.current_frame = (img.current_frame + 1) % img.total_frames;
     }
+    img.render_count = (img.render_count + 1) % img.render_rate;
+    img.onload = context.drawImage(img.content, img.current_frame * img.width, 0,
+        img.width, img.height,
+        img.x - img.width / 2, img.y - img.height / 2, img.width, img.height);
+
     //animation
     request_anim_frame(function () {
         if (delta >= calibration_settings.duration * 1000) {
