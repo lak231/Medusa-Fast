@@ -58,6 +58,10 @@ var cam_width = 320;
 var cam_height = 240;
 var heatmap_data_x = [];
 var heatmap_data_y = [];
+var calibration_current_round = 1;
+var calibration_sprite_1 = [];
+var calibration_sprite_2 = [];
+var calibration_sprite_3 = [];
 
 /************************************
  * CALIBRATION PARAMETERS
@@ -67,7 +71,10 @@ var calibration_settings = {
     method: "watch",    // calibration method, either watch or click.
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
-    position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]]  // array of possible positions
+    position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
+    sprite_array_1 : ['bulbasaur', 'charmander', 'chikorita', 'chimchar', 'cyndaquil', 'mudkip', 'pikachu', 'piplup', 'squirtle', 'torchic', 'totodile', 'treecko', 'turtwig'],
+    sprite_array_2: ['bayleef', 'charmeleon', 'combusken', 'croconaw', 'grotle', 'grovyle', 'ivysaur', 'marshtomp', 'monferno', 'pikachu', 'prinplup', 'quilava', 'wartortle'],
+    sprite_array_3: ['blastoise', 'blaziken', 'charizard', 'empoleon', 'feraligatr', 'infernape', 'meganium', 'pikachu', 'sceptile', 'swampert', 'torterra', 'typhlosion', 'venusaur']
 };
 
 /************************************
@@ -356,19 +363,46 @@ function draw_dot(context, dot, color) {
     if (current_task === "calibration") {
         time_stamp = new Date().getTime();
         //draw_dot_countdown(context, dot, color);
+        var curr_sprite_array = [];
+        switch(calibration_settings.current_round) {
+            case 1:
+                curr_sprite_array = calibration_sprite_1;
+                break;
+            case 2:
+                curr_sprite_array = calibration_sprite_2;
+                break;
+            case 3:
+                curr_sprite_array = calibration_sprite_2;
+                break;
+            default:
+                curr_sprite_array = calibration_sprite_1;
+                break;
+        }
+        var original_img = new Image();
+
+            original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
+
+
+
+
         var img_content = new Image();
-        img_content.src = "../assets/images/gif/sprite-dugtrio.png";
+            img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
+            console.log(original_img.height);
+
+        console.log(img_content.src);
+
         var img = {
             'content': img_content,
             'current_frame': 0,
-            'total_frames': 120,
-            'width': 65,
-            'height': 50,
+            'total_frames': img_content.width/original_img.width,
+            'width': original_img.width,
+            'height': original_img.height,
             'x': dot.x,
             'y': dot.y,
             'render_rate': 3,
             'render_count': 0
         };
+
         draw_gif(context, img);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
@@ -500,6 +534,7 @@ function draw_gif(context, img) {
                 heatmap_data_x = store_data.gaze_x.slice(0);
                 heatmap_data_y = store_data.gaze_y.slice(0);
                 clear_canvas();
+                calibration_current_round += 1;
                 draw_heatmap("create_calibration_break_form");
                 return;
             }
@@ -1210,6 +1245,9 @@ function start_calibration() {
     current_task = 'calibration';
     store_data.task = current_task;
     store_data.description = calibration_settings.method;
+    calibration_sprite_1 = shuffle(calibration_settings.sprite_array_1);
+    calibration_sprite_2 = shuffle(calibration_settings.sprite_array_2);
+    calibration_sprite_3 = shuffle(calibration_settings.sprite_array_3);
     if (webgazer_training_data !== undefined){
         webgazer.loadTrainingData(webgazer_training_data);
         finish_calibration();
@@ -1249,6 +1287,7 @@ function create_new_dot_calibration(){
  * Triggered once the calibration process finishes. Clean up things and go on to next step
  */
 function finish_calibration(){
+    calibration_current_round = 1;
     objects_array = [];
     num_objects_shown = 0;
     store_data.task = "calibration";
