@@ -62,6 +62,8 @@ var calibration_current_round = 1;
 var calibration_sprite_1 = [];
 var calibration_sprite_2 = [];
 var calibration_sprite_3 = [];
+var img_array = [];
+var curr_img;
 
 /************************************
  * CALIBRATION PARAMETERS
@@ -363,47 +365,8 @@ function draw_dot(context, dot, color) {
     if (current_task === "calibration") {
         time_stamp = new Date().getTime();
         //draw_dot_countdown(context, dot, color);
-        var curr_sprite_array = [];
-        switch(calibration_settings.current_round) {
-            case 1:
-                curr_sprite_array = calibration_sprite_1;
-                break;
-            case 2:
-                curr_sprite_array = calibration_sprite_2;
-                break;
-            case 3:
-                curr_sprite_array = calibration_sprite_2;
-                break;
-            default:
-                curr_sprite_array = calibration_sprite_1;
-                break;
-        }
-        var original_img = new Image();
-
-            original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
-
-
-
-
-        var img_content = new Image();
-            img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
-            console.log(original_img.height);
-
-        console.log(img_content.src);
-
-        var img = {
-            'content': img_content,
-            'current_frame': 0,
-            'total_frames': img_content.width/original_img.width,
-            'width': original_img.width,
-            'height': original_img.height,
-            'x': dot.x,
-            'y': dot.y,
-            'render_rate': 3,
-            'render_count': 0
-        };
-
-        draw_gif(context, img);
+        console.log(curr_img.total_frames);
+        draw_gif(context, curr_img);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
     } else{
@@ -429,6 +392,58 @@ function draw_track(context, dot, color) {
     context.stroke();
 }
 
+function create_img_array () {
+    var img_array = [];
+    var width = 0;
+    var height = 0;
+    var total_frames = 0;
+    var curr_sprite_array = [];
+    switch(calibration_settings.current_round) {
+        case 1:
+            curr_sprite_array = calibration_sprite_1;
+            break;
+        case 2:
+            curr_sprite_array = calibration_sprite_2;
+            break;
+        case 3:
+            curr_sprite_array = calibration_sprite_2;
+            break;
+        default:
+            curr_sprite_array = calibration_sprite_1;
+            break;
+    }
+
+    for (i = 0; i < curr_sprite_array.length; i ++) {
+        var original_img = new Image();
+        original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
+        original_img.onload = function() {
+            width = original_img.width;
+            height = original_img.height;
+        };
+
+
+        var img_content = new Image();
+        img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
+        img_content.onload = function () {
+            total_frames = img_content.width/width;
+        };
+
+        var img = {
+            'content': img_content,
+            'current_frame': 0,
+            'total_frames': img_content.width/original_img.width,
+            'width': original_img.width,
+            'height': original_img.height,
+            'x': 0,
+            'y': 0,
+            'render_rate': 3,
+            'render_count': 0
+        };
+
+        img_array.push(img);
+    }
+    return img_array;
+}
 /**
  * Draw a dot with a counting up number inside. Used for validation process
  * @param {*} context 
@@ -1275,7 +1290,13 @@ function create_new_dot_calibration(){
     if (objects_array.length === 0) {
         objects_array = create_dot_array(calibration_settings.position_array);
     }
+    if (img_array.length === 0) {
+        img_array = create_img_array();
+    }
+    curr_img = img_array.pop();
     curr_object = objects_array.pop();
+    curr_img.x = curr_object.x;
+    curr_img.y = curr_object.y;
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
     draw_dot(context, curr_object, dark_color);
