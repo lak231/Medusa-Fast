@@ -392,7 +392,6 @@ function draw_track(context, dot, color) {
 }
 
 function create_img_array () {
-    var img_array = [];
     var width = 0;
     var height = 0;
     var total_frames = 0;
@@ -419,30 +418,29 @@ function create_img_array () {
             original_img.onload = function () {
                 width = original_img.width;
                 height = original_img.height;
+
+                var img_content = new Image();
+                img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
+                img_content.onload = function () {
+                    total_frames = this.width / width;
+                };
+
+                var img = {
+                    'content': img_content,
+                    'current_frame': 0,
+                    'total_frames': total_frames,
+                    'width': original_img.width,
+                    'height': original_img.height,
+                    'x': 0,
+                    'y': 0,
+                    'render_rate': 3,
+                    'render_count': 0
+                };
+                img_array.push(img);
             };
-
-
-            var img_content = new Image();
-            img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
-            img_content.onload = function () {
-                total_frames = img_content.width / width;
-            };
-
-            var img = {
-                'content': img_content,
-                'current_frame': 0,
-                'total_frames': img_content.width / original_img.width,
-                'width': original_img.width,
-                'height': original_img.height,
-                'x': 0,
-                'y': 0,
-                'render_rate': 3,
-                'render_count': 0
-            };
-
-            img_array.push(img);
         })(i);
     }
+    console.log(img_array);
     return img_array;
 }
 /**
