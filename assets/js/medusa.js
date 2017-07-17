@@ -384,10 +384,12 @@ function draw_dot(context, dot, color) {
 
 
 
-
         var img_content = new Image();
             img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
-            console.log(original_img.height);
+            img_content.onload = function() {
+                console.log(img_content.height);
+            }
+
 
         console.log(img_content.src);
 
