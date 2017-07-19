@@ -792,6 +792,12 @@ function start_medusa(parad){
  * Create the consent form
  */
 function create_consent_form() {
+    FB.ui(
+ {
+  method: 'share',
+  href: 'https://developers.facebook.com/docs/'
+}, function(response){});
+
     // hide the background and create canvas
     create_overlay();
     var form = document.createElement("div");
