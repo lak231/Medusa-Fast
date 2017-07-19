@@ -67,7 +67,7 @@ var calibration_sprite_3 = [];
  * CALIBRATION PARAMETERS
  ************************************/
 var calibration_settings = {
-    duration: 5,  // duration of a a singe position sampled
+    duration: 4,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -450,7 +450,7 @@ function draw_dot_countdown(context, dot, color) {
     context.fillStyle = color;
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(calibration_settings.num_dots/3 - num_objects_shown%(calibration_settings.num_dots/3), dot.x, dot.y);
+    context.fillText(calibration_settings.num_dots - num_objects_shown, dot.x, dot.y);
     //animation
     request_anim_frame(function () {
         if (delta >= calibration_settings.duration * 1000) {
