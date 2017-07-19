@@ -1106,6 +1106,7 @@ function create_survey() {
         "</br>" +
         "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
         // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;'src=sdkpreparse'>Share on Facebook</a></div>" +
         "</form>";
     document.body.appendChild(survey);
 }
@@ -1122,13 +1123,13 @@ function create_calibration_instruction() {
     delete_elem("instruction");
     var instruction = document.createElement("div");
     var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every " +  calibration_settings.duration.toString() + " seconds. There will be 39 dots in total, divided into 3 parts with breaks in between. The number on the dot represents the number of dots you have left.";
-    var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely.";
+    // var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely.";
     delete_elem("consent_form");
     instruction.id = "instruction";
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +
+        "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">' +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
         "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>";
