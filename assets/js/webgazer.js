@@ -1029,7 +1029,6 @@ var objectdetect = (function() {
 
         var requestId;
         var requestAnimationFrame_ = function() {
-            console.log("whatthefuck");
             requestId = window.requestAnimationFrame(function() {
                 if (element.readyState === element.HAVE_ENOUGH_DATA) {
                     try {

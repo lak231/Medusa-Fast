@@ -17,6 +17,9 @@ var session_time = "";  // time of current webgazer session
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
     task: "",   // the current performing task
+    url: "",   // url of website
+    canvasWidth: "",    // the width of the canvas
+    canvasHeight: "",   // the height of the canvas
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -27,10 +30,6 @@ var store_data = {
 
 // store all of information of the users which we will send to the database
 var user = {
-    url: "",   // url of website
-    canvasWidth: "",    // the width of the canvas
-    canvasHeight: "",   // the height of the canvas
-    pursuit_position_array: [], // the array of all pursuit positions
     gender:"",    // the gender of the user
     age: "",    // age of the user
     main_country:"",  // country where the user spends the most time in
@@ -648,6 +647,9 @@ function draw_dashed_line(x, y, tx, ty, ctx) {
 function send_gaze_data_to_database(callback){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
+    store_data.url = window.location.href;
+    store_data.canvasHeight = canvas.height;
+    store_data.canvasWidth = canvas.width;
     var params = {
         TableName :TABLE_NAME,
         Item: {
@@ -687,11 +689,6 @@ function send_user_data_to_database(callback){
         document.getElementById("survey_info").innerHTML = "There are " + empty_count.toString() + " more things you need to fill out.";
         return;
     }
-    var canvas = document.getElementById("canvas-overlay");
-    user.url = window.location.href;
-    user.canvasHeight = canvas.height;
-    user.canvasWidth = canvas.width;
-    user.pursuit_position_array = pursuit_paradigm_settings.position_array;
     user.age = document.getElementById('age').value;
     user.gender = document.getElementById('gender').value;
     user.current_country = document.getElementById('current_country').value;
@@ -900,9 +897,18 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
+        session_time = (new Date).getTime().toString();
         create_experiment_instruction();
         create_gaze_database();
         create_user_database();
+        store_data.task = "experiment";
+        store_data.description = "begin";
+        store_data.elapsedTime = [0];
+        store_data.gaze_x = [0];
+        store_data.gaze_y = [0];
+        store_data.object_x = [0];
+        store_data.object_y = [0];
+        send_gaze_data_to_database();
     } else {
         setTimeout(check_webgazer_status, 100);
     }
@@ -984,6 +990,7 @@ function create_user_database() {
         }
     });
 }
+
 
 /**
  * Shows experiment instruction
@@ -1159,20 +1166,17 @@ function create_calibration_break_form(){
  * Start the calibration
  */
 function start_calibration() {
+    current_task = "calibration";
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.zIndex = 14;
     gazeDot.style.display = "block";
     hide_face_tracker();
     collect_data = true;
     webgazer.resume();
-    session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     clear_canvas();
     delete_elem("instruction");
-    current_task = 'calibration';
-    store_data.task = current_task;
-    store_data.description = calibration_settings.method;
     if (webgazer_training_data !== undefined){
         webgazer.loadTrainingData(webgazer_training_data);
         finish_calibration();
@@ -1221,6 +1225,14 @@ function finish_calibration(){
     collect_data = false;
     heatmap_data_x = store_data.gaze_x.slice(0);
     heatmap_data_y = store_data.gaze_y.slice(0);
+    store_data.task = "calibration";
+    store_data.description = "success";
+    store_data.elapsedTime = [0];
+    store_data.gaze_x = [0];
+    store_data.gaze_y = [0];
+    store_data.object_x = [0];
+    store_data.object_y = [0];
+    send_gaze_data_to_database();
     reset_store_data(draw_heatmap("create_validation_instruction"));
 }
 
@@ -1301,6 +1313,11 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
+    store_data.elapsedTime = [0];
+    store_data.gaze_x = [0];
+    store_data.gaze_y = [0];
+    store_data.object_x = [0];
+    store_data.object_y = [0];
     validation_settings.listener = false;
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.display = "none";
@@ -1312,11 +1329,13 @@ function finish_validation(succeed){
     if (succeed === false) {
         store_data.task = "validation";
         store_data.description = "fail";
+        send_gaze_data_to_database();
         create_validation_fail_screen();
     }
     else{
         store_data.task = "validation";
         store_data.description = "success";
+        send_gaze_data_to_database();
         paradigm = "simple";
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
@@ -1672,7 +1691,6 @@ function draw_bonus_round_image() {
         paradigm = "bonus";
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
-        send_gaze_data_to_database();
         draw_heatmap("loop_bonus_round");
     }, bonus_round_settings.image_show_time);
 }
