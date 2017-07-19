@@ -53,7 +53,7 @@ var objects_array = [];    //array of dots
 var num_objects_shown = 0; //number of objects shown
 var paradigm = "simple";  // the paradigm to use for the test
 var possible_paradigm = ["simple","pursuit","heatmap", "massvis"];
-var screen_timeout = 2000;
+var screen_timeout = 3000;
 var cam_width = 320;
 var cam_height = 240;
 var heatmap_data_x = [];
@@ -530,7 +530,7 @@ function draw_heatmap(function_name) {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 99;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Here is a heatmap of where we think you were looking. </h2>" +
+        "<h2 class=\"form__title\"> Here is a heatmap of where we think you were looking. <br> Press the NEXT button when you are done.</h2>" +
         "</header>";
     document.body.appendChild(instruction);
 
@@ -1121,7 +1121,7 @@ function create_calibration_instruction() {
     clear_canvas();
     delete_elem("instruction");
     var instruction = document.createElement("div");
-    var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every 5 seconds. There will be 39 dots in total, divided into 3 parts with breaks inbetween. ";
+    var instruction_guide1 = "This is the calibration step. A dot will appear on the screen every " +  calibration_settings.duration.toString() + " seconds. There will be 39 dots in total, divided into 3 parts with breaks in between. The number on the dot represents the number of dots you have left.";
     var instruction_guide2 = "If you have done this before, and saved a calibration file, you can upload the file to skip this step entirely.";
     delete_elem("consent_form");
     instruction.id = "instruction";
@@ -1149,7 +1149,7 @@ function create_calibration_break_form(){
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Break time! </br> There are more challenges to come.</h2>" +
+        "<h2 class=\"form__title\"> Break time! </br> Press the button when you are ready.</h2>" +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"create_new_dot_calibration()\">Continue Calibration</button>";
     document.body.appendChild(instruction);
@@ -1227,7 +1227,7 @@ function finish_calibration(){
  * VALIDATION
  ************************************/
 function create_validation_instruction() {
-    var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. </br> Press the button when you're ready.";
+    var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. You will have to repeat this procedure " + validation_settings.num_dots + " times. If the score does not reach " + validation_settings.hit_count.toString() + " points in " + validation_settings.duration.toString() + " seconds, you will be redirected to the calibration process. </br> Press the button when you're ready.";
     create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
 }
 
@@ -1384,7 +1384,7 @@ function navigate_tasks() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_simple_instruction() {
-    create_general_instruction("Dot viewing", "Please look at the cross. When the dot appears, please look at it.", "loop_simple_paradigm()", "Start");
+    create_general_instruction("Dot viewing", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
 }
 
 function loop_simple_paradigm() {
@@ -1437,7 +1437,7 @@ function finish_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. Please follow it when it changes color.", "loop_pursuit_paradigm()", "Start");
+    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
@@ -1609,7 +1609,7 @@ function finish_massvis_paradigm() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_bonus_round_instruction() {
-    create_general_instruction("Bonus Round", "Find the panda in picture and compare your result to other people's.<br>This task is optional.", "loop_bonus_round()", "Start");
+    create_general_instruction("Bonus Round", "Find the panda in picture and compare your result to other people's.<br> This task is optional.", "loop_bonus_round()", "Start");
     var instruction = document.getElementById("instruction");
     instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
 }
