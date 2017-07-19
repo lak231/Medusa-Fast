@@ -5,7 +5,7 @@
 const TABLE_NAME = "GAZE_DATA"; // name of data table of gaze data
 const USER_TABLE_NAME = "USERS"; // name of data table of users
 const DEFAULT_DOT_RADIUS = 25;
-const SAMPLING_RATE = 30;   // number of call to function once webgazer got data per second
+const SAMPLING_RATE = 60;   // number of call to function once webgazer got data per second
 const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
 
 /************************************
@@ -62,8 +62,6 @@ var calibration_current_round = 1;
 var calibration_sprite_1 = [];
 var calibration_sprite_2 = [];
 var calibration_sprite_3 = [];
-var img_array = [];
-var curr_img;
 
 /************************************
  * CALIBRATION PARAMETERS
@@ -74,9 +72,6 @@ var calibration_settings = {
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
-    sprite_array_1 : ['bulbasaur', 'charmander', 'chikorita', 'chimchar', 'cyndaquil', 'mudkip', 'pikachu', 'piplup', 'squirtle', 'torchic', 'totodile', 'treecko', 'turtwig'],
-    sprite_array_2: ['bayleef', 'charmeleon', 'combusken', 'croconaw', 'grotle', 'grovyle', 'ivysaur', 'marshtomp', 'monferno', 'pikachu', 'prinplup', 'quilava', 'wartortle'],
-    sprite_array_3: ['blastoise', 'blaziken', 'charizard', 'empoleon', 'feraligatr', 'infernape', 'meganium', 'pikachu', 'sceptile', 'swampert', 'torterra', 'typhlosion', 'venusaur']
 };
 
 /************************************
@@ -364,8 +359,7 @@ function create_dot_array(pos_array, radius){
 function draw_dot(context, dot, color) {
     if (current_task === "calibration") {
         time_stamp = new Date().getTime();
-        //draw_dot_countdown(context, dot, color);
-        draw_gif(context, curr_img);
+        draw_dot_countdown(context, dot, color);
     } else if (current_task === "validation") {
         draw_dot_countup(context, dot, color);
     } else{
@@ -391,56 +385,6 @@ function draw_track(context, dot, color) {
     context.stroke();
 }
 
-function create_img_array () {
-    var width = 0;
-    var width_array = [];
-    var height = 0;
-    var height_array = [];
-    var big_img_width_array = [];
-    var total_frames = 0;
-    var total_frames_array = [];
-    var curr_sprite_array = [];
-    var original_img;
-    var img;
-    var img_content;
-    switch(calibration_settings.current_round) {
-        case 1:
-            curr_sprite_array = calibration_sprite_1;
-            break;
-        case 2:
-            curr_sprite_array = calibration_sprite_2;
-            break;
-        case 3:
-            curr_sprite_array = calibration_sprite_2;
-            break;
-        default:
-            curr_sprite_array = calibration_sprite_1;
-            break;
-    }
-
-    for (i = 0; i < curr_sprite_array.length; i ++) {
-        original_img = new Image();
-        original_img.src = "../assets/images/gif/" + calibration_current_round.toString() + "/" + curr_sprite_array[num_objects_shown] + ".gif";
-        original_img.onload = function () {
-            img_content = new Image();
-            img_content.src = "../assets/images/gif/sprite/" + curr_sprite_array[num_objects_shown] + ".png";
-            img_content.onload = function () {
-                img = {
-                    'content': img_content,
-                    'current_frame': 0,
-                    'total_frames': img_content.width/original_img.width,
-                    'width': original_img.width,
-                    'height': original_img.height,
-                    'x': 0,
-                    'y': 0,
-                    'render_rate': 3,
-                    'render_count': 0
-                };
-                img_array.push(img);
-            };
-        };
-    }
-}
 /**
  * Draw a dot with a counting up number inside. Used for validation process
  * @param {*} context 
@@ -482,71 +426,38 @@ function draw_dot_countup(context, dot, color) {
  */
 function draw_dot_countdown(context, dot, color) {
     var time = new Date().getTime();
-    // var delta = time - time_stamp;
-    // var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
-    // clear_canvas();
-    // //base circle
-    // draw_track(context, dot, color);
-    // //animated circle
-    // context.lineWidth = 7;
-    // context.beginPath();
-    // context.strokeStyle = color;
-    // context.arc(
-    //     dot.x,
-    //     dot.y,
-    //     dot.r,
-    //     Math.PI/-2,
-    //     Math.PI * 3/2-arc_len,
-    //     false
-    // );
-    // context.stroke();
-
-    // //draw countdown number
-    // context.font = "20px Source Sans Pro";
-    // context.fillStyle = color;
-    // context.textAlign = "center";
-    // context.textBaseline = "middle";
-    // context.fillText(calibration_settings.duration - Math.floor(delta / 1000), dot.x, dot.y);
-    // //animation
-    // request_anim_frame(function () {
-    //     if (delta >= calibration_settings.duration * 1000) {
-    //         if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
-    //             heatmap_data_x = store_data.gaze_x.slice(0);
-    //             heatmap_data_y = store_data.gaze_y.slice(0);
-    //             clear_canvas();
-    //             draw_heatmap("create_calibration_break_form");
-    //             return;
-    //         }
-    //         else{
-    //             create_new_dot_calibration();
-    //             return;
-    //         }
-
-    //     }
-    //     draw_dot_countdown(context, dot, color);
-    // });
-}
-
-function draw_gif(context, img) {
-    var time = new Date().getTime();
     var delta = time - time_stamp;
+    var arc_len = delta * Math.PI * 2 / (1000 * calibration_settings.duration);
     clear_canvas();
-    if (img.render_count === img.render_rate - 1) {
-        img.current_frame = (img.current_frame + 1) % img.total_frames;
-    }
-    img.render_count = (img.render_count + 1) % img.render_rate;
-    img.onload = context.drawImage(img.content, img.current_frame * img.width, 0,
-        img.width, img.height,
-        img.x - img.width / 2, img.y - img.height / 2, img.width, img.height);
+    //base circle
+    draw_track(context, dot, color);
+    //animated circle
+    context.lineWidth = 7;
+    context.beginPath();
+    context.strokeStyle = color;
+    context.arc(
+        dot.x,
+        dot.y,
+        dot.r,
+        Math.PI/-2,
+        Math.PI * 3/2-arc_len,
+        false
+    );
+    context.stroke();
 
+    //draw countdown number
+    context.font = "20px Source Sans Pro";
+    context.fillStyle = color;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(calibration_settings.num_dots/3 - num_objects_shown%(calibration_settings.num_dots/3), dot.x, dot.y);
     //animation
     request_anim_frame(function () {
-        if (delta >= calibration_settings.duration * 1000) {   
+        if (delta >= calibration_settings.duration * 1000) {
             if (num_objects_shown === Math.floor(calibration_settings.num_dots / 3) ||num_objects_shown === Math.floor(calibration_settings.num_dots *2 / 3))  {
                 heatmap_data_x = store_data.gaze_x.slice(0);
                 heatmap_data_y = store_data.gaze_y.slice(0);
                 clear_canvas();
-                calibration_current_round += 1;
                 draw_heatmap("create_calibration_break_form");
                 return;
             }
@@ -554,8 +465,9 @@ function draw_gif(context, img) {
                 create_new_dot_calibration();
                 return;
             }
+
         }
-        draw_gif(context, img);
+        draw_dot_countdown(context, dot, color);
     });
 }
 
@@ -609,8 +521,6 @@ function draw_fixation_cross(midX, midY, canvas_object) {
 
 
 function draw_heatmap(function_name) {
-    console.log(heatmap_data_x);
-    console.log(store_data.gaze_x);
     webgazer.pause();
     collect_data = false;
     clear_canvas();
@@ -953,11 +863,9 @@ function initiate_webgazer(){
             }
             if (curr_object === undefined || curr_object === null) return;
             if (collect_data === false) return;
-            
             else if (current_task === "validation"){
                 validation_event_handler(data);
             }
-            console.log(elapsedTime - webgazer_time_stamp);
             // if (elapsedTime - webgazer_time_stamp < 1000 / DATA_COLLECTION_RATE) return;
             webgazer_time_stamp = elapsedTime;
             store_data.elapsedTime.push(elapsedTime);
@@ -1190,7 +1098,7 @@ function create_survey() {
         "<p id='survey_info' class='information'></p>" +
         "</br>" +
         "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
-        "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
+        // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
         "</form>";
     document.body.appendChild(survey);
 }
@@ -1202,12 +1110,6 @@ function create_survey() {
  * Shows calibration instruction
  */
 function create_calibration_instruction() {
-    calibration_sprite_1 = shuffle(calibration_settings.sprite_array_1);
-    calibration_sprite_2 = shuffle(calibration_settings.sprite_array_2);
-    calibration_sprite_3 = shuffle(calibration_settings.sprite_array_3);
-    if (img_array.length === 0) {
-        create_img_array();
-    }
     webgazer_training_data = undefined;
     clear_canvas();
     delete_elem("instruction");
@@ -1222,11 +1124,11 @@ function create_calibration_instruction() {
         "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
-        "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>" +
-        "<label for='calibration_file'>" +
-        "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='17' viewBox='0 0 20 17'><path d='M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z'/></svg>" +
-        "<span>Upload previous calibration data</span>" +
-        "</label>";
+        "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>";
+        // "<label for='calibration_file'>" +
+        // "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='17' viewBox='0 0 20 17'><path d='M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z'/></svg>" +
+        // "<span>Upload previous calibration data</span>" +
+        // "</label>";
     document.body.appendChild(instruction);
     show_video_feed();
 }
@@ -1290,10 +1192,7 @@ function create_new_dot_calibration(){
     if (objects_array.length === 0) {
         objects_array = create_dot_array(calibration_settings.position_array);
     }
-    curr_img = img_array.pop();
     curr_object = objects_array.pop();
-    curr_img.x = curr_object.x;
-    curr_img.y = curr_object.y;
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
     draw_dot(context, curr_object, dark_color);
