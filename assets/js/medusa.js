@@ -67,7 +67,7 @@ var calibration_sprite_3 = [];
  * CALIBRATION PARAMETERS
  ************************************/
 var calibration_settings = {
-    duration: 4,  // duration of a a singe position sampled
+    duration: 5,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
     num_dots: 39,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
@@ -612,17 +612,24 @@ function draw_heatmap(function_name) {
             draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
         } else if (current_task === "bonus" || current_task === "massvis_paradigm") {
             if (current_task === "bonus") {
-                curr_object.src = curr_object.src.slice(0, curr_object.src.length - 4) + " answer.jpg";
+                var prev_height = curr_object.height;
+                var prev_width = curr_object.width;
+                var src = curr_object.src.slice(0, curr_object.src.length - 4) + " answer.jpg";
+                curr_object = new Image();
+                curr_object.src = src;
+                curr_object.height = prev_height;
+                curr_object.width = prev_width;
             }
             canvas = document.getElementById("canvas-overlay");
             context = canvas.getContext("2d");
-            curr_object.onload =
+            curr_object.onload = function() {
                 context.drawImage(curr_object,
                     canvas.width / 2 - curr_object.width / 2,
                     canvas.height / 2 - curr_object.height / 2,
                     curr_object.width,
                     curr_object.height
                 );
+            }
         }
     }, screen_timeout);
 }
@@ -1637,13 +1644,28 @@ function draw_bonus_round_image() {
     collect_data = true;
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    var spacing = 10;
-    context.drawImage(curr_object,
-        canvas.width / 2 - (curr_object.width/curr_object.height * (canvas.height - spacing * 2))/2,
-        spacing,
-        curr_object.width/curr_object.height * (canvas.height - spacing * 2),
-        canvas.height - spacing * 2
-    );
+    var aspect_ratio = curr_object.width/curr_object.height;
+    if (curr_object.width >= canvas.width || curr_object.height >= canvas.height) {
+        var heightmajor_height = canvas.height - massvis_paradigm_settings.spacing * 2;
+        var heightmajor_width = aspect_ratio * heightmajor_height;
+        var widthmajor_width =  canvas.width - massvis_paradigm_settings.spacing * 2;
+        var widthmajor_height = widthmajor_width / aspect_ratio;
+        if (heightmajor_height < canvas.height && heightmajor_width < canvas.width) {
+            curr_object.width = heightmajor_width;
+            curr_object.height = heightmajor_height;
+        } else if (widthmajor_width < canvas.width && widthmajor_height < canvas.height) {
+            curr_object.width = widthmajor_width;
+            curr_object.height = widthmajor_height;
+        }
+    }
+    curr_object.onload =
+        context.drawImage(curr_object,
+            canvas.width / 2 - curr_object.width / 2,
+            canvas.height / 2 - curr_object.height / 2,
+            curr_object.width,
+            curr_object.height
+        );
+
     setTimeout(function(){
         store_data.task = "bonus";
         paradigm = "bonus";
