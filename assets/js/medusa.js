@@ -645,6 +645,7 @@ function draw_dashed_line(x, y, tx, ty, ctx) {
  * Sends gaze data to database and then clear out the store_data variable. Called after each step 
  */
 function send_gaze_data_to_database(callback){
+    session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     store_data.url = window.location.href;
@@ -672,6 +673,7 @@ function send_gaze_data_to_database(callback){
  * Sends user data to the database. Only called at the end of the experiment.
  */
 function send_user_data_to_database(callback){
+    session_time = (new Date).getTime().toString();
     var empty_count = 0;
     $("select").each(function (i) {
         if (this.value === "") {
@@ -897,7 +899,6 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        session_time = (new Date).getTime().toString();
         create_experiment_instruction();
         create_gaze_database();
         create_user_database();
@@ -1136,11 +1137,7 @@ function create_calibration_instruction() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-<<<<<<< HEAD
-        "<h2 class=\"form__title\"> Calibration (1/5)</br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +
-=======
         "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">' +
->>>>>>> 2a4e548cea789dc47badc29c2c86e1ce59c998b2
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
         "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>";
