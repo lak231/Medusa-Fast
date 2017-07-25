@@ -1135,7 +1135,7 @@ function create_calibration_instruction() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +
+        "<h2 class=\"form__title\"> Calibration (1/5)</br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
         "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>";
@@ -1240,7 +1240,7 @@ function finish_calibration(){
  ************************************/
 function create_validation_instruction() {
     var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. You will have to repeat this procedure " + validation_settings.num_dots + " times. If the score does not reach " + validation_settings.hit_count.toString() + " points in " + validation_settings.duration.toString() + " seconds, you will be redirected to the calibration process. </br> Press the button when you're ready.";
-    create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
+    create_general_instruction("Validation (2/5)", instruction_guide1, "start_validation()", "Start");
 }
 
 /**
@@ -1403,7 +1403,7 @@ function navigate_tasks() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_simple_instruction() {
-    create_general_instruction("Dot viewing", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
+    create_general_instruction("Dot viewing (3/5)", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
 }
 
 function loop_simple_paradigm() {
@@ -1456,7 +1456,7 @@ function finish_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
+    create_general_instruction("Dot pursuing (4/5)", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
@@ -1548,7 +1548,7 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function create_massvis_instruction() {
-    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
+    create_general_instruction("Massvis (5/5)", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
 }
 
 function loop_massvis_paradigm() {
