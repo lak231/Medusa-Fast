@@ -825,10 +825,18 @@ function create_consent_form() {
 
         "</fieldset>" +
         "<p class='information' id='webcam-info'></p>" +
-        "<button class=\"form__button\" type=\"button\" onclick=\"load_webgazer()\">Next</button>" +
+        "<button class=\"form__button\" type=\"button\" onclick=\"consent_form_navigation()\">Next</button>" +
         "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
+}
+
+function consent_form_navigation() {
+    if ($('#consent-yes').is(':checked')) {
+        load_webgazer();
+    } else if ($('#consent-no').is(':checked')) {
+        window.location.href = "../index.html";
+    }
 }
 
 /**
@@ -1240,7 +1248,7 @@ function finish_calibration(){
  * VALIDATION
  ************************************/
 function create_validation_instruction() {
-    var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. You will have to repeat this procedure " + validation_settings.num_dots + " times. If the score does not reach " + validation_settings.hit_count.toString() + " points in " + validation_settings.duration.toString() + " seconds, you will be redirected to the calibration process. </br> Press the button when you're ready.";
+    var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. You will have to repeat this procedure " + validation_settings.num_dots + " times. If the score does not reach " + validation_settings.hit_count.toString() + " points in " + (validation_settings.duration / 1000).toString() + " seconds, you will be redirected to the calibration process. </br> Press the button when you're ready.";
     create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
 }
 
