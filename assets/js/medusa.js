@@ -645,6 +645,7 @@ function draw_dashed_line(x, y, tx, ty, ctx) {
  * Sends gaze data to database and then clear out the store_data variable. Called after each step 
  */
 function send_gaze_data_to_database(callback){
+    session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     store_data.url = window.location.href;
@@ -672,6 +673,7 @@ function send_gaze_data_to_database(callback){
  * Sends user data to the database. Only called at the end of the experiment.
  */
 function send_user_data_to_database(callback){
+    session_time = (new Date).getTime().toString();
     var empty_count = 0;
     $("select").each(function (i) {
         if (this.value === "") {
@@ -905,7 +907,6 @@ function check_webgazer_status() {
         console.log('webgazer is ready.');
         // Create database
         createID();
-        session_time = (new Date).getTime().toString();
         create_experiment_instruction();
         create_gaze_database();
         create_user_database();
