@@ -1603,6 +1603,12 @@ function draw_massvis_image() {
             curr_object.height
         );
 
+    context.font = "20px Source Sans Pro";
+    context.fillStyle = font_color;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(num_objects_shown.toString() + " / " + massvis_paradigm_settings.num_trials.toString(), canvas.width - 50, 25);
+
     setTimeout(function(){
         store_data.task = "massvis";
         paradigm = "massvis";
