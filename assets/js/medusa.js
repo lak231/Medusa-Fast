@@ -1007,9 +1007,9 @@ function create_user_database() {
 function create_experiment_instruction() {
     if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
-        var instruction_guide1 = "Please remove all of your glasses and hats. Please modify the camera until the green lines roughly fit your face, and try to keep your head still during the entire experiment.";
-        var instruction_guide2 = "For nearly half of your experiment, we'll be training your computer to guess where you're looking (and we'll show you what we think along the way!). We'll end the experiment by having you look at charts, graphs, and infographics to help us understand the way you process information. Finally, you'll have a chance to complete a searching challenge and share your results with your friends.";
-        var instruction_guide3 = "We know focusing on the screen for a long time is tiring to the eyes, so there will be break in between sections.";
+        var instruction_guide1 = "For nearly half of your experiment, we'll be training your computer to guess where you're looking (and we'll show you what we think along the way!). We'll end the experiment by having you look at charts, graphs, and infographics to help us understand the way you process information. Finally, you'll have a chance to complete a searching challenge and share your results with your friends.";
+        var instruction_guide2 = "We know focusing on the screen for a long time is tiring to the eyes, so there will be break in between sections.";
+        var instruction_guide3 = "Before we start, there are few tips we want to share with you to help you progress through the experiment faster.";
         delete_elem("consent_form");
         instruction.id = "instruction";
         instruction.className += "overlay-div";
@@ -1017,14 +1017,14 @@ function create_experiment_instruction() {
         instruction.innerHTML += "<header class=\"form__header\">" +
             "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
             "</header>" +
-            "<button class=\"form__button\" type=\"button\" onclick=\"create_webcam_instruction_glasses()\">Start</button>";
+            "<button class=\"form__button\" type=\"button\" onclick=\"create_webcam_instruction_perfect()\">Start</button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
 }
 
 function create_webcam_instruction_glasses() {
-    create_general_instruction("Please take off your glasses.", "", "create_webcam_instruction_uneven(); delete_elem('guide-img');", "Next");
+    create_general_instruction("Glasses.", "Firstly, glasses. The program can't identify your eyes or your face if you wear glasses. Therefore, if you wear glasses, please take them off before continue.", "create_webcam_instruction_uneven(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.src = "../assets/images/guide/Glasses.png";
     guide.id = "guide-img";
@@ -1042,7 +1042,7 @@ function create_webcam_instruction_glasses() {
 }
 
 function create_webcam_instruction_uneven() {
-    create_general_instruction("Please make sure that you have even lighting across your face.", "", "create_webcam_instruction_broken(); delete_elem('guide-img');", "Next");
+    create_general_instruction("Lighting conditions.", "Secondly, lighting conditions. This is rather tricky, but the main idea is that you should make sure that you have even lighting across your face. Ideally, the light source should be behind or in front you.", "create_webcam_instruction_reset(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.id = "guide-img";
     guide.src = "../assets/images/guide/Uneven.png";
@@ -1060,7 +1060,7 @@ function create_webcam_instruction_uneven() {
 }
 
 function create_webcam_instruction_broken() {
-    create_general_instruction("Please take off your glasses.", "", "create_webcam_instruction_reset(); delete_elem('guide-img');", "Next");
+    create_general_instruction("Problems.", "However, the conditions are not always ideal and the program may fail to identify your eyes and your face. Should it fail, the green line will not match your face and your eyes. There are two primary suspects here.", "create_webcam_instruction_glasses(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.src = "../assets/images/guide/Broken.png";
     guide.id = "guide-img";
@@ -1078,7 +1078,7 @@ function create_webcam_instruction_broken() {
 }
 
 function create_webcam_instruction_reset() {
-    create_general_instruction("Please take off your glasses.", "", "create_webcam_instruction_perfect(); delete_elem('guide-img');", "Next");
+    create_general_instruction("Recalibrate", "Now, after you have fixed everything, you should try to calibrate again. To do that, move your face away completely from the webcam and then move back to in front of the webcam. The program will recalibrate and it should be able to indentify your face correctly now. If it is not, please perform this step again.", "create_webcam_instruction_final_check(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.src = "../assets/images/guide/Reset.png";
     guide.id = "guide-img";
@@ -1096,7 +1096,24 @@ function create_webcam_instruction_reset() {
 }
 
 function create_webcam_instruction_perfect() {
-    create_general_instruction("Please take off your glasses.", "", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("The ONLY thing this program needs.", "The one central requirement for this experiment to run smoothly is that the program can identify your face and eyes accurately. How do you know that? The green line should fit your face and your eyes correctly.", "create_webcam_instruction_broken(); delete_elem('guide-img');", "Continue");
+    var guide = new Image();
+    guide.src = "../assets/images/guide/Perfect.png";
+    guide.id = "guide-img";
+    guide.style.display = 'block';
+    guide.style.position = 'fixed';
+    guide.style.top = "65%";
+    guide.style.left = "calc(50% - 400px)";
+    guide.style.zIndex = 13;
+    guide.width = cam_width;
+    document.body.appendChild(guide);
+    var video = document.getElementById('webgazerVideoFeed');
+    video.style.left = "calc(50% + 25px)";
+    var overlay = document.getElementById('face_tracker');
+    overlay.style.left = "calc(50% + 25px)";
+}
+function create_webcam_instruction_final_check() {
+    create_general_instruction("A few other tips.", "When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
