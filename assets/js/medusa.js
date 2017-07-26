@@ -1113,7 +1113,7 @@ function create_webcam_instruction_perfect() {
     overlay.style.left = "calc(50% + 25px)";
 }
 function create_webcam_instruction_final_check() {
-    create_general_instruction("A few other tips.", "When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("A few other tips.", "When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
