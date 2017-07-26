@@ -1175,6 +1175,7 @@ function create_calibration_break_form(){
  * Start the calibration
  */
 function start_calibration() {
+    session_time = (new Date).getTime().toString();
     // send initial data to database
     store_data.task = "calibration";
     store_data.description = "begin";
@@ -1208,8 +1209,6 @@ function start_calibration() {
  * Create a new dot for calibration
  */
 function create_new_dot_calibration(){
-    store_data.description = num_objects_shown.toString();
-    send_gaze_data_to_database();
     collect_data = true;
     hide_face_tracker();
     delete_elem("instruction");
@@ -1225,6 +1224,10 @@ function create_new_dot_calibration(){
         objects_array = create_dot_array(calibration_settings.position_array);
     }
     curr_object = objects_array.pop();
+    store_data.object_x.push(curr_object.x);
+    store_data.object_y.push(curr_object.y);
+    store_data.description = num_objects_shown.toString();
+    send_gaze_data_to_database();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
     draw_dot(context, curr_object, dark_color);
@@ -1260,6 +1263,7 @@ function create_validation_instruction() {
  * Prepares validation process
  */
 function start_validation(){
+    session_time = (new Date).getTime().toString();
     store_data.task = "validation";
     store_data.description = "begin";
     store_data.elapsedTime = [0];
@@ -1285,8 +1289,6 @@ function start_validation(){
  * Create new dots for validation
  */
 function create_new_dot_validation(){
-    store_data.description = num_objects_shown.toString();
-    send_gaze_data_to_database();
     if (num_objects_shown >= validation_settings.num_dots) {
         finish_validation(true);
         return;
@@ -1299,6 +1301,10 @@ function create_new_dot_validation(){
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
+    store_data.object_x.push(curr_object.x);
+    store_data.object_y.push(curr_object.y);
+    store_data.description = num_objects_shown.toString();
+    send_gaze_data_to_database();
     draw_dot(context, curr_object, dark_color);
     validation_settings.listener = true;
     time_stamp = new Date().getTime();
