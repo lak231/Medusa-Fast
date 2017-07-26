@@ -645,7 +645,6 @@ function draw_dashed_line(x, y, tx, ty, ctx) {
  * Sends gaze data to database and then clear out the store_data variable. Called after each step 
  */
 function send_gaze_data_to_database(callback){
-    session_time = (new Date).getTime().toString();
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     store_data.url = window.location.href;
@@ -910,6 +909,7 @@ function check_webgazer_status() {
         create_experiment_instruction();
         create_gaze_database();
         create_user_database();
+        session_time = (new Date).getTime().toString();
         store_data.task = "experiment";
         store_data.description = "begin";
         store_data.elapsedTime = [0];
@@ -1175,6 +1175,15 @@ function create_calibration_break_form(){
  * Start the calibration
  */
 function start_calibration() {
+    // send initial data to database
+    store_data.task = "calibration";
+    store_data.description = "begin";
+    store_data.elapsedTime = [0];
+    store_data.gaze_x = [0];
+    store_data.gaze_y = [0];
+    store_data.object_x = [0];
+    store_data.object_y = [0];
+    send_gaze_data_to_database();
     current_task = "calibration";
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.zIndex = 14;
@@ -1199,6 +1208,8 @@ function start_calibration() {
  * Create a new dot for calibration
  */
 function create_new_dot_calibration(){
+    store_data.description = num_objects_shown.toString();
+    send_gaze_data_to_database();
     collect_data = true;
     hide_face_tracker();
     delete_elem("instruction");
@@ -1228,20 +1239,12 @@ function finish_calibration(){
     calibration_current_round = 1;
     objects_array = [];
     num_objects_shown = 0;
-    store_data.task = "calibration";
     store_data.description = "success";
+    send_gaze_data_to_database();
     webgazer.pause();
     collect_data = false;
     heatmap_data_x = store_data.gaze_x.slice(0);
     heatmap_data_y = store_data.gaze_y.slice(0);
-    store_data.task = "calibration";
-    store_data.description = "success";
-    store_data.elapsedTime = [0];
-    store_data.gaze_x = [0];
-    store_data.gaze_y = [0];
-    store_data.object_x = [0];
-    store_data.object_y = [0];
-    send_gaze_data_to_database();
     reset_store_data(draw_heatmap("create_validation_instruction"));
 }
 
@@ -1257,12 +1260,19 @@ function create_validation_instruction() {
  * Prepares validation process
  */
 function start_validation(){
+    store_data.task = "validation";
+    store_data.description = "begin";
+    store_data.elapsedTime = [0];
+    store_data.gaze_x = [0];
+    store_data.gaze_y = [0];
+    store_data.object_x = [0];
+    store_data.object_y = [0];
+    send_gaze_data_to_database();
     clear_canvas();
     delete_elem("instruction");
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
     current_task = 'validation';
-    store_data.description = validation_settings;
     collect_data = true;
     webgazer.resume();
     create_new_dot_validation();
@@ -1275,6 +1285,8 @@ function start_validation(){
  * Create new dots for validation
  */
 function create_new_dot_validation(){
+    store_data.description = num_objects_shown.toString();
+    send_gaze_data_to_database();
     if (num_objects_shown >= validation_settings.num_dots) {
         finish_validation(true);
         return;
@@ -1322,11 +1334,6 @@ function validation_event_handler(data) {
  * Triggered when validation ends
  */
 function finish_validation(succeed){
-    store_data.elapsedTime = [0];
-    store_data.gaze_x = [0];
-    store_data.gaze_y = [0];
-    store_data.object_x = [0];
-    store_data.object_y = [0];
     validation_settings.listener = false;
     var gazeDot = document.getElementById("gazeDot");
     gazeDot.style.display = "none";
@@ -1336,19 +1343,17 @@ function finish_validation(succeed){
     webgazer.pause();
     collect_data = false;
     if (succeed === false) {
-        store_data.task = "validation";
         store_data.description = "fail";
         send_gaze_data_to_database();
-        create_validation_fail_screen();
+        reset_store_data(create_validation_fail_screen());
     }
     else{
-        store_data.task = "validation";
         store_data.description = "success";
         send_gaze_data_to_database();
         paradigm = "simple";
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
-        draw_heatmap("navigate_tasks");
+        reset_store_data(draw_heatmap("navigate_tasks"));
     }
 }
 
@@ -1413,6 +1418,7 @@ function navigate_tasks() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_simple_instruction() {
+    session_time = (new Date).getTime().toString();
     create_general_instruction("Dot viewing", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
 }
 
@@ -1466,6 +1472,7 @@ function finish_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
+    session_time = (new Date).getTime().toString();
     create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
 }
 
@@ -1558,6 +1565,7 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function create_massvis_instruction() {
+    session_time = (new Date).getTime().toString();
     create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
 }
 
