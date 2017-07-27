@@ -17,9 +17,6 @@ var session_time = "";  // time of current webgazer session
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
     task: "",   // the current performing task
-    url: "",   // url of website
-    canvasWidth: "",    // the width of the canvas
-    canvasHeight: "",   // the height of the canvas
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -647,15 +644,43 @@ function draw_dashed_line(x, y, tx, ty, ctx) {
 function send_gaze_data_to_database(callback){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    store_data.url = window.location.href;
-    store_data.canvasHeight = canvas.height;
-    store_data.canvasWidth = canvas.width;
+    var temp_store_data = {
+        task: "",   // the current performing task
+        url: "",   // url of website
+        canvasWidth: "",    // the width of the canvas
+        canvasHeight: "",   // the height of the canvas
+        description: "",    // a description of the task. Depends on the type of task
+        elapsedTime: [], // time since webgazer.begin() is called
+        object_x: [], // x position of whatever object the current task is using
+        object_y: [],    // y position of whatever object the current task is using
+        gaze_x: [], // x position of gaze
+        gaze_y: [] // y position of gaze
+    };
+    temp_store_data.url = window.location.href;
+    temp_store_data.canvasHeight = canvas.height;
+    temp_store_data.canvasWidth = canvas.width;
+    temp_store_data.task = store_data.task;
+    temp_store_data.description = store_data.description
+    if (current_task === "calibration"){   
+        temp_store_data.gaze_x = [0];
+        temp_store_data.gaze_y = [0];
+        temp_store_data.object_x = [0];
+        temp_store_data.object_y = [0];
+        temp_store_data.elapsedTime = [0];
+    }
+    else{
+        temp_store_data.gaze_x = store_data.gaze_x;
+        temp_store_data.gaze_y = store_data.gaze_y;
+        temp_store_data.object_x = store_data.object_x;
+        temp_store_data.object_y = store_data.object_y;
+        temp_store_data.elapsedTime = store_data.elapsedTime;
+    }
     var params = {
         TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
             "time_collected": session_time,
-            "info": store_data
+            "info": temp_store_data
         }
     };
     docClient.put(params, function(err, data) {
@@ -909,15 +934,6 @@ function check_webgazer_status() {
         create_experiment_instruction();
         create_gaze_database();
         create_user_database();
-        session_time = (new Date).getTime().toString();
-        store_data.task = "experiment";
-        store_data.description = "begin";
-        store_data.elapsedTime = [0];
-        store_data.gaze_x = [0];
-        store_data.gaze_y = [0];
-        store_data.object_x = [0];
-        store_data.object_y = [0];
-        send_gaze_data_to_database();
     } else {
         setTimeout(check_webgazer_status, 100);
     }
@@ -1005,6 +1021,10 @@ function create_user_database() {
  * Shows experiment instruction
  */
 function create_experiment_instruction() {
+    session_time = (new Date).getTime().toString();
+    store_data.task = "experiment";
+    store_data.description = "begin";
+    send_gaze_data_to_database();
     if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
         var instruction_guide1 = "For nearly half of your experiment, we'll be training your computer to guess where you're looking (and we'll show you what we think along the way!). We'll end the experiment by having you look at charts, graphs, and infographics to help us understand the way you process information. Finally, you'll have a chance to complete a searching challenge and share your results with your friends.";
@@ -1287,11 +1307,6 @@ function start_calibration() {
     // send initial data to database
     store_data.task = "calibration";
     store_data.description = "begin";
-    store_data.elapsedTime = [0];
-    store_data.gaze_x = [0];
-    store_data.gaze_y = [0];
-    store_data.object_x = [0];
-    store_data.object_y = [0];
     send_gaze_data_to_database();
     current_task = "calibration";
     var gazeDot = document.getElementById("gazeDot");
@@ -1332,9 +1347,7 @@ function create_new_dot_calibration(){
         objects_array = create_dot_array(calibration_settings.position_array);
     }
     curr_object = objects_array.pop();
-    store_data.object_x.push(curr_object.x);
-    store_data.object_y.push(curr_object.y);
-    store_data.description = num_objects_shown.toString();
+    store_data.description = (num_objects_shown+1).toString();
     send_gaze_data_to_database();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
@@ -1375,11 +1388,6 @@ function start_validation(){
     session_time = (new Date).getTime().toString();
     store_data.task = "validation";
     store_data.description = "begin";
-    store_data.elapsedTime = [0];
-    store_data.gaze_x = [0];
-    store_data.gaze_y = [0];
-    store_data.object_x = [0];
-    store_data.object_y = [0];
     send_gaze_data_to_database();
     clear_canvas();
     delete_elem("instruction");
@@ -1410,9 +1418,7 @@ function create_new_dot_validation(){
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
-    store_data.object_x.push(curr_object.x);
-    store_data.object_y.push(curr_object.y);
-    store_data.description = num_objects_shown.toString();
+    store_data.description = (num_objects_shown+1).toString();
     send_gaze_data_to_database();
     draw_dot(context, curr_object, dark_color);
     validation_settings.listener = true;
