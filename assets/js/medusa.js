@@ -801,12 +801,14 @@ function create_consent_form() {
     form.innerHTML +=
         "<header class=\"form__header\">" +
         "<h2 class=\"form__title\">Consent form</h2>" +
-        "<p class='information' style='font-size: 1em'><b>Why we are doing this research:</b> We are trying to examine the feasibility of using consumer-grade webcams to conduct eye-tracking experiments to replace traditional eye-tracking method.</p>" +
-        "<p class='information' style='font-size: 1em'><b>What you will have to do:</b> You will be presented with a series of tasks that involves looking at some dots and data visualizations .</p>" +
-        "<p class='information' style='font-size: 1em'><b>Privacy and Data collection:</b> We will not ask you for your name. We will not store any videos or images from the webcam. The only data from your webcam that we are collecting is predicted coordinates of your gaze made by webgazer. All data will be stored in a secure server.</p>" +
-        "<p class='information' style='font-size: 1em'><b>Duration:</b> Approximately 15 minutes.</p>" +
-        "<p class='information' style='font-size: 1em'><b>Taking part is voluntary:</b> You are free to leave the experiment at any time. If you refuse to be in the experiment or stop participating, there will no penalty or loss of benefits to which you are otherwise entitled.</p>" +
-        "<p class='information' style='font-size: 1em'><b>If you have questions:</b> You may contact Professor Evan Peck at <a href='mailto:evan.peck@bucknell.edu'>evan.peck@bucknell.edu</a>. If you have questions about your rights as a research participant, please contact Matthew Slater, Bucknell University's IRB Chair at 570.577.2767 or at <a href='mailto:matthew.slater@bucknell.edu'>matthew.slater@bucknell.edu</a></p>" +
+            "<div style='overflow-y: scroll; max-height: 15em;'>" +
+        "<p class='information'><b>Why we are doing this research:</b> We are trying to examine the feasibility of using consumer-grade webcams to conduct eye-tracking experiments to replace traditional eye-tracking method.</p>" +
+        "<p class='information'><b>What you will have to do:</b> You will be presented with a series of tasks that involves looking at some dots and data visualizations .</p>" +
+        "<p class='information'><b>Privacy and Data collection:</b> We will not ask you for your name. We will not store any videos or images from the webcam. The only data from your webcam that we are collecting is predicted coordinates of your gaze made by webgazer. All data will be stored in a secure server.</p>" +
+        "<p class='information'><b>Duration:</b> Approximately 15 minutes.</p>" +
+        "<p class='information'><b>Taking part is voluntary:</b> You are free to leave the experiment at any time. If you refuse to be in the experiment or stop participating, there will no penalty or loss of benefits to which you are otherwise entitled.</p>" +
+        "<p class='information'><b>If you have questions:</b> You may contact Professor Evan Peck at <a href='mailto:evan.peck@bucknell.edu'>evan.peck@bucknell.edu</a>. If you have questions about your rights as a research participant, please contact Matthew Slater, Bucknell University's IRB Chair at 570.577.2767 or at <a href='mailto:matthew.slater@bucknell.edu'>matthew.slater@bucknell.edu</a></p>" +
+            "</div>" +
         "</header>" +
 
         "<form>" +
@@ -835,6 +837,7 @@ function create_consent_form() {
 function consent_form_navigation() {
     if ($('#consent-yes').is(':checked')) {
         load_webgazer();
+        //create_survey();
     } else if ($('#consent-no').is(':checked')) {
         window.location.href = "../index.html";
     }
@@ -892,6 +895,9 @@ function initiate_webgazer(){
             }
             store_data.gaze_x.push(data.x);
             store_data.gaze_y.push(data.y);
+            if (current_task === "bonus") {
+                loop_bonus_round();
+            }
         })
         .begin()
         .showPredictionPoints(false);
@@ -1113,7 +1119,7 @@ function create_webcam_instruction_perfect() {
     overlay.style.left = "calc(50% + 25px)";
 }
 function create_webcam_instruction_final_check() {
-    create_general_instruction("A few other tips.", "At this step, everything should be correct and the program should be able to identify your eyes correct. When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("A few other tips.", "At this step, everything should be correct and the program should be able to identify your eyes correct. When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_bonus_round_instruction(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
@@ -1171,8 +1177,12 @@ function save_user_choices() {
  */
 function create_survey() {
     var age_options = '';
+    var performnace_rating = '';
     for (var i = 6; i < 120; i++) {
         age_options += '<option value=' + i + '>' + i + '</option>';
+    }
+    for (i = 1; i < 11; i++) {
+        performnace_rating += '<option value=' + i + '>' + i + '</option>';
     }
     var survey = document.createElement("div");
     delete_elem("consent_form");
@@ -1182,7 +1192,7 @@ function create_survey() {
     survey.innerHTML += "<header class=\"form__header\">" +
         "<h2 class=\"form__title\">This is the last of it, we promise.</h2>" +
         "</header>" +
-        "<form id='selection_fields'>" +
+        "<form id='selection_fields' style='max-height: 60%; overflow-y: scroll; overflow-x: hidden'>" +
         "<select id='experience' onchange='autofill_survey(this)' required>" +
             "<option value=\"\" disabled selected> Have you done this experiment before? </option>" +
             "<option value='yes'> Yes </option>" +
@@ -1225,12 +1235,17 @@ function create_survey() {
         "<option value='right-handed'>Right-handed</option><option value='left-handed'>Left-handed</option><option value='ambidextrous'>Ambidextrous</option>" +
         "</select>" +
         "</br>" +
+        "<select id = 'performance' required>" +
+        "<option value=\"\" disabled selected> On a scale of 1 to 10, how well do you think the eye tracker performed? </option>" + performnace_rating +
+        "</select>" +
+        "</br>" +
+        "<textarea rows='5' style='width: calc(100% - 10px)' name='comment' form='selection_fields' placeholder='Comments...'></textarea>" +
+        "</form>" +
         "<p id='survey_info' class='information'></p>" +
         "</br>" +
         "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
         // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;'src=sdkpreparse'>Share on Facebook</a></div>" +
-        "</form>";
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;'src=sdkpreparse'>Share on Facebook</a></div>";
     document.body.appendChild(survey);
 }
 
@@ -1766,30 +1781,44 @@ function finish_massvis_paradigm() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_bonus_round_instruction() {
-    create_general_instruction("Bonus Round", "Find the panda in picture and compare your result to other people's.<br> This task is optional.", "loop_bonus_round()", "Start");
+
+    create_general_instruction("Bonus Round", "Make a painting with just your eyes.<br> This task is optional.", "create_heatmap_overlay()", "Start");
     var instruction = document.getElementById("instruction");
     instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
 }
 
-function loop_bonus_round() {
-    if (num_objects_shown >= bonus_round_settings.num_trials) {
-        finish_bonus_round();
-        return;
-    }
-    var canvas = document.getElementById("canvas-overlay");
+function create_heatmap_overlay() {
     current_task = "bonus";
     collect_data = true;
     webgazer.resume();
-    clear_canvas();
-    objects_array = shuffle(bonus_round_settings.image_array);
-    curr_object = new Image();
-    curr_object.src = objects_array.pop();
-    store_data.description = curr_object.src;
-    draw_fixation_cross(canvas.width * 0.5, canvas.height * 0.5, canvas);
-    num_objects_shown ++;
-    webgazer.pause();
-    collect_data = false;
-    setTimeout(draw_bonus_round_image, bonus_round_settings.fixation_rest_time);
+    webgazer.showPredictionPoints(true);
+    var canvas = document.createElement('canvas');
+    canvas.id     = "heatmap-overlay";
+    // canvas.addEventListener("mousedown", canvas_on_click, false);
+    // style the newly created canvas
+    canvas.style.zIndex   = 11;
+    canvas.style.position = "fixed";
+    canvas.style.left = 0;
+    canvas.style.top = 0;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+}
+
+function loop_bonus_round() {
+    var canvas = document.getElementById("heatmap-overlay");
+    var heat = simpleheat(canvas);
+    var points = [];
+    for (i = 0; i < store_data.gaze_x.length; i++) {
+        var point = [
+            store_data.gaze_x[i],
+            store_data.gaze_y[i],
+            0.1];
+        points.push(point);
+    }
+
+    heat.data(points);
+    heat.draw();
 }
 
 /**

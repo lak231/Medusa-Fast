@@ -21,6 +21,11 @@ html, body {
     top: 0; left: 0; bottom: 0; right: 0;
 }
 
+/*::-webkit-scrollbar {*/
+    /*width: 0px;*/
+    /*background: transparent; !* make scrollbar transparent *!*/
+/*}*/
+
 .form__header {
     padding-bottom: 30px;
     margin-bottom: 10px;
