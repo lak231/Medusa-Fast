@@ -17,9 +17,6 @@ var session_time = "";  // time of current webgazer session
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
     task: "",   // the current performing task
-    url: "",   // url of website
-    canvasWidth: "",    // the width of the canvas
-    canvasHeight: "",   // the height of the canvas
     description: "",    // a description of the task. Depends on the type of task
     elapsedTime: [], // time since webgazer.begin() is called
     object_x: [], // x position of whatever object the current task is using
@@ -647,15 +644,43 @@ function draw_dashed_line(x, y, tx, ty, ctx) {
 function send_gaze_data_to_database(callback){
     var canvas = document.getElementById("canvas-overlay");
     var context = canvas.getContext("2d");
-    store_data.url = window.location.href;
-    store_data.canvasHeight = canvas.height;
-    store_data.canvasWidth = canvas.width;
+    var temp_store_data = {
+        task: "",   // the current performing task
+        url: "",   // url of website
+        canvasWidth: "",    // the width of the canvas
+        canvasHeight: "",   // the height of the canvas
+        description: "",    // a description of the task. Depends on the type of task
+        elapsedTime: [], // time since webgazer.begin() is called
+        object_x: [], // x position of whatever object the current task is using
+        object_y: [],    // y position of whatever object the current task is using
+        gaze_x: [], // x position of gaze
+        gaze_y: [] // y position of gaze
+    };
+    temp_store_data.url = window.location.href;
+    temp_store_data.canvasHeight = canvas.height;
+    temp_store_data.canvasWidth = canvas.width;
+    temp_store_data.task = store_data.task;
+    temp_store_data.description = store_data.description
+    if (current_task === "calibration"){
+        temp_store_data.gaze_x = [0];
+        temp_store_data.gaze_y = [0];
+        temp_store_data.object_x = [0];
+        temp_store_data.object_y = [0];
+        temp_store_data.elapsedTime = [0];
+    }
+    else{
+        temp_store_data.gaze_x = store_data.gaze_x;
+        temp_store_data.gaze_y = store_data.gaze_y;
+        temp_store_data.object_x = store_data.object_x;
+        temp_store_data.object_y = store_data.object_y;
+        temp_store_data.elapsedTime = store_data.elapsedTime;
+    }
     var params = {
         TableName :TABLE_NAME,
         Item: {
             "gazer_id": gazer_id,
             "time_collected": session_time,
-            "info": store_data
+            "info": temp_store_data
         }
     };
     docClient.put(params, function(err, data) {
@@ -663,7 +688,7 @@ function send_gaze_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            reset_store_data(callback);
+            callback;
         }
     });
 }
@@ -837,7 +862,6 @@ function create_consent_form() {
 function consent_form_navigation() {
     if ($('#consent-yes').is(':checked')) {
         load_webgazer();
-        //create_survey();
     } else if ($('#consent-no').is(':checked')) {
         window.location.href = "../index.html";
     }
@@ -915,15 +939,6 @@ function check_webgazer_status() {
         create_experiment_instruction();
         create_gaze_database();
         create_user_database();
-        session_time = (new Date).getTime().toString();
-        store_data.task = "experiment";
-        store_data.description = "begin";
-        store_data.elapsedTime = [0];
-        store_data.gaze_x = [0];
-        store_data.gaze_y = [0];
-        store_data.object_x = [0];
-        store_data.object_y = [0];
-        send_gaze_data_to_database();
     } else {
         setTimeout(check_webgazer_status, 100);
     }
@@ -1011,6 +1026,10 @@ function create_user_database() {
  * Shows experiment instruction
  */
 function create_experiment_instruction() {
+    session_time = (new Date).getTime().toString();
+    store_data.task = "experiment";
+    store_data.description = "begin";
+    send_gaze_data_to_database();
     if ($("#consent-yes").is(':checked')) {
         var instruction = document.createElement("div");
         var instruction_guide1 = "For nearly half of your experiment, we'll be training your computer to guess where you're looking (and we'll show you what we think along the way!). We'll end the experiment by having you look at charts, graphs, and infographics to help us understand the way you process information. Finally, you'll have a chance to complete a searching challenge and share your results with your friends.";
@@ -1119,7 +1138,7 @@ function create_webcam_instruction_perfect() {
     overlay.style.left = "calc(50% + 25px)";
 }
 function create_webcam_instruction_final_check() {
-    create_general_instruction("A few other tips.", "At this step, everything should be correct and the program should be able to identify your eyes correct. When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_bonus_round_instruction(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("A few other tips.", "When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
@@ -1267,7 +1286,7 @@ function create_calibration_instruction() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">' +
+        "<h2 class=\"form__title\"> Calibration (1/5) </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">' +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
         "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>";
@@ -1297,15 +1316,11 @@ function create_calibration_break_form(){
  * Start the calibration
  */
 function start_calibration() {
+    reset_store_data();
     session_time = (new Date).getTime().toString();
     // send initial data to database
     store_data.task = "calibration";
     store_data.description = "begin";
-    store_data.elapsedTime = [0];
-    store_data.gaze_x = [0];
-    store_data.gaze_y = [0];
-    store_data.object_x = [0];
-    store_data.object_y = [0];
     send_gaze_data_to_database();
     current_task = "calibration";
     var gazeDot = document.getElementById("gazeDot");
@@ -1346,9 +1361,7 @@ function create_new_dot_calibration(){
         objects_array = create_dot_array(calibration_settings.position_array);
     }
     curr_object = objects_array.pop();
-    store_data.object_x.push(curr_object.x);
-    store_data.object_y.push(curr_object.y);
-    store_data.description = num_objects_shown.toString();
+    store_data.description = (num_objects_shown+1).toString();
     send_gaze_data_to_database();
     webgazer.addWatchListener(curr_object.x, curr_object.y);
     time_stamp = new Date().getTime();
@@ -1378,21 +1391,17 @@ function finish_calibration(){
  ************************************/
 function create_validation_instruction() {
     var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. You will have to repeat this procedure " + validation_settings.num_dots + " times. If the score does not reach " + validation_settings.hit_count.toString() + " points in " + (validation_settings.duration / 1000).toString() + " seconds, you will be redirected to the calibration process. </br> Press the button when you're ready.";
-    create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
+    create_general_instruction("Validation(2/5)", instruction_guide1, "start_validation()", "Start");
 }
 
 /**
  * Prepares validation process
  */
 function start_validation(){
+    reset_store_data();
     session_time = (new Date).getTime().toString();
     store_data.task = "validation";
     store_data.description = "begin";
-    store_data.elapsedTime = [0];
-    store_data.gaze_x = [0];
-    store_data.gaze_y = [0];
-    store_data.object_x = [0];
-    store_data.object_y = [0];
     send_gaze_data_to_database();
     clear_canvas();
     delete_elem("instruction");
@@ -1423,9 +1432,7 @@ function create_new_dot_validation(){
         objects_array = create_dot_array(validation_settings.position_array);
     }
     curr_object = objects_array.pop();
-    store_data.object_x.push(curr_object.x);
-    store_data.object_y.push(curr_object.y);
-    store_data.description = num_objects_shown.toString();
+    store_data.description = (num_objects_shown+1).toString();
     send_gaze_data_to_database();
     draw_dot(context, curr_object, dark_color);
     validation_settings.listener = true;
@@ -1548,7 +1555,8 @@ function navigate_tasks() {
  ************************************/
 function create_simple_instruction() {
     session_time = (new Date).getTime().toString();
-    create_general_instruction("Dot viewing", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
+    reset_store_data();
+    create_general_instruction("Dot viewing (3/5)", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
 }
 
 function loop_simple_paradigm() {
@@ -1601,8 +1609,9 @@ function finish_simple_paradigm(){
  * SMOOTH PURSUIT PARADIGM
  ************************************/
 function create_pursuit_instruction() {
+    reset_store_data();
     session_time = (new Date).getTime().toString();
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
+    create_general_instruction("Dot pursuing (4/5)", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
@@ -1694,8 +1703,9 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function create_massvis_instruction() {
+    reset_store_data();
     session_time = (new Date).getTime().toString();
-    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
+    create_general_instruction("Massvis (5/5)", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
 }
 
 function loop_massvis_paradigm() {
