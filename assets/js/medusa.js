@@ -1024,7 +1024,7 @@ function create_experiment_instruction() {
 }
 
 function create_webcam_instruction_glasses() {
-    create_general_instruction("Glasses.", "Firstly, glasses. The program can't identify your eyes or your face if you wear glasses. Therefore, if you wear glasses, please take them off before continue.", "create_webcam_instruction_uneven(); delete_elem('guide-img');", "Next");
+    create_general_instruction("Glasses", "Firstly, glasses. The program can't identify your eyes or your face if you wear glasses. Therefore, if you wear glasses, please take them off before continue.", "create_webcam_instruction_uneven(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.src = "../assets/images/guide/Glasses.png";
     guide.id = "guide-img";
@@ -1042,7 +1042,7 @@ function create_webcam_instruction_glasses() {
 }
 
 function create_webcam_instruction_uneven() {
-    create_general_instruction("Lighting conditions.", "Secondly, lighting conditions. This is rather tricky, but the main idea is that you should make sure that you have even lighting across your face. Ideally, the light source should be behind or in front you.", "create_webcam_instruction_reset(); delete_elem('guide-img');", "Next");
+    create_general_instruction("Lighting conditions", "Secondly, lighting conditions. This is rather tricky, but the main idea is that you should make sure that you have even lighting across your face. Ideally, the light source should be behind or in front you.", "create_webcam_instruction_reset(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.id = "guide-img";
     guide.src = "../assets/images/guide/Uneven.png";
@@ -1060,7 +1060,7 @@ function create_webcam_instruction_uneven() {
 }
 
 function create_webcam_instruction_broken() {
-    create_general_instruction("Problems.", "However, the conditions are not always ideal and the program may fail to identify your eyes and your face. Should it fail, the green line will not match your face and your eyes. There are two primary suspects here.", "create_webcam_instruction_glasses(); delete_elem('guide-img');", "Next");
+    create_general_instruction("When things go wrong", "However, the conditions are not always ideal and the program may fail to identify your eyes and your face. Should it fail, the green line will not match your face and your eyes. There are two primary suspects here.", "create_webcam_instruction_glasses(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.src = "../assets/images/guide/Broken.png";
     guide.id = "guide-img";
@@ -1078,7 +1078,7 @@ function create_webcam_instruction_broken() {
 }
 
 function create_webcam_instruction_reset() {
-    create_general_instruction("Recalibrate", "Now, after you have fixed everything, you should try to calibrate again. To do that, move your face away completely from the webcam and then move back to in front of the webcam. The program will recalibrate and it should be able to indentify your face correctly now. If it is not, please perform this step again.", "create_webcam_instruction_final_check(); delete_elem('guide-img');", "Next");
+    create_general_instruction("A final touch", "Now, after you have fixed everything, you should try to calibrate again. To do that, move your face away completely from the webcam and then move back to in front of the webcam. The program will recalibrate and it should be able to indentify your face correctly now. If it is not, please perform this step again.", "create_webcam_instruction_final_check(); delete_elem('guide-img');", "Next");
     var guide = new Image();
     guide.src = "../assets/images/guide/Reset.png";
     guide.id = "guide-img";
@@ -1096,7 +1096,7 @@ function create_webcam_instruction_reset() {
 }
 
 function create_webcam_instruction_perfect() {
-    create_general_instruction("The ONLY thing this program needs.", "The one central requirement for this experiment to run smoothly is that the program can identify your face and eyes accurately. How do you know that? The green line should fit your face and your eyes correctly.", "create_webcam_instruction_broken(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("A crucial point", "It is extremely crucial that the program can identify your eyes accurately. How do you know that? The green line should fit your face and your eyes correctly.", "create_webcam_instruction_broken(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
@@ -1113,7 +1113,7 @@ function create_webcam_instruction_perfect() {
     overlay.style.left = "calc(50% + 25px)";
 }
 function create_webcam_instruction_final_check() {
-    create_general_instruction("A few other tips.", "When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("A few other tips.", "At this step, everything should be correct and the program should be able to identify your eyes correct. When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
