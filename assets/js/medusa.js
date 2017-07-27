@@ -663,7 +663,7 @@ function send_gaze_data_to_database(callback){
             console.log("Unable to add item: " + "\n" + JSON.stringify(err, undefined, 2));
         } else {
             console.log("PutItem succeeded: " + "\n" + JSON.stringify(data, undefined, 2));
-            reset_store_data(callback);
+            callback;
         }
     });
 }
@@ -1113,7 +1113,7 @@ function create_webcam_instruction_perfect() {
     overlay.style.left = "calc(50% + 25px)";
 }
 function create_webcam_instruction_final_check() {
-    create_general_instruction("A few other tips.", "At this step, everything should be correct and the program should be able to identify your eyes correct. When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
+    create_general_instruction("A few other tips.", "When you progress through the experiment, try to maintain your head position, and recalibrate whenever you think the program fails to identify your face and your eyes. Again, we really appreciate your participation.", "create_calibration_instruction(); delete_elem('guide-img');", "Continue");
     var guide = new Image();
     guide.src = "../assets/images/guide/Perfect.png";
     guide.id = "guide-img";
@@ -1252,7 +1252,7 @@ function create_calibration_instruction() {
     instruction.className += "overlay-div";
     instruction.style.zIndex = 12;
     instruction.innerHTML += "<header class=\"form__header\">" +
-        "<h2 class=\"form__title\"> Calibration </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">' +
+        "<h2 class=\"form__title\"> Calibration (1/5) </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">' +
         "</header>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"start_calibration()\">Start</button>" +
         "<input id='calibration_file' class=\"file__button\" type=\"file\" onchange=\"upload_calibration_data(event)\"> </input>";
@@ -1282,6 +1282,7 @@ function create_calibration_break_form(){
  * Start the calibration
  */
 function start_calibration() {
+    reset_store_data();
     session_time = (new Date).getTime().toString();
     // send initial data to database
     store_data.task = "calibration";
@@ -1363,13 +1364,14 @@ function finish_calibration(){
  ************************************/
 function create_validation_instruction() {
     var instruction_guide1 = "There will be a dot appearing on the screen. Please look at it until the score on the dot reaches " + validation_settings.hit_count.toString() + " points. You will have to repeat this procedure " + validation_settings.num_dots + " times. If the score does not reach " + validation_settings.hit_count.toString() + " points in " + (validation_settings.duration / 1000).toString() + " seconds, you will be redirected to the calibration process. </br> Press the button when you're ready.";
-    create_general_instruction("Validation", instruction_guide1, "start_validation()", "Start");
+    create_general_instruction("Validation(2/5)", instruction_guide1, "start_validation()", "Start");
 }
 
 /**
  * Prepares validation process
  */
 function start_validation(){
+    reset_store_data();
     session_time = (new Date).getTime().toString();
     store_data.task = "validation";
     store_data.description = "begin";
@@ -1533,7 +1535,8 @@ function navigate_tasks() {
  ************************************/
 function create_simple_instruction() {
     session_time = (new Date).getTime().toString();
-    create_general_instruction("Dot viewing", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
+    reset_store_data();
+    create_general_instruction("Dot viewing (3/5)", "Please look at the cross. When a dot appears, please look at it. You will have to repeat this process " + simple_paradigm_settings.num_trials.toString() + " times", "loop_simple_paradigm()", "Start");
 }
 
 function loop_simple_paradigm() {
@@ -1585,9 +1588,10 @@ function finish_simple_paradigm(){
 /************************************
  * SMOOTH PURSUIT PARADIGM
  ************************************/
-function create_pursuit_instruction() {
+function create_pursuit_instruction() {        
+    reset_store_data();
     session_time = (new Date).getTime().toString();
-    create_general_instruction("Dot pursuing", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
+    create_general_instruction("Dot pursuing (4/5)", "There will be a dot appearing on the screen. When it changes color, please follow it. You will have to repeat this procedure " + pursuit_paradigm_settings.num_trials.toString() + " times", "loop_pursuit_paradigm()", "Start");
 }
 
 function loop_pursuit_paradigm() {
@@ -1679,8 +1683,9 @@ function finish_pursuit_paradigm(){
  * MASSVIS PARADIGM
  ************************************/
 function create_massvis_instruction() {
+    reset_store_data();
     session_time = (new Date).getTime().toString();
-    create_general_instruction("Massvis", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
+    create_general_instruction("Massvis (5/5)", "There will be a fixation cross appearing on the screen. Please look at it. <br> When the cross disappears, there will be a data visualization appearing on the screen. Feel free to look at whatever you like on the visualization.", "loop_massvis_paradigm()", "Start");
 }
 
 function loop_massvis_paradigm() {
