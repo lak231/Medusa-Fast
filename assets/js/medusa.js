@@ -1042,7 +1042,7 @@ function create_experiment_instruction() {
         instruction.innerHTML += "<header class=\"form__header\">" +
             "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
             "</header>" +
-            "<button class=\"form__button\" type=\"button\" onclick=\"create_webcam_instruction_perfect()\">Start</button>";
+            "<button class=\"form__button\" type=\"button\" onclick=\"create_survey()\">Start</button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
