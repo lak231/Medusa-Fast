@@ -75,10 +75,10 @@ var calibration_settings = {
  ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 13,  // the number of dots used for validation
+    num_dots: 1,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 200,  // radius of acceptable gaze data around validation dot
+    distance: 2000,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -1042,7 +1042,7 @@ function create_experiment_instruction() {
         instruction.innerHTML += "<header class=\"form__header\">" +
             "<h2 class=\"form__title\">Thank you for participating. </br></h2>" + '<p class=\"information\">'  + instruction_guide1 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide2 +    '<\p>'+ '<p class=\"information\">'  + instruction_guide3 +    '<\p>' +
             "</header>" +
-            "<button class=\"form__button\" type=\"button\" onclick=\"create_survey()\">Start</button>";
+            "<button class=\"form__button\" type=\"button\" onclick=\"create_webcam_instruction_glasses()\">Start</button>";
         document.body.appendChild(instruction);
         show_video_feed();
     }
@@ -1264,7 +1264,7 @@ function create_survey() {
         "</br>" +
         "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
         // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;'src=sdkpreparse'>Share on Facebook</a></div>";
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>";
     document.body.appendChild(survey);
 }
 
@@ -1791,13 +1791,14 @@ function finish_massvis_paradigm() {
  * If you want to introduce your own paradigms, follow the same structure and extend the design array above.
  ************************************/
 function create_bonus_round_instruction() {
-
+    reset_store_data();
     create_general_instruction("Bonus Round", "Make a painting with just your eyes.<br> This task is optional.", "create_heatmap_overlay()", "Start");
     var instruction = document.getElementById("instruction");
     instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
 }
 
 function create_heatmap_overlay() {
+    var function_name = "bonus_round_share";
     current_task = "bonus";
     collect_data = true;
     webgazer.resume();
@@ -1813,6 +1814,28 @@ function create_heatmap_overlay() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     document.body.appendChild(canvas);
+    var button = document.createElement("button");
+    button.className += "form__button";
+    button.id = "heatmap-button";
+    button.style.opacity = 0.5;
+    button.style.right = "1em";
+    button.style.bottom = "2em";
+    button.innerHTML = "Done";
+    button.style.position = "absolute";
+    button.style.zIndex = 99;
+    button.addEventListener('click', function () {
+        window[function_name](canvas);
+        webgazer.pause();
+        collect_data = false;
+        delete_elem("heatmap-button");
+    });
+    button.onmouseover = function() {
+        button.style.opacity = 1;
+    };
+    button.onmouseout = function() {
+        button.style.opacity = 0.5;
+    };
+    document.body.appendChild(button);
 }
 
 function loop_bonus_round() {
@@ -1831,47 +1854,124 @@ function loop_bonus_round() {
     heat.draw();
 }
 
-/**
- * Draw bonus round images
- */
-function draw_bonus_round_image() {
-    clear_canvas();
-    webgazer.resume();
-    collect_data = true;
-    var canvas = document.getElementById("canvas-overlay");
-    var context = canvas.getContext("2d");
-    var aspect_ratio = curr_object.width/curr_object.height;
-    if (curr_object.width >= canvas.width || curr_object.height >= canvas.height) {
-        var heightmajor_height = canvas.height - massvis_paradigm_settings.spacing * 2;
-        var heightmajor_width = aspect_ratio * heightmajor_height;
-        var widthmajor_width =  canvas.width - massvis_paradigm_settings.spacing * 2;
-        var widthmajor_height = widthmajor_width / aspect_ratio;
-        if (heightmajor_height < canvas.height && heightmajor_width < canvas.width) {
-            curr_object.width = heightmajor_width;
-            curr_object.height = heightmajor_height;
-        } else if (widthmajor_width < canvas.width && widthmajor_height < canvas.height) {
-            curr_object.width = widthmajor_width;
-            curr_object.height = widthmajor_height;
-        }
-    }
-    curr_object.onload =
-        context.drawImage(curr_object,
-            canvas.width / 2 - curr_object.width / 2,
-            canvas.height / 2 - curr_object.height / 2,
-            curr_object.width,
-            curr_object.height
-        );
+function upload_to_imgur(canvas) {
+    var image = canvas.toDataURL().slice(22);
+    var form = new FormData();
+    form.append("image", image);
 
-    setTimeout(function(){
-        store_data.task = "bonus";
-        paradigm = "bonus";
-        heatmap_data_x = store_data.gaze_x.slice(0);
-        heatmap_data_y = store_data.gaze_y.slice(0);
-        draw_heatmap("loop_bonus_round");
-    }, bonus_round_settings.image_show_time);
+    var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "https://api.imgur.com/3/image",
+        "method": "POST",
+        "headers": {
+            "authorization": "Bearer a5f26b451063ef77438ddef31a437190e2887f2f"
+        },
+        "processData": false,
+        "contentType": false,
+        "mimeType": "multipart/form-data",
+        "data": form
+    };
+
+
+    $.ajax(settings).done(function (response) {
+        var link = JSON.parse(response).data.link;
+        link = encodeURIComponent(link);
+        var share_link = "https://www.facebook.com/dialog/share?" +
+                            "app_id=140235746556932" +
+                            "&quote=" + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io") +
+                            "&href=" + link +
+                            "&display=popup";
+        window.open(share_link, "_blank");
+    });
 }
 
+function bonus_round_share(canvas) {
+    //
+    //
+    // document.body.innerHTML += "<div id='fb-share-div' style='position: absolute; z-index: 99; bottom: 2em; right: 10em; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=" + link + "&amp;src=sdkpreparse'>Share on Facebook</a></div>";
+
+    var button = document.createElement("button");
+    button.className += "form__button";
+    button.id = "heatmap-button";
+    button.style.opacity = 0.5;
+    button.style.right = "1em";
+    button.style.bottom = "2em";
+    button.innerHTML = "Next";
+    button.style.position = "absolute";
+    button.style.zIndex = 99;
+    button.addEventListener('click', function () {
+        finish_bonus_round();
+    });
+    button.onmouseover = function() {
+        button.style.opacity = 1;
+    };
+    button.onmouseout = function() {
+        button.style.opacity = 0.5;
+    };
+    document.body.appendChild(button);
+
+    var share_button = document.createElement("button");
+    share_button.style.backgroundColor = "#3b5998";
+    share_button.className += "form__button";
+    share_button.id = "bonus-round-share-button";
+    share_button.style.right = "10em";
+    share_button.style.bottom = "2em";
+    share_button.innerHTML = "Share on Facebook";
+    share_button.style.position = "absolute";
+    share_button.style.zIndex = 99;
+    share_button.addEventListener('click', function () {
+        finish_bonus_round();
+        upload_to_imgur(canvas);
+    });
+
+    document.body.appendChild(share_button);
+}
+// /**
+//  * Draw bonus round images
+//  */
+// function draw_bonus_round_image() {
+//     clear_canvas();
+//     webgazer.resume();
+//     collect_data = true;
+//     var canvas = document.getElementById("canvas-overlay");
+//     var context = canvas.getContext("2d");
+//     var aspect_ratio = curr_object.width/curr_object.height;
+//     if (curr_object.width >= canvas.width || curr_object.height >= canvas.height) {
+//         var heightmajor_height = canvas.height - massvis_paradigm_settings.spacing * 2;
+//         var heightmajor_width = aspect_ratio * heightmajor_height;
+//         var widthmajor_width =  canvas.width - massvis_paradigm_settings.spacing * 2;
+//         var widthmajor_height = widthmajor_width / aspect_ratio;
+//         if (heightmajor_height < canvas.height && heightmajor_width < canvas.width) {
+//             curr_object.width = heightmajor_width;
+//             curr_object.height = heightmajor_height;
+//         } else if (widthmajor_width < canvas.width && widthmajor_height < canvas.height) {
+//             curr_object.width = widthmajor_width;
+//             curr_object.height = widthmajor_height;
+//         }
+//     }
+//     curr_object.onload =
+//         context.drawImage(curr_object,
+//             canvas.width / 2 - curr_object.width / 2,
+//             canvas.height / 2 - curr_object.height / 2,
+//             curr_object.width,
+//             curr_object.height
+//         );
+//
+//     setTimeout(function(){
+//         store_data.task = "bonus";
+//         paradigm = "bonus";
+//         heatmap_data_x = store_data.gaze_x.slice(0);
+//         heatmap_data_y = store_data.gaze_y.slice(0);
+//         draw_heatmap("loop_bonus_round");
+//     }, bonus_round_settings.image_show_time);
+// }
+
 function finish_bonus_round() {
+    delete_elem("heatmap-overlay");
+    webgazer.showPredictionPoints(false);
+    delete_elem("bonus-round-share-button");
+    delete_elem("heatmap-button");
     clear_canvas();
     num_objects_shown = 0;
     store_data.task = "bonus";
