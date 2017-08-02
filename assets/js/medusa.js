@@ -75,10 +75,10 @@ var calibration_settings = {
  ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 1,  // the number of dots used for validation
+    num_dots: 13,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 2000,  // radius of acceptable gaze data around validation dot
+    distance: 200,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -1264,7 +1264,8 @@ function create_survey() {
         "</br>" +
         "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
         // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>";
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://khaiquangnguyen.github.io") + "'>Share on Twitter</a></div>";
     document.body.appendChild(survey);
 }
 
@@ -1854,7 +1855,7 @@ function loop_bonus_round() {
     heat.draw();
 }
 
-function upload_to_imgur(canvas) {
+function upload_to_imgur(canvas, destination) {
     var image = canvas.toDataURL().slice(22);
     var form = new FormData();
     form.append("image", image);
@@ -1876,13 +1877,22 @@ function upload_to_imgur(canvas) {
 
     $.ajax(settings).done(function (response) {
         var link = JSON.parse(response).data.link;
-        link = encodeURIComponent(link);
-        var share_link = "https://www.facebook.com/dialog/share?" +
-                            "app_id=140235746556932" +
-                            "&quote=" + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io") +
-                            "&href=" + link +
-                            "&display=popup";
-        window.open(share_link, "_blank");
+        var share_link = "";
+        if (destination === "facebook") {
+            link = encodeURIComponent(link);
+            share_link = "https://www.facebook.com/dialog/share?" +
+                "app_id=140235746556932" +
+                "&quote=" + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io") +
+                "&href=" + link +
+                "&display=popup";
+            window.open(share_link, "_blank");
+        } else if (destination === "twitter") {
+            link = link.replace("i.", "");
+            link = link.slice(0, -4);
+            link = encodeURIComponent(link);
+            share_link = "https://twitter.com/intent/tweet?text=" + link + " " + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io");
+            window.open(share_link, "_blank");
+        }
     });
 }
 
@@ -1911,21 +1921,37 @@ function bonus_round_share(canvas) {
     };
     document.body.appendChild(button);
 
-    var share_button = document.createElement("button");
-    share_button.style.backgroundColor = "#3b5998";
-    share_button.className += "form__button";
-    share_button.id = "bonus-round-share-button";
-    share_button.style.right = "10em";
-    share_button.style.bottom = "2em";
-    share_button.innerHTML = "Share on Facebook";
-    share_button.style.position = "absolute";
-    share_button.style.zIndex = 99;
-    share_button.addEventListener('click', function () {
+    var share_button_fb = document.createElement("button");
+    share_button_fb.style.backgroundColor = "#3b5998";
+    share_button_fb.className += "form__button";
+    share_button_fb.id = "bonus-round-share-button-fb";
+    share_button_fb.style.right = "10em";
+    share_button_fb.style.bottom = "2em";
+    share_button_fb.innerHTML = "Share on Facebook";
+    share_button_fb.style.position = "absolute";
+    share_button_fb.style.zIndex = 99;
+    share_button_fb.addEventListener('click', function () {
         finish_bonus_round();
-        upload_to_imgur(canvas);
+        upload_to_imgur(canvas, "facebook");
     });
 
-    document.body.appendChild(share_button);
+    document.body.appendChild(share_button_fb);
+
+    var share_button_tw = document.createElement("button");
+    share_button_tw.style.backgroundColor = "#1DA1F2";
+    share_button_tw.className += "form__button";
+    share_button_tw.id = "bonus-round-share-button-tw";
+    share_button_tw.style.right = "30em";
+    share_button_tw.style.bottom = "2em";
+    share_button_tw.innerHTML = "Share on Twitter";
+    share_button_tw.style.position = "absolute";
+    share_button_tw.style.zIndex = 99;
+    share_button_tw.addEventListener('click', function () {
+        finish_bonus_round();
+        upload_to_imgur(canvas, "twitter");
+    });
+
+    document.body.appendChild(share_button_tw);
 }
 // /**
 //  * Draw bonus round images
@@ -1970,7 +1996,8 @@ function bonus_round_share(canvas) {
 function finish_bonus_round() {
     delete_elem("heatmap-overlay");
     webgazer.showPredictionPoints(false);
-    delete_elem("bonus-round-share-button");
+    delete_elem("bonus-round-share-button-fb");
+    delete_elem("bonus-round-share-button-tw");
     delete_elem("heatmap-button");
     clear_canvas();
     num_objects_shown = 0;
