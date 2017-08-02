@@ -1793,6 +1793,7 @@ function finish_massvis_paradigm() {
  ************************************/
 function create_bonus_round_instruction() {
     reset_store_data();
+    session_time = (new Date).getTime().toString();
     create_general_instruction("Bonus Round", "Make a painting with just your eyes.<br> This task is optional.", "create_heatmap_overlay()", "Start");
     var instruction = document.getElementById("instruction");
     instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
@@ -1877,6 +1878,10 @@ function upload_to_imgur(canvas, destination) {
 
     $.ajax(settings).done(function (response) {
         var link = JSON.parse(response).data.link;
+        store_data.description = link;
+        store_data.object_x = [0];
+        store_data.object_y = [0];
+        send_gaze_data_to_database();
         var share_link = "";
         if (destination === "facebook") {
             link = encodeURIComponent(link);
