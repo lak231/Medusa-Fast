@@ -55,7 +55,7 @@ var cam_height = 240;
 var heatmap_data_x = [];
 var heatmap_data_y = [];
 var calibration_current_round = 1;
-var calibration_sprite_1 = [];
+var calibration_sprite_1 = [o];
 var calibration_sprite_2 = [];
 var calibration_sprite_3 = [];
 
