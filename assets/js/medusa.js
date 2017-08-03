@@ -1928,7 +1928,6 @@ function bonus_round_share(link) {
             "&href=" + link +
             "&display=popup";
         window.open(share_link, "_blank");
-        finish_bonus_round();
     });
 
     document.body.appendChild(share_button_fb);
@@ -1948,7 +1947,6 @@ function bonus_round_share(link) {
         link = encodeURIComponent(link);
         share_link = "https://twitter.com/intent/tweet?text=" + link + " " + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io");
         window.open(share_link, "_blank");
-        finish_bonus_round();
     });
 
     document.body.appendChild(share_button_tw);
