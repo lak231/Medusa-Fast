@@ -33,7 +33,9 @@ var user = {
     current_country:"",   // the current country the user is living in
     education_level:"",   // the education level of the user
     main_hand:"",     // the main hand (left, right or ambidextrous) of the user
-    eye_sight:"" // the eye sight of the user. either near-sight, far-sight or normal
+    eye_sight:"", // the eye sight of the user. either near-sight, far-sight or normal
+    performance:"", // the performance of webgazer
+    comment:""      // the comment of the user
 };
 
 var collect_data = true;
@@ -251,7 +253,6 @@ function enable_medusa_stylesheet() {
 
 /**
  * create the overlay over the website
- * Creates overlay over website
  */
 function create_overlay(){
     toggle_stylesheets();
@@ -722,6 +723,9 @@ function send_user_data_to_database(callback){
     user.main_hand = document.getElementById('handedness').value;
     user.education_level = document.getElementById('education_level').value;
     user.eye_sight = document.getElementById('vision').value;
+    user.performance = document.getElementById('performance').value;
+    user.comment = document.getElementById('comment').value;
+
     var params = {
         TableName :USER_TABLE_NAME,
         Item: {
@@ -1212,7 +1216,12 @@ function save_user_choices() {
 /**
  * Create the survey
  */
-function create_survey() {
+function create_survey(show_share_button) {
+    var share_button = "";
+    if (show_share_button === true){
+        share_button =         "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://khaiquangnguyen.github.io") + "'>Share on Twitter</a></div>";
+    }
     var age_options = '';
     var performnace_rating = '';
     for (var i = 6; i < 120; i++) {
@@ -1276,7 +1285,7 @@ function create_survey() {
         "<option value=\"\" disabled selected> On a scale of 1 to 10, how well do you think the eye tracker performed? </option>" + performnace_rating +
         "</select>" +
         "</br>" +
-        "<textarea rows='5' style='width: calc(100% - 10px)' name='comment' form='selection_fields' placeholder='Comments...'></textarea>" +
+        "<textarea rows='5' id = 'comment' style='width: calc(100% - 10px)' name='comment' form='selection_fields' placeholder='Comments...'></textarea>" +
         "</form>" +
         "<p id='survey_info' class='information'></p>" +
         "</br>" +
@@ -1790,7 +1799,7 @@ function draw_massvis_image() {
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
         send_gaze_data_to_database();
-        draw_heatmap("loop_massvis_paradigm");
+        reset_store_data(draw_heatmap("loop_massvis_paradigm"));
     }, massvis_paradigm_settings.image_show_time);
 }
 
@@ -1814,7 +1823,7 @@ function create_bonus_round_instruction() {
     session_time = (new Date).getTime().toString();
     create_general_instruction("Bonus Round", "Make a painting with just your eyes.<br> This task is optional.", "create_heatmap_overlay()", "Start");
     var instruction = document.getElementById("instruction");
-    instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
+    instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey(true)\"> Skip </button>";
 }
 
 function create_heatmap_overlay() {
@@ -1939,7 +1948,6 @@ function bonus_round_share(link) {
     share_button_fb.style.position = "absolute";
     share_button_fb.style.zIndex = 99;
     share_button_fb.addEventListener('click', function (e) {
-        console.log(link);
         link = encodeURIComponent(link);
         share_link = "https://www.facebook.com/dialog/share?" +
             "app_id=140235746556932" +
@@ -2021,7 +2029,7 @@ function finish_bonus_round() {
     paradigm = "bonus";
     webgazer.pause();
     collect_data = false;
-    create_survey();
+    create_survey(false);
     console.log("finish bonus paradigm");
 }
 
