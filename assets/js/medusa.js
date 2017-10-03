@@ -868,7 +868,7 @@ function create_consent_form() {
     if (browser !== "chrome") {
         isChrome = false;
         document.getElementById("webcam-info").innerHTML = "";
-        document.getElementById("webcam-info").innerHTML += "Please use Chrome."
+        document.getElementById("webcam-info").innerHTML += "Please use Chrome!"
     }
 }
 
