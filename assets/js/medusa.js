@@ -852,7 +852,7 @@ function create_consent_form() {
         "</p>" +
 
         "</fieldset>" +
-        "<p class='information' id='webcam-info'></p>" +
+        "<p class='information' id='webcam-info' style='color: red'></p>" +
         "<button class=\"form__button\" type=\"button\" onclick=\"consent_form_navigation()\">Next</button>" +
         "</form>";
     form.style.zIndex = 11;
@@ -864,6 +864,9 @@ function consent_form_navigation() {
         load_webgazer();
     } else if ($('#consent-no').is(':checked')) {
         window.location.href = "../index.html";
+    } else {
+        document.getElementById("webcam-info").innerHTML = "";
+        document.getElementById("webcam-info").innerHTML += "Please select one of the two options given."
     }
 }
 
