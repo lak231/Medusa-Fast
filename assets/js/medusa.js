@@ -1811,7 +1811,7 @@ function create_bonus_round_instruction() {
 }
 
 function create_heatmap_overlay() {
-    var function_name = "bonus_round_share";
+    var function_name = "upload_to_imgur";
     current_task = "bonus";
     collect_data = true;
     webgazer.resume();
@@ -1867,7 +1867,7 @@ function loop_bonus_round() {
     heat.draw();
 }
 
-function upload_to_imgur(canvas, destination) {
+function upload_to_imgur(canvas) {
     var image = canvas.toDataURL().slice(22);
     var form = new FormData();
     form.append("image", image);
@@ -1889,34 +1889,19 @@ function upload_to_imgur(canvas, destination) {
 
     $.ajax(settings).done(function (response) {
         var link = JSON.parse(response).data.link;
+        bonus_round_share(link);
         store_data.description = link;
         store_data.object_x = [0];
         store_data.object_y = [0];
         send_gaze_data_to_database();
-        var share_link = "";
-        if (destination === "facebook") {
-            link = encodeURIComponent(link);
-            share_link = "https://www.facebook.com/dialog/share?" +
-                "app_id=140235746556932" +
-                "&quote=" + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io") +
-                "&href=" + link +
-                "&display=popup";
-            window.open(share_link, "_blank");
-        } else if (destination === "twitter") {
-            link = link.replace("i.", "");
-            link = link.slice(0, -4);
-            link = encodeURIComponent(link);
-            share_link = "https://twitter.com/intent/tweet?text=" + link + " " + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io");
-            window.open(share_link, "_blank");
-        }
     });
 }
 
-function bonus_round_share(canvas) {
+function bonus_round_share(link) {
     //
     //
     // document.body.innerHTML += "<div id='fb-share-div' style='position: absolute; z-index: 99; bottom: 2em; right: 10em; vertical-align: bottom; background-color: #3b5998; ' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=" + link + "&amp;src=sdkpreparse'>Share on Facebook</a></div>";
-
+    var share_link = "";
     var button = document.createElement("button");
     button.className += "form__button";
     button.id = "heatmap-button";
@@ -1946,9 +1931,14 @@ function bonus_round_share(canvas) {
     share_button_fb.innerHTML = "Share on Facebook";
     share_button_fb.style.position = "absolute";
     share_button_fb.style.zIndex = 99;
-    share_button_fb.addEventListener('click', function () {
-        finish_bonus_round();
-        upload_to_imgur(canvas, "facebook");
+    share_button_fb.addEventListener('click', function (e) {
+        link = encodeURIComponent(link);
+        share_link = "https://www.facebook.com/dialog/share?" +
+            "app_id=140235746556932" +
+            "&quote=" + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io") +
+            "&href=" + link +
+            "&display=popup";
+        window.open(share_link, "_blank");
     });
 
     document.body.appendChild(share_button_fb);
@@ -1963,8 +1953,11 @@ function bonus_round_share(canvas) {
     share_button_tw.style.position = "absolute";
     share_button_tw.style.zIndex = 99;
     share_button_tw.addEventListener('click', function () {
-        finish_bonus_round();
-        upload_to_imgur(canvas, "twitter");
+        link = link.replace("i.", "");
+        link = link.slice(0, -4);
+        link = encodeURIComponent(link);
+        share_link = "https://twitter.com/intent/tweet?text=" + link + " " + encodeURIComponent("I made this drawing only with my eyes. You can make your own AND contribute to science at: https://khaiquangnguyen.github.io");
+        window.open(share_link, "_blank");
     });
 
     document.body.appendChild(share_button_tw);
