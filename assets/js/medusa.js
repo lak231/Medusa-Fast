@@ -253,7 +253,6 @@ function enable_medusa_stylesheet() {
 
 /**
  * create the overlay over the website
- * Creates overlay over website
  */
 function create_overlay(){
     toggle_stylesheets();
@@ -1783,7 +1782,7 @@ function draw_massvis_image() {
         heatmap_data_x = store_data.gaze_x.slice(0);
         heatmap_data_y = store_data.gaze_y.slice(0);
         send_gaze_data_to_database();
-        draw_heatmap("loop_massvis_paradigm");
+        reset_store_data(draw_heatmap("loop_massvis_paradigm"));
     }, massvis_paradigm_settings.image_show_time);
 }
 
