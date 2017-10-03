@@ -33,7 +33,9 @@ var user = {
     current_country:"",   // the current country the user is living in
     education_level:"",   // the education level of the user
     main_hand:"",     // the main hand (left, right or ambidextrous) of the user
-    eye_sight:"" // the eye sight of the user. either near-sight, far-sight or normal
+    eye_sight:"", // the eye sight of the user. either near-sight, far-sight or normal
+    performance:"", // the performance of webgazer
+    comment:""      // the comment of the user
 };
 
 var collect_data = true;
@@ -65,7 +67,7 @@ var calibration_sprite_3 = [];
 var calibration_settings = {
     duration: 4,  // duration of a a singe position sampled
     method: "watch",    // calibration method, either watch or click.
-    num_dots: 39,  // the number of dots used for calibration
+    num_dots: 1,  // the number of dots used for calibration
     distance: 200,  // radius of acceptable gaze data around calibration dot
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
 };
@@ -75,10 +77,10 @@ var calibration_settings = {
  ************************************/
 var validation_settings = {
     duration: 20000,  // duration of a a singe position sampled in ms
-    num_dots: 13,  // the number of dots used for validation
+    num_dots: 1,  // the number of dots used for validation
     position_array: [[0.2,0.2],[0.8,0.2],[0.2,0.5],[0.5,0.5],[0.8,0.5],[0.2,0.8],[0.5,0.8],[0.8,0.8],[0.35,0.35],[0.65,0.35],[0.35,0.65],[0.65,0.65],[0.5,0.2]],  // array of possible positions
     // array of possible positions
-    distance: 200,  // radius of acceptable gaze data around validation dot
+    distance: 2000,  // radius of acceptable gaze data around validation dot
     hit_count: 20,
     listener: false
 };
@@ -722,6 +724,9 @@ function send_user_data_to_database(callback){
     user.main_hand = document.getElementById('handedness').value;
     user.education_level = document.getElementById('education_level').value;
     user.eye_sight = document.getElementById('vision').value;
+    user.performance = document.getElementById('performance').value;
+    user.comment = document.getElementById('comment').value;
+    
     var params = {
         TableName :USER_TABLE_NAME,
         Item: {
@@ -1194,7 +1199,12 @@ function save_user_choices() {
 /**
  * Create the survey
  */
-function create_survey() {
+function create_survey(show_share_button) {
+    var share_button = "";
+    if (show_share_button === true){
+        share_button =         "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
+        "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://khaiquangnguyen.github.io") + "'>Share on Twitter</a></div>";
+    }
     var age_options = '';
     var performnace_rating = '';
     for (var i = 6; i < 120; i++) {
@@ -1258,14 +1268,13 @@ function create_survey() {
         "<option value=\"\" disabled selected> On a scale of 1 to 10, how well do you think the eye tracker performed? </option>" + performnace_rating +
         "</select>" +
         "</br>" +
-        "<textarea rows='5' style='width: calc(100% - 10px)' name='comment' form='selection_fields' placeholder='Comments...'></textarea>" +
+        "<textarea rows='5' id = 'comment' style='width: calc(100% - 10px)' name='comment' form='selection_fields' placeholder='Comments...'></textarea>" +
         "</form>" +
         "<p id='survey_info' class='information'></p>" +
         "</br>" +
-        "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
+        "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" + share_button
         // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://khaiquangnguyen.github.io") + "'>Share on Twitter</a></div>";
+
     document.body.appendChild(survey);
 }
 
@@ -1528,25 +1537,27 @@ function create_general_instruction(title, information, button_action, button_la
  * start running task based on paradigm
  */
 function navigate_tasks() {
-    switch (paradigm) {
-        case "simple":
-            create_simple_instruction();
-            break;
-        case "pursuit":
-            create_pursuit_instruction();
-            break;
-        case "massvis":
-            create_massvis_instruction();
-            break;
-        case "iframe":
-            create_iframe_testable();
-            break;
-        case "bonus":
-            create_bonus_round_instruction();
-            break;
-        default:
-            loop_iframe_paradigm();
-    }
+    create_bonus_round_instruction();
+
+    // switch (paradigm) {
+    //     case "simple":
+    //         create_simple_instruction();
+    //         break;
+    //     case "pursuit":
+    //         create_pursuit_instruction();
+    //         break;
+    //     case "massvis":
+    //         create_massvis_instruction();
+    //         break;
+    //     case "iframe":
+    //         create_iframe_testable();
+    //         break;
+    //     case "bonus":
+    //         create_bonus_round_instruction();
+    //         break;
+    //     default:
+    //         create_bonus_round_instruction();
+    // }
 }
 
 
@@ -1796,7 +1807,7 @@ function create_bonus_round_instruction() {
     session_time = (new Date).getTime().toString();
     create_general_instruction("Bonus Round", "Make a painting with just your eyes.<br> This task is optional.", "create_heatmap_overlay()", "Start");
     var instruction = document.getElementById("instruction");
-    instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey()\"> Skip </button>";
+    instruction.innerHTML += "<button class=\"form__button\" type=\"button\" onclick=\"delete_elem('instruction'); hide_face_tracker(); create_survey(true)\"> Skip </button>";
 }
 
 function create_heatmap_overlay() {
@@ -2010,7 +2021,7 @@ function finish_bonus_round() {
     paradigm = "bonus";
     webgazer.pause();
     collect_data = false;
-    create_survey();
+    create_survey(false);
     console.log("finish bonus paradigm");
 }
 
