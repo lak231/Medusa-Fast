@@ -13,7 +13,7 @@ const DATA_COLLECTION_RATE = 60;    // number of data collected per second.
  ************************************/
 var gazer_id = "";  // id of user
 var session_time = "";  // time of current webgazer session
-
+var isChrome = true;
 // data variable. Used as a template for the type of data we send to the database. May add other attributes
 var store_data = {
     task: "",   // the current performing task
@@ -857,16 +857,31 @@ function create_consent_form() {
         "</form>";
     form.style.zIndex = 11;
     document.body.appendChild(form);
+    var ua = navigator.userAgent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(\.\d+)*)/i),
+        browser;
+    if (navigator.userAgent.match(/Edge/i) || navigator.userAgent.match(/Trident.*rv[ :]*11\./i)) {
+        browser = "msie";
+    }
+    else {
+        browser = ua[1].toLowerCase();
+    }
+    if (browser !== "chrome") {
+        isChrome = false;
+        document.getElementById("webcam-info").innerHTML = "";
+        document.getElementById("webcam-info").innerHTML += "Please use Chrome."
+    }
 }
 
 function consent_form_navigation() {
-    if ($('#consent-yes').is(':checked')) {
-        load_webgazer();
-    } else if ($('#consent-no').is(':checked')) {
-        window.location.href = "../index.html";
-    } else {
-        document.getElementById("webcam-info").innerHTML = "";
-        document.getElementById("webcam-info").innerHTML += "Please select one of the two options given."
+    if (isChrome === true) {
+        if ($('#consent-yes').is(':checked')) {
+            load_webgazer();
+        } else if ($('#consent-no').is(':checked')) {
+            window.location.href = "../index.html";
+        } else {
+            document.getElementById("webcam-info").innerHTML = "";
+            document.getElementById("webcam-info").innerHTML += "Please select one of the two options given."
+        }
     }
 }
 
