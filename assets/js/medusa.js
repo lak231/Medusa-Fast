@@ -830,7 +830,7 @@ function create_consent_form() {
     form.innerHTML +=
         "<header class=\"form__header\">" +
         "<h2 class=\"form__title\">Consent form</h2>" +
-            "<div style='overflow-y: scroll; max-height: 15em;'>" +
+            "<div style='overflow-y: scroll; max-height: 30vh;'>" +
         "<p class='information'><b>Why we are doing this research:</b> We are trying to examine the feasibility of using consumer-grade webcams to conduct eye-tracking experiments to replace traditional eye-tracking method.</p>" +
         "<p class='information'><b>What you will have to do:</b> You will be presented with a series of tasks that involves looking at some dots and data visualizations .</p>" +
         "<p class='information'><b>Privacy and Data collection:</b> We will not ask you for your name. We will not store any videos or images from the webcam. The only data from your webcam that we are collecting is predicted coordinates of your gaze made by webgazer. All data will be stored in a secure server.</p>" +
@@ -1219,8 +1219,8 @@ function save_user_choices() {
 function create_survey(show_share_button) {
     var share_button = "";
     if (show_share_button === true){
-        share_button =         "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://khaiquangnguyen.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkhaiquangnguyen.github.io%2Fhtml%2Fsimple.html&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://khaiquangnguyen.github.io") + "'>Share on Twitter</a></div>";
+        share_button =         "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://bucknell-hci.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent("https://bucknell-hci.github.io/html/simple.html")+"&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
+            "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://https://bucknell-hci.github.io") + "'>Share on Twitter</a></div>";
     }
     var age_options = '';
     var performnace_rating = '';
@@ -1291,8 +1291,7 @@ function create_survey(show_share_button) {
         "</br>" +
         "<button class=\"form__button\" type=\"button\" onclick = 'send_user_data_to_database()'> Bye Bye! </button>" +
         // "<a class=\"form__button\" type=\"button\" onclick = \"download_calibration_data(this)\"> Download calibration data for later usage and bye </a>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #3b5998;' class='fb-share-button form__button' data-href='https://bucknell-hci.github.io/html/simple.html' data-layout='button' data-size='large' data-mobile-iframe='false'><a style='text-decoration: none!important; color:" + background_color + "!important;' class='fb-xfbml-parse-ignore' target='_blank' href='https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent("https://bucknell-hci.github.io/html/simple.html")+"&amp;src=sdkpreparse'>Share on Facebook</a></div>" +
-        "<div style='display: inline-block; vertical-align: bottom; background-color: #1DA1F2;' class='form__button'><a style='text-decoration: none!important; color:" + background_color + "!important;' target='_blank' href='https://twitter.com/intent/tweet?text=" + encodeURIComponent("https://https://bucknell-hci.github.io") + "'>Share on Twitter</a></div>";
+        share_button;
     document.body.appendChild(survey);
 }
 
@@ -1894,7 +1893,7 @@ function upload_to_imgur(canvas) {
         "url": "https://api.imgur.com/3/image",
         "method": "POST",
         "headers": {
-            "authorization": "Bearer a5f26b451063ef77438ddef31a437190e2887f2f"
+            "authorization": "Bearer b99c6cfd9f5ed209e572032238a4a4db48e3ed3d"
         },
         "processData": false,
         "contentType": false,
